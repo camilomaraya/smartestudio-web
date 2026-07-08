@@ -1,0 +1,72 @@
+.equipo {
+  padding-block: var(--space-section);
+  background-color: var(--bg);
+}
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
+}
+
+.titulo {
+  font-size: var(--text-3xl);
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+/* Variante de la .card global, con contenido centrado */
+.tarjeta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.foto {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 30% 25%, rgba(243, 193, 58, 0.18), var(--bg) 70%);
+  border: 1px solid var(--gold);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: var(--text-xl);
+  color: var(--gold);
+  margin-bottom: var(--space-2);
+}
+
+.nombre {
+  font-size: var(--text-lg);
+}
+
+.cargo {
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.bio {
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+@media (max-width: 860px) {
+  .grilla {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+}

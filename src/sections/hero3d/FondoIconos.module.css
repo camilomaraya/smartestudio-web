@@ -1,0 +1,60 @@
+.wrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+/* ============================================
+   Fallback estático (mobile / low-power)
+   ============================================ */
+
+/* Sobredimensionado para que el drift no muestre bordes */
+.patron {
+  position: absolute;
+  inset: -6%;
+  background-repeat: repeat;
+  animation: derivaPatron 26s ease-in-out infinite alternate;
+}
+
+@keyframes derivaPatron {
+  from {
+    transform: translateY(-0.8%);
+  }
+  to {
+    transform: translateY(0.8%);
+  }
+}
+
+/* El bloque global de prefers-reduced-motion ya anula la animación;
+   esta regla lo hace explícito para quien lea este archivo. */
+@media (prefers-reduced-motion: reduce) {
+  .patron {
+    animation: none;
+  }
+}
+
+.brillo {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 42%,
+    rgba(243, 193, 58, 0.07),
+    transparent 70%
+  );
+}
+
+/* ============================================
+   Glow que sigue al cursor (solo desktop WebGL)
+   ============================================ */
+.glowCursor {
+  position: absolute;
+  top: -240px;
+  left: -240px;
+  width: 480px;
+  height: 480px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(243, 193, 58, 0.09), transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}

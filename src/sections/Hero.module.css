@@ -1,0 +1,71 @@
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-block: calc(var(--nav-height) + var(--space-7)) var(--space-8);
+  background-color: var(--bg);
+  overflow: hidden;
+}
+
+/* Contenedor del canvas de íconos. El resplandor CSS queda debajo del
+   canvas y es también el fallback liviano cuando WebGL no se monta. */
+.canvasFondo {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 42%,
+    rgba(243, 193, 58, 0.08),
+    transparent 70%
+  );
+}
+
+.contenido {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.titular {
+  font-size: var(--text-hero);
+}
+
+/* Máscara del reveal por línea: recorta la línea que sube desde abajo.
+   El padding/margin compensado evita cortar acentos (AQUÍ) y descendentes. */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+/* Cada línea es un bloque sin quiebre: el salto queda donde lo definimos */
+.linea {
+  display: block;
+  white-space: nowrap;
+}
+
+.dorado {
+  color: var(--gold);
+}
+
+.bajada {
+  max-width: 40ch;
+  font-size: var(--text-lg);
+  color: var(--muted);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}

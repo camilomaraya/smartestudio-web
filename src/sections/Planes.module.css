@@ -1,0 +1,189 @@
+.planes {
+  padding-block: var(--space-section);
+  background-color: var(--bg-soft);
+  border-block: 1px solid var(--line);
+}
+
+.encabezado {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-7);
+}
+
+.titulo {
+  font-size: var(--text-3xl);
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+/* Compone la .card global; sobre sección soft, el relleno va en --bg */
+.tarjeta {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  background-color: var(--bg);
+}
+
+.destacada {
+  border-color: var(--gold);
+  transform: scale(1.02);
+}
+
+.destacada:hover {
+  transform: scale(1.02) translateY(-4px);
+}
+
+.badge {
+  position: absolute;
+  top: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: var(--space-1) var(--space-4);
+  background-color: var(--gold);
+  color: var(--bg);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.cabecera {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-bottom: var(--space-5);
+  border-bottom: 1px solid var(--line);
+}
+
+.nombre {
+  font-size: var(--text-xl);
+}
+
+.tagline {
+  font-size: var(--text-sm);
+  color: var(--gold);
+}
+
+.precio {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.desde {
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.monto {
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-2xl);
+  line-height: 1.1;
+  color: var(--white);
+}
+
+/* flex-grow empareja la altura de las 4 tarjetas: el CTA queda abajo */
+.items {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.items li {
+  padding-left: var(--space-5);
+  position: relative;
+}
+
+.items li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--font-utility);
+  font-weight: 600;
+  color: var(--gold);
+}
+
+.accion {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-top: auto;
+}
+
+/* Bloque "Personaliza tu plan": a lo ancho, más sobrio */
+.personaliza {
+  margin-top: var(--space-8);
+  padding: var(--space-6);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-6);
+}
+
+.personalizaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.personalizaTitulo {
+  font-size: var(--text-2xl);
+}
+
+.personalizaBajada {
+  max-width: 48ch;
+  color: var(--muted);
+}
+
+.nota {
+  margin-top: var(--space-5);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+@media (max-width: 1080px) {
+  .grilla {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Sin escala en grillas apretadas para no desalinear las filas */
+  .destacada {
+    transform: none;
+  }
+
+  .destacada:hover {
+    transform: translateY(-4px);
+  }
+}
+
+@media (max-width: 720px) {
+  .personaliza {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .grilla {
+    grid-template-columns: 1fr;
+  }
+}

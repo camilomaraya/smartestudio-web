@@ -1,0 +1,183 @@
+.nav {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 100;
+  height: var(--nav-height);
+  background-color: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast);
+}
+
+/* Estado con scroll: sólida + blur */
+.navSolida,
+.navAbierta {
+  background-color: rgba(10, 10, 10, 0.78);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border-bottom-color: var(--line);
+}
+
+/* Desktop: logo | enlaces centrados | CTA */
+.inner {
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.logo {
+  grid-column: 1;
+  justify-self: start;
+  display: inline-flex;
+}
+
+/* display: contents deja lista y CTA como ítems directos de la grilla,
+   centrando los enlaces respecto a la página completa */
+.menu {
+  display: contents;
+}
+
+.lista {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.ctaWrap {
+  grid-column: 3;
+  justify-self: end;
+}
+
+.enlace {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  color: var(--white);
+  transition: color var(--transition-fast);
+}
+
+/* Subrayado animado sutil */
+.enlace::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 1px;
+  background-color: var(--gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-fast);
+}
+
+.enlace:hover {
+  color: var(--gold);
+}
+
+.enlace:hover::after,
+.enlace:focus-visible::after {
+  transform: scaleX(1);
+}
+
+/* Botón hamburguesa (solo mobile) */
+.toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 7px;
+  width: 44px;
+  height: 44px;
+  padding: 11px;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+
+.toggle:hover {
+  border-color: var(--gold);
+}
+
+.toggleBar {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background-color: var(--white);
+  transition: transform var(--transition-fast);
+}
+
+.toggle[aria-expanded='true'] .toggleBar:first-child {
+  transform: translateY(4.5px) rotate(45deg);
+}
+
+.toggle[aria-expanded='true'] .toggleBar:last-child {
+  transform: translateY(-4.5px) rotate(-45deg);
+}
+
+@media (max-width: 860px) {
+  .inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .toggle {
+    display: flex;
+  }
+
+  .menu {
+    position: absolute;
+    top: var(--nav-height);
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-5);
+    padding: var(--space-6) var(--gutter) var(--space-7);
+    background-color: rgba(10, 10, 10, 0.92);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .menuAbierto {
+    display: flex;
+  }
+
+  .lista {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .lista li {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .enlace {
+    display: flex;
+    padding: var(--space-4) 0;
+    font-size: var(--text-base);
+  }
+
+  .enlace::after {
+    display: none;
+  }
+
+  .ctaWrap {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: var(--space-2);
+  }
+}

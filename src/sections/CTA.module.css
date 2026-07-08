@@ -1,0 +1,72 @@
+.cta {
+  padding-block: var(--space-section);
+  background-color: var(--bg-soft);
+  border-block: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  padding-block: var(--space-4);
+}
+
+.pista {
+  display: inline-flex;
+  animation: desplazar 30s linear infinite;
+}
+
+/* Enorme y expandido: momento de impacto */
+.frase {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: clamp(2.5rem, 7vw, 5.5rem);
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Alterna blanco/dorado entre repeticiones (par de copias = loop parejo) */
+.frase:nth-child(even) {
+  color: var(--gold);
+}
+
+.separador {
+  font-size: 0.5em;
+  color: var(--gold);
+  margin-inline: 0.8em;
+}
+
+@keyframes desplazar {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* La pista contiene 4 copias; media pista = 2 copias, loop perfecto */
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pista {
+    animation: none;
+  }
+}
+
+.contenido {
+  margin-top: var(--space-7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-5);
+}
+
+.bajada {
+  font-size: var(--text-lg);
+  color: var(--muted);
+}

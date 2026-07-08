@@ -1,0 +1,63 @@
+/* ============================================
+   Smart Estudio — Design tokens
+   ============================================ */
+:root {
+  /* Colores */
+  --bg: #0a0a0a;
+  --bg-soft: #141414;
+  --gold: #f3c13a;
+  --gold-deep: #c9992e;
+  --gold-soft: #ffe39a;
+  --white: #ffffff;
+  --muted: #8e8e8e;
+  --line: rgba(255, 255, 255, 0.1);
+
+  /* Tipografías */
+  /* Archivo variable: Expanded (wdth 125) + Black (900); ver global.css */
+  --font-display: 'Archivo', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-utility: 'Space Grotesk', sans-serif;
+
+  /* Escala tipográfica */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: clamp(1.25rem, 1rem + 1vw, 1.5rem);
+  --text-2xl: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+  --text-3xl: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+  /* Ajustado para que las 2 líneas del hero (Archivo Expanded) no se partan */
+  --text-hero: clamp(2rem, 8.8vw, 7rem);
+
+  /* Espaciado */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+  --space-section: clamp(80px, 12vh, 160px);
+
+  /* Layout */
+  --container: 1200px;
+  --container-narrow: 820px;
+  --gutter: clamp(1rem, 4vw, 2.5rem);
+  --nav-height: 76px;
+
+  /* Bordes */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+  --radius-pill: 999px;
+
+  /* Transiciones (micro-interacciones base; animaciones GSAP van en Etapa 3) */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-fast: 220ms var(--ease-out);
+
+  /* Sombras */
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-gold: 0 8px 24px rgba(243, 193, 58, 0.22);
+}
