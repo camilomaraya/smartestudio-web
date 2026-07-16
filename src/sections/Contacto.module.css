@@ -110,6 +110,39 @@
   border-color: var(--gold);
 }
 
+.hpCampo {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.turnstile {
+  min-height: 65px;
+}
+
+.error {
+  font-family: var(--font-utility);
+  font-size: var(--text-sm);
+  color: #f2685c;
+}
+
+.exito {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  max-width: var(--container-narrow);
+}
+
+.exitoTexto {
+  color: var(--muted);
+  max-width: 46ch;
+}
+
 @media (max-width: 860px) {
   .inner {
     grid-template-columns: 1fr;
