@@ -66,6 +66,17 @@ h3 {
   line-height: 1.04;
 }
 
+/* Tipografía monumental — se aplica a mano solo en hero, interstitiales
+   y momentos display. No sustituye a h1/h2/h3, que siguen en Archivo. */
+.titular {
+  font-family: var(--font-titular);
+  font-weight: 900;
+  font-size: var(--text-display);
+  line-height: var(--lh-display);
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+}
+
 ::selection {
   background-color: var(--gold);
   color: var(--bg);

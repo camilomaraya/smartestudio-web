@@ -1,183 +1,169 @@
-.nav {
+/* ============================================
+   Círculos fijos (hamburguesa + logo)
+   No cambian con el scroll: son siempre iguales.
+   ============================================ */
+.circulo {
   position: fixed;
-  inset: 0 0 auto;
+  top: var(--gutter);
   z-index: 100;
-  height: var(--nav-height);
-  background-color: transparent;
-  border-bottom: 1px solid transparent;
-  transition:
-    background-color var(--transition-fast),
-    border-color var(--transition-fast);
-}
-
-/* Estado con scroll: sólida + blur */
-.navSolida,
-.navAbierta {
-  background-color: rgba(10, 10, 10, 0.78);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
-  border-bottom-color: var(--line);
-}
-
-/* Desktop: logo | enlaces centrados | CTA */
-.inner {
-  height: 100%;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  background-color: var(--gold);
+  border: 0;
+  border-radius: var(--radius-pill);
+  color: var(--bg);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
 }
 
-.logo {
-  grid-column: 1;
-  justify-self: start;
-  display: inline-flex;
+.circulo:active {
+  transform: scale(0.92);
 }
 
-/* display: contents deja lista y CTA como ítems directos de la grilla,
-   centrando los enlaces respecto a la página completa */
-.menu {
-  display: contents;
+.circuloHamburguesa {
+  right: var(--gutter);
+}
+
+.circuloLogo {
+  left: var(--gutter);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+}
+
+/* Tres líneas de 18×2 con gap 5px: 16px de alto total,
+   7px entre el centro de la primera y el de la del medio. */
+.lineas {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.linea {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--bg);
+  transition: transform 0.3s var(--ease-out), opacity 0.3s var(--ease-out);
+}
+
+.circulo[aria-expanded='true'] .linea:first-child {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.circulo[aria-expanded='true'] .linea:nth-child(2) {
+  opacity: 0;
+}
+
+.circulo[aria-expanded='true'] .linea:last-child {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* ============================================
+   Panel fullscreen
+   ============================================ */
+.panel {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  display: none;
+  background-color: var(--bg);
+  opacity: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.panelVisible {
+  display: block;
+}
+
+/* min-height completo para que el pie caiga abajo y los enlaces
+   queden centrados con el margin-block: auto de la lista. */
+.panelInner {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  /* Reserva el alto de los círculos para que no pisen el primer enlace */
+  padding-block: calc(var(--gutter) + 50px + var(--space-6)) var(--space-7);
 }
 
 .lista {
-  grid-column: 2;
   display: flex;
-  align-items: center;
-  gap: var(--space-5);
-}
-
-.ctaWrap {
-  grid-column: 3;
-  justify-self: end;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  margin-block: auto;
 }
 
 .enlace {
-  position: relative;
+  display: inline-block;
+  font-family: var(--font-display);
+  /* Misma instancia que h1/h2/h3: Expanded (wdth 125) + Black (900) */
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color var(--transition-fast);
+}
+
+.enlace:hover,
+.enlace:focus-visible {
+  color: var(--gold);
+}
+
+/* ============================================
+   Pie del panel
+   ============================================ */
+.pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+
+.redes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+.pieEnlace {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
   font-family: var(--font-utility);
   font-weight: 500;
   font-size: var(--text-sm);
-  letter-spacing: 0.04em;
-  color: var(--white);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
   transition: color var(--transition-fast);
 }
 
-/* Subrayado animado sutil */
-.enlace::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 8px;
-  height: 1px;
-  background-color: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform var(--transition-fast);
-}
-
-.enlace:hover {
+.pieEnlace:hover,
+.pieEnlace:focus-visible {
   color: var(--gold);
 }
 
-.enlace:hover::after,
-.enlace:focus-visible::after {
-  transform: scaleX(1);
-}
-
-/* Botón hamburguesa (solo mobile) */
-.toggle {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  gap: 7px;
-  width: 44px;
-  height: 44px;
-  padding: 11px;
-  background: none;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: border-color var(--transition-fast);
-}
-
-.toggle:hover {
-  border-color: var(--gold);
-}
-
-.toggleBar {
-  display: block;
-  height: 2px;
-  width: 100%;
-  background-color: var(--white);
-  transition: transform var(--transition-fast);
-}
-
-.toggle[aria-expanded='true'] .toggleBar:first-child {
-  transform: translateY(4.5px) rotate(45deg);
-}
-
-.toggle[aria-expanded='true'] .toggleBar:last-child {
-  transform: translateY(-4.5px) rotate(-45deg);
-}
-
-@media (max-width: 860px) {
-  .inner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+/* Viewports muy angostos: círculos algo más chicos, aún sobre 44px */
+@media (max-width: 375px) {
+  .circulo {
+    width: 44px;
+    height: 44px;
   }
 
-  .toggle {
-    display: flex;
-  }
-
-  .menu {
-    position: absolute;
-    top: var(--nav-height);
-    left: 0;
-    right: 0;
-    display: none;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--space-5);
-    padding: var(--space-6) var(--gutter) var(--space-7);
-    background-color: rgba(10, 10, 10, 0.92);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .menuAbierto {
-    display: flex;
-  }
-
-  .lista {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .lista li {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .enlace {
-    display: flex;
-    padding: var(--space-4) 0;
-    font-size: var(--text-base);
-  }
-
-  .enlace::after {
-    display: none;
-  }
-
-  .ctaWrap {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    margin-top: var(--space-2);
+  .panelInner {
+    padding-block: calc(var(--gutter) + 44px + var(--space-6)) var(--space-7);
   }
 }
