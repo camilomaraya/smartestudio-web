@@ -72,4 +72,8 @@
   /* Sombras */
   --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.45);
   --shadow-gold: 0 8px 24px rgba(243, 193, 58, 0.22);
+
+  /* Efectos */
+  /* Grano global sobre --bg: micro-textura, no ruido visible */
+  --opacidad-grano: 0.03;
 }
