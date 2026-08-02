@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /
+
+# Archivos y directorios que existen se sirven tal cual: eso deja pasar
+# server/contacto.php y todos los assets del build sin regla aparte.
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Todo lo demás lo resuelve el router en el cliente.
+RewriteRule ^ index.html [L]

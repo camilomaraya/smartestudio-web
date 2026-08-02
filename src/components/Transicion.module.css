@@ -1,0 +1,36 @@
+/* Nace oculta desde CSS: si el JS falla, nunca aparece y los <a href>
+   reales de EnlaceRuta navegan igual. GSAP la muestra con autoAlpha. */
+.cortina {
+  position: fixed;
+  inset: 0;
+  /* Por encima de todo, incluidos el nav (100) y su panel (99) */
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Solo bloquea la interacción mientras hay transición en curso */
+.activa {
+  pointer-events: auto;
+}
+
+/* Blanco, no dorado: esto ocurre en cada navegación y el dorado es escaso.
+   La escala se baja redefiniendo el token en el elemento, no peleando
+   especificidad contra .titular (DESIGN.md §5). */
+.nombre {
+  --text-display: clamp(2rem, 7vw, 5rem);
+  display: block;
+  color: var(--white);
+}
+
+/* Mismo patrón que hero, interstitial y CTA */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}

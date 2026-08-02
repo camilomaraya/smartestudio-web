@@ -1,15 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router'
 import { gsap, useGSAP } from '../lib/gsap'
 import { scrollToSection } from '../lib/lenis'
+import { irAAncla } from '../lib/navegacion'
+import { useTransicion } from '../hooks/useTransicion'
+import EnlaceRuta from './EnlaceRuta'
 import styles from './Nav.module.css'
 
+/*
+ * Tres tipos de enlace:
+ *   ruta   → navegación real con Link.
+ *   local  → sección que existe en todas las rutas (vive en el Layout):
+ *            scroll directo, nunca navega.
+ *   ancla  → sección que solo existe en el home: desde otra ruta hay que
+ *            navegar primero (ver lib/navegacion.js).
+ */
 const enlaces = [
-  { label: 'Servicios', href: '#servicios' },
-  { label: 'Proceso', href: '#proceso' },
-  { label: 'Trabajos', href: '#trabajos' },
-  { label: 'Planes', href: '#planes' },
-  { label: 'Equipo', href: '#equipo' },
-  { label: 'Contacto', href: '#contacto' },
+  { label: 'Servicios', ancla: 'servicios' },
+  { label: 'Proceso', ancla: 'proceso' },
+  { label: 'Proyectos', ruta: '/proyectos' },
+  { label: 'Planes', ancla: 'planes' },
+  { label: 'Equipo', ancla: 'equipo' },
+  { label: 'Contacto', ancla: 'contacto', local: true },
 ]
 
 // TODO: unificar con las redes del Footer cuando lleguen las URLs reales.
@@ -25,6 +37,9 @@ export default function Nav() {
   const [abierto, setAbierto] = useState(false)
   const [visible, setVisible] = useState(false)
 
+  const { pathname } = useLocation()
+  const { navegarCon } = useTransicion()
+
   const logoRef = useRef(null)
   const botonRef = useRef(null)
   const panelRef = useRef(null)
@@ -38,10 +53,24 @@ export default function Nav() {
 
   const cerrar = () => setAbierto(false)
 
-  const irA = (event, href) => {
-    event.preventDefault()
+  const irA = (evento, enlace) => {
+    evento.preventDefault()
     cerrar()
-    scrollToSection(href)
+
+    // Contacto vive en el Layout: está en todas las rutas, no navega nunca.
+    if (enlace.local) {
+      scrollToSection(`#${enlace.ancla}`)
+      return
+    }
+    // navegarCon en lugar de navigate: desde otra ruta esto SÍ es una
+    // navegación y lleva cortina. Desde el home, irAAncla hace scroll
+    // directo y no la usa.
+    irAAncla(enlace.ancla, { pathname, navigate: navegarCon })
+  }
+
+  const irAlInicio = () => {
+    cerrar()
+    irAAncla('inicio', { pathname, navigate: navegarCon })
   }
 
   // La preferencia de movimiento se resuelve una vez y se mantiene actualizada
@@ -168,7 +197,7 @@ export default function Nav() {
         type="button"
         className={styles.marca}
         aria-label="Smart Estudio — ir al inicio"
-        onClick={(evento) => irA(evento, '#inicio')}
+        onClick={irAlInicio}
       >
         <img src="/logo-smart.png" alt="" className={styles.logo} width="512" height="512" />
       </button>
@@ -202,15 +231,26 @@ export default function Nav() {
           <nav aria-label="Navegación principal">
             <ul className={styles.lista}>
               {enlaces.map((enlace) => (
-                <li key={enlace.href}>
-                  <a
-                    href={enlace.href}
-                    className={styles.enlace}
-                    data-enlace
-                    onClick={(evento) => irA(evento, enlace.href)}
-                  >
-                    {enlace.label}
-                  </a>
+                <li key={enlace.label}>
+                  {enlace.ruta ? (
+                    <EnlaceRuta
+                      to={enlace.ruta}
+                      className={styles.enlace}
+                      data-enlace
+                      alNavegar={cerrar}
+                    >
+                      {enlace.label}
+                    </EnlaceRuta>
+                  ) : (
+                    <a
+                      href={`#${enlace.ancla}`}
+                      className={styles.enlace}
+                      data-enlace
+                      onClick={(evento) => irA(evento, enlace)}
+                    >
+                      {enlace.label}
+                    </a>
+                  )}
                 </li>
               ))}
             </ul>
@@ -220,7 +260,7 @@ export default function Nav() {
             <a
               href="#contacto"
               className={styles.pieEnlace}
-              onClick={(evento) => irA(evento, '#contacto')}
+              onClick={(evento) => irA(evento, { ancla: 'contacto', local: true })}
             >
               Conversemos
             </a>

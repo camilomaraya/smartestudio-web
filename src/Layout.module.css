@@ -1,0 +1,8 @@
+/* El <main> recibe el foco al cambiar de ruta para que los lectores de
+   pantalla anuncien la página nueva. El indicador visual se omite a
+   propósito: ese foco lo mueve el programa, no una interacción de teclado,
+   y un contorno alrededor de toda la página sería ruido. El foco visible
+   del resto del sitio (:focus-visible en global.css) no se toca. */
+.main:focus {
+  outline: none;
+}

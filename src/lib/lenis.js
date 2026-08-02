@@ -41,11 +41,19 @@ export function getLenis() {
   return lenis
 }
 
-// Scroll a una sección por selector ("#planes") o elemento.
-// Con fallback nativo cuando Lenis está desactivado (reduced motion).
-export function scrollToSection(target) {
+/*
+ * Scroll a una sección por selector ("#planes") o elemento.
+ * Con fallback nativo cuando Lenis está desactivado (reduced motion).
+ *
+ * `inmediato` salta sin animar: lo usa la llegada desde otra ruta, donde el
+ * salto ocurre detrás de la cortina de transición. Animarlo ahí solo logra
+ * que el tramo final del viaje se vea al levantarse la cortina, sin que el
+ * usuario haya visto de dónde venía. Las anclas dentro del home no lo usan:
+ * ahí el recorrido sí comunica distancia.
+ */
+export function scrollToSection(target, { inmediato = false } = {}) {
   if (lenis) {
-    lenis.scrollTo(target, { offset: -8 })
+    lenis.scrollTo(target, { offset: -8, immediate: inmediato })
     return
   }
   const el = typeof target === 'string' ? document.querySelector(target) : target

@@ -1,0 +1,40 @@
+/* Módulo compartido por las páginas stub de la Fase 3a. Provisional: al
+   construirse los índices y fichas reales (fases 5 y 6) cada página pasa a
+   tener su propio módulo y este desaparece. */
+
+.cuerpo {
+  padding-bottom: var(--space-section);
+}
+
+.texto {
+  max-width: var(--container-narrow);
+  font-size: var(--text-lg);
+  color: var(--muted);
+}
+
+.slug {
+  font-family: var(--font-utility);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-6);
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color var(--transition-fast);
+}
+
+.volver:hover,
+.volver:focus-visible {
+  color: var(--gold);
+}

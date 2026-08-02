@@ -1,0 +1,34 @@
+/* El padding superior reserva el alto del logo fijo (36.3% de su caja,
+   ver Nav.module.css) para que el titular no quede debajo. */
+.cabecera {
+  padding-block: calc(var(--gutter) + var(--ancho-logo) * 0.363 + var(--space-7))
+    var(--space-8);
+}
+
+.titulo {
+  font-size: var(--text-3xl);
+}
+
+/* Máscara del reveal por línea, igual que en hero, interstitial y CTA:
+   el padding/margin compensado evita cortar acentos y descendentes. */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.linea {
+  display: block;
+}
+
+.acento {
+  color: var(--gold);
+}
+
+.bajada {
+  max-width: var(--container-narrow);
+  margin-top: var(--space-5);
+  font-size: var(--text-lg);
+  color: var(--muted);
+}

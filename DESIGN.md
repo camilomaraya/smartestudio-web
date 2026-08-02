@@ -1,9 +1,11 @@
 # DESIGN.md — Smart Estudio
 
-Sistema de diseño del sitio one-page de **Smart Estudio**, agencia de marketing digital de La Serena–Coquimbo.
-Este documento describe lo que el código ya implementa: sirve como referencia al agregar secciones o componentes nuevos, para que todo siga leyéndose como una sola pieza.
+Sistema de diseño del sitio **multipágina** de **Smart Estudio**, agencia de marketing digital de La Serena–Coquimbo.
+Este documento es la referencia al agregar páginas, secciones o componentes, para que todo siga leyéndose como una sola pieza.
 
-> **Estado:** el sitio está en medio de un rediseño editorial (rama `rediseno-editorial`). Hero, nav, interstitial y CTA ya siguen el lenguaje nuevo. Proceso, Servicios, Trabajos, Planes, Equipo y Contacto todavía son secciones de la versión anterior y se van a reconstruir. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
+> **Cómo leer este documento.** La mayoría describe lo que el código ya implementa. Lo que todavía no está construido va marcado con **`[pendiente]`** y el número de fase. Si algo lleva `[pendiente]`, **no existe en el código todavía**: es la regla que debe cumplir cuando se construya, no algo que se pueda importar hoy.
+>
+> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, CTA amplificado, grano global y toda la **infraestructura multipágina**: rutas y layout compartido (3a), transición entre páginas (3b) y prerender + SEO por ruta (3c). Próxima fase: **4** (sección F en el home). Servicios, Planes, Equipo y Contacto todavía son secciones de la versión anterior y se reconstruyen en las fases 5 a 8. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
 
 ---
 
@@ -31,7 +33,7 @@ Fuente única de verdad: `src/styles/tokens.css`. **Ningún valor de color, espa
 | --- | --- | --- |
 | `--bg` | `#0a0a0a` | Fondo base y color de texto sobre dorado |
 | `--bg-soft` | `#141414` | Acento puntual de superficie (hoy solo el CTA) y relleno de inputs |
-| `--gold` | `#f3c13a` | Acento principal: eyebrows, botón primario, foco, hovers |
+| `--gold` | `#f3c13a` | Acento principal: acento de titular, botón primario, foco, hovers |
 | `--gold-deep` | `#c9992e` | Dorado apagado para jerarquías terciarias |
 | `--gold-soft` | `#ffe39a` | Dorado claro: hover del botón primario, labels sobre media |
 | `--gold-echo` | `rgba(243,193,58,.25)` | Dorado fantasma. Solo para el eco de los interstitiales: texto que reverbera detrás del statement, no información |
@@ -45,10 +47,10 @@ El único color fuera de la paleta es el rojo de error del formulario (`#f2685c`
 
 Cuatro familias, cargadas desde Google Fonts en `index.html`. Hay una jerarquía de voces y no se saltan escalones:
 
-- **`--font-titular` · Big Shoulders Display Black (900)** — la voz monumental. Solo para momentos que ocupan la pantalla completa: el titular del hero, los statements de interstitial y el headline del CTA. Se aplica con la clase global `.titular`, no repitiendo la familia por módulo. Si algo lleva Big Shoulders, es porque esa pantalla existe para decir esa frase.
-- **`--font-display` · Archivo** — titulares de escala media: `h2`, `h3`, encabezados de sección. Instancia fija: variable Expanded (`font-stretch: 125%`) + Black (`font-weight: 900`), mayúsculas, `letter-spacing: -0.02em`, `line-height: 1.04`. Aplicado globalmente a `h1, h2, h3` en `global.css`.
+- **`--font-titular` · Big Shoulders Display Black (900)** — la voz monumental. Solo para momentos que ocupan la pantalla completa: el titular del hero, los statements de interstitial, la frase de la sección F y el headline del CTA. Se aplica con la clase global `.titular`, no repitiendo la familia por módulo. Si algo lleva Big Shoulders, es porque esa pantalla existe para decir esa frase. **No tiene itálica** (sus ejes son peso, ancho y óptico): el acento dentro de un titular se hace con color, nunca con cursiva.
+- **`--font-display` · Archivo** — titulares de sección y de página: `h1` de índice y ficha, `h2`, `h3`. Instancia fija: variable Expanded (`font-stretch: 125%`) + Black (`font-weight: 900`), mayúsculas, `letter-spacing: -0.02em`, `line-height: 1.04`. Aplicado globalmente a `h1, h2, h3` en `global.css`.
 - **`--font-body` · Inter** — párrafos y textos largos. `line-height: 1.6`.
-- **`--font-utility` · Space Grotesk** — la "letra chica con carácter": eyebrows, labels, botones, precios, badges, enlaces de nav. Casi siempre en mayúsculas con `letter-spacing` entre `0.04em` y `0.18em`.
+- **`--font-utility` · Space Grotesk** — la "letra chica con carácter": labels, botones, precios, badges, enlaces de nav, listas de servicios prestados en fichas. Casi siempre en mayúsculas con `letter-spacing` entre `0.04em` y `0.18em`.
 
 Escala fluida con `clamp()`: `--text-xs` → `--text-3xl`, más:
 
@@ -61,9 +63,16 @@ Escala fluida con `clamp()`: `--text-xs` → `--text-3xl`, más:
 ### Espaciado y layout
 
 - Escala `--space-1` (4px) → `--space-9` (96px). No usar píxeles sueltos para separaciones.
-- `--space-section: clamp(80px, 12vh, 160px)` es el `padding-block` de las secciones de contenido. Las secciones full-viewport (ver §3) no lo usan: se resuelven con `min-height: 100svh` y centrado.
+- `--space-section: clamp(80px, 12vh, 160px)` es el `padding-block` de las secciones de contenido. Las secciones full-viewport (ver §4) no lo usan: se resuelven con `min-height: 100svh` y centrado.
 - `--container: 1200px` con la utilidad `.container` (`width: min(var(--container), 100% - var(--gutter)*2)`); `--container-narrow: 820px` para bloques de lectura.
-- `--gutter: clamp(1rem, 4vw, 2.5rem)`, `--nav-height: 70px` (también es el `scroll-padding-top` del documento). Ya no existe una barra de nav: el token es el espacio que reservan los elementos fijos de la esquina superior.
+- `--gutter: clamp(1rem, 4vw, 2.5rem)`, `--nav-height: 70px` (también es el `scroll-padding-top` del documento). No existe una barra de nav: el token es el espacio que reservan los elementos fijos de la esquina superior.
+
+### Grano global
+
+- `--opacidad-grano: 0.03` (`tokens.css:78`).
+- La capa vive en `body::before` (`global.css:30-48`): fija, sobre todo el sitio, con un SVG `feTurbulence` inline como data-URI.
+- `baseFrequency: 0.8` y **`stitchTiles="stitch"` es obligatorio** — sin eso aparecen costuras cada 200px.
+- Palancas de calibración: `baseFrequency` cambia el tamaño del grano, `--opacidad-grano` la intensidad. No se toca nada más de esa capa.
 
 ### Radios, sombras, easing
 
@@ -73,55 +82,155 @@ Escala fluida con `clamp()`: `--text-xs` → `--text-3xl`, más:
 
 ---
 
-## 3. Ritmo de la página
+## 3. Arquitectura del sitio
 
-**El ritmo ya no lo marca el fondo.** La alternancia `--bg` / `--bg-soft` fue el sistema de la versión anterior y quedó descartada: hoy casi todo el sitio es `--bg` y `--bg-soft` sobrevive como acento único de superficie en el CTA. Lo que marca la respiración ahora es **la alternancia entre secciones de contenido y secciones full-viewport**: una pantalla completa con una sola idea tipográfica corta el scroll, deja aire y separa bloques mucho más fuerte de lo que lo hacía un cambio de gris.
+El sitio es **multipágina**. Servicios y Proyectos tienen índice y ficha propia; Planes, Equipo y Contacto viven en el home y no justifican página propia.
 
-| Sección | Fondo | Tipo |
+| Ruta | Qué | `h1` de la página |
 | --- | --- | --- |
-| Hero | `--bg` | Full-viewport (WebGL) |
-| Manifiesto (interstitial) | `--bg` | Full-viewport tipográfico |
-| Proceso | `--bg` | Contenido |
-| Servicios | `--bg` | Contenido |
-| Trabajos | `--bg` | Contenido |
-| Planes | `--bg` | Contenido |
-| Equipo | `--bg` | Contenido |
-| CTA (cierre) | `--bg-soft` | Full-viewport tipográfico |
-| Contacto | `--bg` | Contenido |
+| `/` | Home (scroll largo) | Titular del hero |
+| `/servicios` | Índice de servicios | Titular de página |
+| `/servicios/:slug` | Ficha de servicio | Nombre del servicio |
+| `/proyectos` | Índice de proyectos | Titular de página |
+| `/proyectos/:slug` | Ficha de proyecto | Nombre del cliente |
 
-**Secciones full-viewport:** `min-height: 100svh` (no `100vh` — la barra del navegador móvil rompe el segundo), contenido centrado, sin `.eyebrow`, sin `border-block`, sin encabezado estándar. Abren directo con el contenido. Llevan timeline propia (§5), no el reveal genérico.
+La nomenclatura es **"Proyectos"**, no "Trabajos" — en URLs, en el nav, en los nombres de archivo y en el copy. La sección `Trabajos` de la versión anterior queda obsoleta (ver §5).
 
-**Regla derivada de tarjetas:** las `.card` usan `--bg-soft` sobre fondo `--bg`, e invierten a `--bg` si alguna vez quedan sobre `--bg-soft`. La tarjeta siempre contrasta con su fondo.
+### Arquitectura elegida: React Router + prerender
 
-**Estructura de sección de contenido (estándar):**
+Se descartaron:
+
+- **SPA pura** — el HTML que sube al hosting queda vacío y se cae el SEO. Inaceptable para una agencia de marketing.
+- **MPA estático puro** (múltiples entradas HTML en Vite) — SEO perfecto pero se pierde Lenis entre páginas y cada navegación es un refresh completo.
+
+El prerender genera un HTML real por ruta al hacer build. Igual hace falta `.htaccess` con rewrite como fallback en DirectAdmin.
+
+### Prerender: script propio, no plugin
+
+`scripts/prerender.mjs` es **el único comando de build** (`npm run build`): construye el bundle de cliente, después un bundle **SSR** de `src/prerender.jsx`, lo ejecuta una vez por ruta e inyecta el HTML y el `<head>` en el `index.html` generado.
+
+**Por qué no un plugin.** Se probó `vite-prerender-plugin` —el único del ecosistema que sigue mantenido y declara soporte de Vite 8— y **generaba el HTML correctamente**, incluso sobre Rolldown. El problema es su estrategia: ejecuta el bundle de **cliente** dentro de Node. El *scheduler* de React, en su build de navegador, abre un `MessageChannel` al cargarse; en Node ese `MessagePort` queda como handle activo y **`vite build` nunca termina** — el HTML sale bien y el proceso se cuelga para siempre (`EXIT 124`, no un error). Reproducido aislado: importar el chunk generado deja `handles: 1 ["MessagePort"]`.
+
+Intentar esconder `globalThis.MessageChannel` durante el import **empeora la cosa**: sin él, el render toma otra rama que toca `window` y el build pasa de colgarse a fallar. No insistir por ahí.
+
+Un bundle SSR no tiene ese problema: Vite externaliza las dependencias, Node resuelve `react-dom/server` a **`react-dom/server.node`**, que programa con `setImmediate` en vez de `MessageChannel` y no deja el event loop vivo.
+
+> Si alguien vuelve a evaluar esto —y va a pasar, porque un plugin es menos código—: el criterio no es si genera bien el HTML (el plugin lo hace), es **si el build termina**.
+
+**El build falla con código distinto de cero** si una ruta no se genera, sale vacía, no tiene `<h1>` o el contenido no queda dentro de `#root`. Un prerender que falla en silencio sube HTML vacíos al hosting sin que nadie se entere.
+
+**Las rutas a generar viven en `src/lib/rutasPrerender.js`**, no en la configuración. La Fase 6 reemplaza esas dos constantes por los slugs de `src/data/` y no toca nada más. El catch-all no se prerenderiza: no es una página, es la respuesta a una URL que no existe.
+
+### Lo que hay que excluir del prerender: nada
+
+La sospecha inicial era que el hero WebGL, `three`, el canvas 2D de `atlasIconos`, Lenis, la cortina y `useRutaScroll` iban a necesitar guardas. **Ninguno resultó ser problema**, y el motivo es el principio del §6: *todo lo que toca el navegador se monta en efectos, y los efectos no corren en el servidor*.
+
+- `HeroCanvas` es `lazy()` y `FondoIconos` devuelve `null` hasta que corre su efecto → `three` nunca se importa.
+- `atlasIconos.js` sí se evalúa en Node, pero su nivel superior son constantes; el canvas se dibuja dentro de funciones que solo llaman los efectos.
+- `new Lenis()` es lo único que revienta fuera del navegador, y vive en `initLenis()` ← `useLenis()` ← efecto.
+- La cortina consulta `matchMedia` y `requestAnimationFrame` dentro de callbacks, no en render.
+
+El único ajuste que hizo falta fue cambiar `useLayoutEffect` por su variante isomórfica en `useRutaScroll`, y solo para no emitir un warning de React en cada build.
+
+**Ese hallazgo vale más que la lista de sospechosos: confirma que la regla 1 del §6 se paga sola.** Si algo revienta el prerender en el futuro, la corrección es moverlo a un efecto, no envolverlo en `typeof window !== 'undefined'`.
+
+### Layout compartido
+
+Envuelve todas las rutas y contiene, en este orden: **nav** (§5) → `<main>` con la ruta → **quiz de contacto** → **footer**.
+
+**El quiz de contacto aparece en todas las páginas**, no solo en el home. Consecuencia: `server/contacto.php` recibe un campo oculto `origen` con la ruta desde la que se envió, para saber qué página convierte. `[pendiente — Fase 8]`
+
+Lenis es instancia única y vive en el layout, no en las páginas: no se destruye al cambiar de ruta.
+
+### SEO por ruta
+
+`src/lib/seo.js` define `title`, `meta description` y `canonical` por ruta. **El título no se define ahí**: reutiliza el mismo `tituloDeRuta()` que usa el cliente al navegar (`hooks/useRutaScroll.js`), para que la pestaña y el HTML generado nunca digan cosas distintas.
+
+Las descripciones de ficha son placeholders con la estructura final. En la Fase 6, la `meta description` de una ficha pasa a ser **el mismo párrafo de 2-3 líneas del cliente o servicio** que se usa en el índice y en la cabecera de la ficha (§8). Un párrafo escrito, tres lugares servidos.
+
+Open Graph y Twitter siguen pendientes: falta la imagen social. El dominio de las canónicas (`https://smartestudio.cl`) está marcado con TODO hasta confirmarlo.
+
+---
+
+## 4. Ritmo de la página
+
+**El ritmo no lo marca el fondo.** La alternancia `--bg` / `--bg-soft` fue el sistema de la versión anterior y quedó descartada: hoy casi todo el sitio es `--bg` y `--bg-soft` sobrevive como acento único de superficie en el CTA. Lo que marca la respiración es **la alternancia entre secciones de contenido y secciones full-viewport**: una pantalla completa con una sola idea tipográfica corta el scroll, deja aire y separa bloques mucho más fuerte de lo que lo hacía un cambio de gris.
+
+### Ritmo del home
+
+| Sección | Fondo | Tipo | Estado |
+| --- | --- | --- | --- |
+| Hero | `--bg` | Full-viewport (WebGL) | Hecho |
+| Manifiesto (interstitial) | `--bg` | Full-viewport tipográfico | Hecho |
+| **F** — la frase que se corrige | `--bg` | Full-viewport tipográfico | `[pendiente — Fase 4]` |
+| Servicios | `--bg` | Contenido | `[pendiente — Fase 5]` |
+| **E** — preview del "detrás" | `--bg` | Contenido (columna central) | `[pendiente — Fase 6]` |
+| Planes | `--bg` | Contenido | `[pendiente — Fase 7]` |
+| Equipo | `--bg` | Contenido | `[pendiente — Fase 8]` |
+| CTA (cierre) | `--bg-soft` | Full-viewport tipográfico | Hecho |
+| Contacto (quiz) | `--bg` | Contenido | `[pendiente — Fase 8]` |
+
+**F reemplaza a la antigua sección Proceso** (el acrónimo SMART), que se elimina: se llamaba "Proceso" pero no describía ningún proceso, eran cinco adjetivos sin secuencia. Si el juego con el nombre de la agencia importa, puede sobrevivir como una línea en el footer o dentro de Servicios, sin ocupar pantalla.
+
+**E reemplaza a la antigua sección Trabajos.**
+
+### Ritmo de un índice (`/servicios`, `/proyectos`) `[pendiente]`
+
+Cabecera de página (titular partido, ver abajo) → **lista vertical**, un bloque por ítem, uno debajo del otro → enlace de vuelta al home → quiz.
+
+**No es una grilla.** Cada bloque de proyecto lleva su propio carrusel de 3-5 imágenes, de modo que el visitante ya vio varias fotos del caso antes de entrar a la ficha. Composición del bloque: carrusel → nombre del cliente (`h2`) → lista corta de servicios prestados en Space Grotesk (varía por cliente) → párrafo de 2-3 líneas en tono humano → doble enlace a la ficha.
+
+### Ritmo de una ficha (`/proyectos/:slug`) `[pendiente]`
+
+Cabecera (nombre `h1` + servicio `h2` + el mismo párrafo del índice) → carrusel grande → frase destacada en negrita + párrafo que la desarrolla → video con controles → imagen a ancho completo → párrafo de contexto (qué pidió el cliente, para qué se usó, qué formatos se entregaron) → más carruseles y videos alternados → "Explorar otros proyectos" con enlaces al resto → quiz.
+
+### Secciones full-viewport
+
+`min-height: 100svh` (no `100vh` — la barra del navegador móvil rompe el segundo), contenido centrado, sin encabezado estándar, sin `border-block`. Abren directo con el contenido. Llevan timeline propia (§6), no el reveal genérico.
+
+### Estructura de sección de contenido (estándar nuevo)
+
+Este patrón **reemplaza al estándar anterior** (`eyebrow` → `h2` → bajada → contenido). Viene del análisis de Agence Foudre e invierte el orden: la bajada explicativa va **después** del contenido, no antes.
 
 ```
 <section id="…" class="{seccion}">
   <div class="container">
-    <div class="{encabezado}" data-reveal-group>
-      <p class="eyebrow">Etiqueta</p>
-      <h2 class="{titulo}">Título</h2>
-      <p>Bajada opcional</p>
-    </div>
+    <h2 class="{titularSeccion}" data-reveal-group>
+      <span class="mascara"><span>Primera línea</span></span>
+      <span class="mascara"><span>Segunda línea</span></span>
+      <span class="mascara"><span class="acento">Fragmento final</span></span>
+    </h2>
+
     … contenido …
+
+    <p class="{bajada}">Bajada explicativa, opcional.</p>
   </div>
 </section>
 ```
 
-El encabezado usa `flex-direction: column` con `gap: var(--space-3)` y `margin-bottom: var(--space-7)`.
+Reglas del titular de sección:
+
+1. **Partido en 3-4 líneas cortas, una idea por línea.** No es un párrafo que hace wrap: cada línea es una decisión.
+2. **El último fragmento va dorado** (`--gold`). Foudre lo hace en cursiva; acá el acento es color, porque Big Shoulders no tiene itálica y porque el dorado ya es el mecanismo de acento del sistema (el hero lo hace igual con "BUENAS IDEAS").
+3. **Sin eyebrow.** El titular se sostiene solo. Foudre lo apoya con un tríptico de emojis; Smart no puede usar emojis (no calzan con oro-sobre-negro), así que la escala y el corte de línea tienen que hacer todo el trabajo.
+4. **Familia:** `--font-display` (Archivo Expanded Black), a la escala de `h2` que ya define `global.css`. Si una sección necesita más peso sube a `--text-hero`; **no** sube a `.titular`, que está reservada para las full-viewport.
+5. **Entrada:** una `.mascara` por línea, con stagger. Es el gesto por defecto, no un gesto "con carácter" (§6).
+6. La bajada es `--muted`, `--font-body`, dentro de `--container-narrow`, y es opcional. Si no aporta nada, no va.
+
+**Regla derivada de tarjetas:** las `.card` usan `--bg-soft` sobre fondo `--bg`, e invierten a `--bg` si alguna vez quedan sobre `--bg-soft`. La tarjeta siempre contrasta con su fondo.
 
 ---
 
-## 4. Piezas compartidas
+## 5. Piezas compartidas
 
 Viven en `src/styles/global.css` y se componen con la clase del módulo (`class="card ${styles.tarjeta}"`), no se duplican:
 
 - **`.titular`** — la voz monumental: `--font-titular`, `font-weight: 900`, `font-size: var(--text-display)`, `line-height: var(--lh-display)`, mayúsculas. Para escalar un titular puntual por encima o por debajo de la escala base, **no se pelea especificidad contra `.titular`**: se **redefine `--text-display` en el propio elemento** (`.miTitular { --text-display: clamp(2rem, 7vw, 5rem) }`). El token es local al elemento y `.titular` lo lee. Este es el mecanismo oficial de ajuste de escala del display.
-- **`.mascara`** — patrón de reveal por línea. Contenedor con `overflow: hidden` y `padding/margin-block: ±0.08em` (para no cortar acentos ni descendentes); adentro, un `<span>` por línea que entra con `yPercent: 110 → 0`, `power4.out`. Ya se usa en hero, interstitial y CTA: **es el gesto estándar de entrada de cualquier titular grande.** Los elementos dentro de `.mascara` son la excepción a la regla de `clearProps` (§5).
-- **`.eyebrow`** — etiqueta de sección: Space Grotesk, mayúsculas, `letter-spacing: .18em`, dorada, con una línea dorada de 28×2px antes vía `::before`. Aparece en las secciones de contenido; las full-viewport abren directo, sin eyebrow.
+- **`.mascara`** — patrón de reveal por línea. Contenedor con `overflow: hidden` y `padding/margin-block: ±0.08em` (para no cortar acentos ni descendentes); adentro, un `<span>` por línea que entra con `yPercent: 110 → 0`, `power4.out`. Se usa en hero, interstitial, CTA y en los titulares de sección: **es el gesto estándar de entrada de cualquier titular.** Los elementos dentro de `.mascara` son la excepción a la regla de `clearProps` (§6).
 - **`.card`** — fondo `--bg-soft`, borde `--line`, radio `md`, padding `--space-6`. Al hover: `translateY(-4px)`, borde dorado y `--shadow-lift`.
 - **`.card-numero`** — numeración/etiqueta dorada en Space Grotesk.
 - **`.visually-hidden`** — texto solo para lectores de pantalla.
+- **`.eyebrow`** — *deprecada como encabezado de sección.* El estándar nuevo (§4) no la usa. Se conserva porque sirve como etiqueta de bloques menores dentro de fichas (por ejemplo, "SERVICIOS PRESTADOS"). Si al cerrar la Fase 8 no quedó ningún uso, se elimina de `global.css`.
 
 ### Patrón statement / eco
 
@@ -133,14 +242,16 @@ El gesto propio de los interstitiales tipográficos, ya implementado en Manifies
 
 ### Componentes
 
-- **`Button`** (`src/components/ui/Button.jsx`) — dos variantes: `primary` (fondo dorado, texto `--bg`, glow al hover) y `ghost` (transparente, borde `--line`, se vuelve dorado al hover). Píldora, Space Grotesk 600, `min-height: 44px`, `translateY(-2px)` al hover y `scale(.98)` al presionar. Renderiza `<a>` si recibe `href`, si no `<button>`.
+- **`Button`** (`src/components/ui/Button.jsx`) — dos variantes: `primary` (fondo dorado, texto `--bg`, glow al hover) y `ghost` (transparente, borde `--line`, se vuelve dorado al hover). Píldora, Space Grotesk 600, `min-height: 44px`, `translateY(-2px)` al hover y `scale(.98)` al presionar. Renderiza `<a>` si recibe `href`, si no `<button>`. **Al haber rutas, los enlaces internos pasan por el `Link` del router**, no por `<a href>` crudo: un `<a>` recarga la página entera y mata Lenis.
 - **`Nav`** (`src/components/Nav.jsx`) — sin barra: el logo suelto a la izquierda (sin contenedor, porque es apaisado y blanco) y un único círculo dorado de 50px con la hamburguesa a la derecha, ambos fijos a `--gutter` de las esquinas superiores y alineados por centro óptico. No cambian con el scroll. La hamburguesa abre un panel fullscreen `--bg` sólido con los enlaces en Archivo Expanded 900 a `clamp(2rem, 5vw, 3.5rem)`, centrados verticalmente y alineados a la izquierda del container, más un pie con CTA y redes en Space Grotesk. Igual en desktop y mobile; bajo 375px los círculos bajan a 44px. El panel entra con fade (0.4s) + stagger de enlaces (0.08s, `y: 30 → 0`) y sale con fade de 0.3s; cierra con `Escape`, al scrollear o al elegir un enlace, con focus trap sobre círculos + panel.
+  El nav tiene **tres tipos de enlace**: anclas que solo existen en el home (pasan por `irAAncla`, que navega primero si estás en otra ruta), la sección de contacto (scroll directo siempre, porque vive en el Layout y está en todas las rutas) y rutas reales (`/proyectos`, vía `EnlaceRuta`). El logo lleva al inicio del home. Footer aplica el mismo criterio.
 - **Logo** — `public/logo-smart.png` (512×512, logotipo en la franja central del lienzo). Se usa en nav, footer y favicon. Token `--ancho-logo: clamp(140px, 17vw, 240px)`. **Ojo:** el `img { max-width: 100% }` global rompe los márgenes negativos que compensan el aire del PNG; los módulos que lo usan necesitan `max-width: none`.
-- **Tarjeta de trabajo** (`Trabajos.module.css`) — `aspect-ratio: 4/5`, overflow oculto, capa `.media` que hace zoom `scale(1.06)` al hover y capa interna `.mediaFondo` sobredimensionada (`inset: -8% 0`) que lleva el parallax. Ahí van las imágenes/videos reales. Overlay inferior con gradiente para legibilidad del label.
+- **Carrusel** `[pendiente — Fase 6]` — **no existe todavía.** Lo necesitan el índice de proyectos (uno por bloque, 3-5 imágenes) y las fichas (uno grande y varios intercalados). Requisitos: navegable con teclado, con estado visible de posición, sin autoplay que compita con el scroll, y degradando a la primera imagen visible si el JS falla. Se decide entonces si se implementa a mano o con librería.
+- **Tarjeta de trabajo** (`Trabajos.module.css`) — **obsoleta.** El formato `aspect-ratio: 4/5` en grilla no se usa en el diseño nuevo: el índice es lista vertical con carrusel y el home muestra E. Lo que **sí se rescata** es su mecanismo de parallax —capa `.media` con zoom `scale(1.06)` al hover y capa interna `.mediaFondo` sobredimensionada (`inset: -8% 0`) que lleva el `scrub`—, reutilizable en las piezas de E y en los carruseles. El módulo se elimina o se renombra a `Proyectos.module.css` cuando se construya la Fase 6.
 
 ---
 
-## 5. Movimiento
+## 6. Movimiento
 
 Stack: **Lenis** (scroll suave) + **GSAP/ScrollTrigger**. Instancia única de Lenis en `src/lib/lenis.js`, manejada por el ticker de GSAP (`gsap.ticker.add`) y sincronizada con `lenis.on('scroll', ScrollTrigger.update)`, con `lagSmoothing(0)`. La navegación interna usa `scrollToSection()`, que cae al `scrollIntoView` nativo cuando Lenis está desactivado.
 
@@ -150,6 +261,45 @@ Stack: **Lenis** (scroll suave) + **GSAP/ScrollTrigger**. Instancia única de Le
 2. **Todo va dentro de `gsap.matchMedia('(prefers-reduced-motion: no-preference)')`.** Con movimiento reducido: sin Lenis, sin reveals, sin marquee (`global.css` además recorta transiciones y animaciones a 0.01ms).
 3. **`clearProps: 'opacity,transform'` al terminar**, para que los estilos inline no pisen los hovers CSS. **Excepción:** los `<span>` dentro de `.mascara` conservan su transform final; limpiarlos los devuelve al `yPercent` del CSS.
 4. **Reveals una sola vez** (`once: true`, `start: 'top 85%'`). Nada re-anima al volver a subir. Las secciones full-viewport disparan más tarde (`start: 'top 70%'`), porque su contenido está centrado y no arriba.
+
+### Ciclo de vida entre rutas
+
+1. **Cada sección monta su animación dentro de un `gsap.context()`** con el ref de la sección como scope, y revierte en el cleanup. `useGSAP()` de `@gsap/react` ya hace exactamente esto: no hace falta escribirlo a mano.
+2. **Al cambiar de ruta:** `useRutaScroll` resetea el scroll a 0 (`immediate`) en `useLayoutEffect`, antes de pintar la ruta nueva.
+3. **Después de montar la ruta nueva**, tras doble `rAF`: `ScrollTrigger.refresh()`.
+4. **Lenis no se destruye** al navegar: vive en el layout compartido (§3).
+5. **Las anclas del home desde otra ruta** navegan con `state.scrollTo` y `Home` hace el scroll al montar (`lib/navegacion.js`).
+
+### Tres trampas que ya costaron caro
+
+Encontradas depurando las fases 3a y 3b. Las tres reaparecen sola en cuanto se anima algo nuevo:
+
+1. **`fromTo` con `y: 0` explícito en los titulares con `.mascara`, nunca `set` + `to` de solo `yPercent`.** GSAP guarda `y` (px) y `yPercent` como componentes separadas **y las suma**: bajo el doble montaje de StrictMode, la segunda pasada lee el `translateY` que dejó la primera como `y` y le suma otra vez el porcentaje. El titular termina al doble de desplazamiento, invisible detrás de su propia máscara.
+2. **Después de cambiar de ruta, cualquier `scrollTo` necesita `getLenis()?.resize()` antes.** Lenis cachea el límite de scroll y **clampea todo destino a ese valor**; al llegar desde otra ruta ese límite es el que midió en la ruta anterior, así que el scroll se detiene siempre en el mismo punto sin importar la sección pedida. **Esto va a reaparecer en la Fase 6** con los enlaces internos de las fichas.
+3. **La transición se salta si `document.hidden`, y `visibilitychange` salta la timeline a su estado final.** Con la pestaña en segundo plano el navegador congela los `rAF`: sin esto la timeline queda a medias, la navegación sin completar y el flag de "en curso" trabado, con lo que ningún enlace vuelve a responder.
+
+### Transición entre páginas
+
+`src/components/Transicion.jsx` — **cubrir, después navegar**. La cortina entra desde abajo (420 ms), y recién con la pantalla cubierta se llama `navigate()`: ahí ocurren el reset de scroll y el `refresh()` sin que se vea el salto. Después sale hacia arriba (420 ms).
+
+**La duración no siempre es la misma, y el porqué importa:**
+
+- **Navegación normal** (a `/proyectos`, a una ficha): **900 ms fijos** — 420 + 60 de respiro + 420. La salida va encadenada en la misma timeline; no espera nada. Este es el camino por defecto.
+- **Navegación a un ancla del home**: **variable, con tope de ~1300 ms.** Acá la página nueva tiene que montar *y* saltar a la sección antes de que se levante la cortina, y esa cadena —montar, esperar el `refresh` de ScrollTrigger, esperar a que la sección deje de moverse, `resize` de Lenis, saltar— tarda del orden de 430 ms después de cubrir. Con la duración fija de 900 ms el salto caía **fuera** de la ventana cubierta y se veía. Por eso `Home` emite una señal (`avisarScrollListo()`) cuando terminó de saltar, y la cortina espera esa señal para destapar.
+
+**Reglas de esa espera:**
+
+1. **Tope de seguridad obligatorio.** Si la señal no llega, la cortina se levanta igual. Ninguna cortina puede quedar colgada esperando un evento que no llegó — mismo criterio que el respaldo de 500 ms del scroll al ancla. El primero que llegue (señal o tope) cancela al otro: `destapar()` es idempotente por bandera y limpia el `setTimeout`.
+2. **Solo cuando hay ancla.** Se detecta por `opciones.state.scrollTo` en `navegarCon`. Una navegación normal no espera nada.
+3. **La señal es opcional por diseño.** `avisarScrollListo()` es seguro de llamar siempre: si no había espera —navegación normal, o `prefers-reduced-motion`, donde nunca se montó cortina— no hace nada. El camino sin cortina **no puede depender de ella en absoluto**.
+
+**Al llegar por ancla desde otra ruta, la sección destino aparece ya revelada.** Es intencional: el reveal es para descubrir algo al scrollear hacia ello, y acá el usuario pidió ir. No se acopla el reveal a la cortina — esa independencia se preserva a propósito, y el reveal debe seguir funcionando igual sin transición alguna.
+
+- El nombre de la ruta destino va centrado en `.titular` **blanco, no dorado**: esto pasa en cada navegación y el dorado es escaso. La cortina entera es `aria-hidden`; el cambio de página lo anuncian el `document.title` y el foco al `<main>`.
+- **`EnlaceRuta`** renderiza un `<a href>` real con `preventDefault` encima, y **no intercepta** con `meta`/`ctrl`/`shift`/`alt` ni con botones que no sean el izquierdo — si no, se rompen "abrir en pestaña nueva" y el click con la rueda. El `href` real además lo necesita el prerender para rastrear rutas.
+- Una transición a la vez: lo que se dispare durante otra se ignora, no se encola. `POP` (atrás/adelante) es instantáneo y corta cualquier transición en curso.
+- **La cortina nace oculta desde CSS.** Si el JS falla, nunca aparece y los `<a href>` navegan igual: la transición se suma encima, no es la condición para ver la página.
+- **El salto a un ancla del home desde otra ruta es instantáneo** (`scrollToSection(target, { inmediato: true })`), porque ocurre detrás de la cortina y el usuario no vio el arranque: no hay continuidad espacial que preservar. Las anclas *dentro* del home siguen con scroll suave, donde el recorrido sí comunica distancia.
 
 ### Reveal estándar
 
@@ -171,12 +321,14 @@ Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 
 - **Hero** — intro al montar: eyebrow → titular → bajada → CTAs. El titular sube por línea desde `.mascara`. Copy: "DE AQUÍ SALEN BUENAS IDEAS", con "BUENAS IDEAS" en dorado (split de color dentro del mismo titular).
 - **Manifiesto** — interstitial tipográfico full-viewport, patrón statement/eco. Timeline propia con `start: 'top 70%'`, `once`. Timing calibrado: statement `duration: 1.4` en `t=0.4` (lento a propósito, para darle peso), eco en `t=1.5`.
-- **Proceso** — acrónimo SMART en cascada: cada letra dorada entra 0.1s antes que su texto, con filas escalonadas cada 0.14s.
-- **Trabajos** — reveal con `scale: .96 → 1` y parallax `scrub` de ±5% sobre `.mediaFondo`.
-- **Planes** — el plan destacado entra un beat después que el resto (stagger por función).
-- **Equipo** — avatares con `scale: .85 → 1`.
+- **F** `[pendiente — Fase 4]` — la frase se **reescribe al entrar**: parte de lo que el cliente cree que necesita y se transforma en lo que en realidad necesita. Las palabras que salen quedan tachadas y en gris oscuro; las que entran, en dorado. Una sola frase en `.titular`, cero assets, cero dependencias.
+  **Regla crítica:** si el JS falla, la frase debe verse **en su estado final**, no en el inicial. Si no, el visitante lee exactamente el mensaje contrario al que se quiere dar. Esta es la única excepción real a "todo nace visible": acá lo que nace visible es el resultado, y la animación reconstruye el estado inicial para después corregirlo.
+- **E** `[pendiente — Fase 6]` — columna central angosta por donde pasan piezas reales de contenido (post, reel, historia, informe, web), con texto tipográfico alternando izquierda y derecha que explica el trabajo invisible detrás de cada una. El zigzag es el gesto; parallax leve sobre las piezas. Cierra con enlace a `/proyectos`.
+- **Índice de proyectos** `[pendiente]` — el carrusel por bloque es el gesto; nada más compite.
+- **Planes** — el plan destacado entra un beat después que el resto (stagger por función). *(Sección de la versión anterior.)*
+- **Equipo** — avatares con `scale: .85 → 1`. *(Sección de la versión anterior.)*
 - **CTA** — cierre full-viewport: headline "Comencemos a trabajar" ("trabajar" en dorado) en `.titular`, subiendo desde `.mascara` (`power4.out`, 0.9s), botón 0.4s después, y debajo el marquee infinito de 30s (`translateX(-50%)` sobre 4 copias = loop perfecto), con `playbackRate` modulado por `lenis.velocity` vía Web Animations API. Las frases alternan blanco y dorado.
-- **Hero 3D** — ver abajo.
+- **Hero 3D** — ver §7.
 
 ### Nota de composición pendiente
 
@@ -184,7 +336,7 @@ Hero e interstitial quedaron **centrados**. Funciona, pero la asimetría editori
 
 ---
 
-## 6. Fondo del hero (WebGL)
+## 7. Fondo del hero (WebGL)
 
 `src/sections/hero3d/` — campo de íconos de marketing que reacciona al cursor. Es el único elemento "rico" del sitio y está construido para no costar nada cuando no aplica.
 
@@ -203,55 +355,120 @@ El canvas tiene `pointer-events: none`: el tracking del cursor se hace en `windo
 
 > El gris base `#6a6a6a` está **hardcodeado en dos lugares que deben quedar sincronizados**: `atlasIconos.js:135` (`ctx.fillStyle`) y `CampoIconos.jsx:44` (`uColor`). Si alguna vez se cambia el tono, se cambian los dos.
 
+> **Prerender:** este bloque queda excluido del prerender (§3). `three` no corre en Node.
+
 ---
 
-## 7. Accesibilidad
+## 8. Contenido y datos
+
+### Modelo de datos `[pendiente — Fase 6]`
+
+**`src/data/proyectos.js`**
+
+| Campo | Qué |
+| --- | --- |
+| `slug` | `villa-verla` |
+| `nombre` | Villa Verla |
+| `servicios` | Array de slugs de servicio |
+| `resumen` | 2-3 líneas — sirve para índice, ficha y `meta description` |
+| `portada` | Imagen del índice |
+| `piezas` | Array de `{ tipo, formato, src, titulo, detras }` |
+
+`tipo`: post / reel / historia / informe / web. `formato`: imagen o video. `detras`: el texto del zigzag de la sección E.
+
+**`src/data/servicios.js`** — ampliar el existente con `slug`, `resumen` y flag `externalizado`.
+
+Los cuatro principales llevan ficha propia: community management, diseño gráfico e identidad, fotografía y video, publicidad digital. Los externalizados (web, SEO, analítica) quedan como lista dentro de la ficha que corresponda, **sin página propia** — refleja la jerarquía real del negocio.
+
+### Reglas de contenido
+
+1. **Un párrafo por cliente sirve para tres lugares:** índice, cabecera de ficha y `meta description`. Se escribe una vez, en tono humano —habla del rubro y de la sensación del trabajo—, y se reutiliza. No se escriben tres versiones.
+2. **Las fichas no llevan métricas ni porcentajes.** Es material visual con texto de contexto. Le conviene a Smart, que no tiene números que mostrar, y evita prometer resultados que después hay que sostener.
+3. **La sección E usa piezas de clientes distintos a los de las fichas.** El home muestra variedad, las fichas muestran profundidad. Si se repiten, el sitio se siente más chico de lo que es.
+4. **Cada cliente necesita permiso explícito para aparecer con nombre.** Sin nombre, la ficha pierde la mitad del valor. Villa Verla es proyecto propio de Camilo y sirve de piloto; el resto son de Abby.
+
+---
+
+## 9. Accesibilidad
 
 - **Objetivos táctiles de 44px mínimo** en botones, enlaces de nav, enlaces de contacto e inputs (48px).
 - **Foco visible global**: `outline: 2px solid var(--gold)` con `offset: 3px` en `:focus-visible`. Los inputs lo reemplazan por borde dorado; no se quita el foco sin sustituto.
-- **Jerarquía de encabezados** correcta: un `h1` (hero), `h2` por sección. Los statements de interstitial son decorativos a nivel semántico o `h2` según su rol; no compiten con el `h1`.
-- Elementos decorativos (canvas, separadores, letras del acrónimo, eco del interstitial) marcados `aria-hidden="true"`.
+- **Jerarquía de encabezados:** **un `h1` por ruta** (ver la tabla del §3), `h2` por sección o por bloque de índice. Los statements de interstitial son decorativos a nivel semántico o `h2` según su rol; no compiten con el `h1`.
+- **Cambio de ruta**: `useRutaScroll` mueve el foco al `<main>` (`tabIndex={-1}`, con `preventScroll` para no pelear con el reset de scroll) y actualiza el `document.title`. Solo en navegaciones reales, no en la primera carga: ahí robar el foco sería intrusivo.
+- Elementos decorativos (canvas, separadores, eco del interstitial, palabras tachadas de F) marcados `aria-hidden="true"`.
+- El **carrusel** debe ser navegable con teclado y anunciar posición (§5).
 - `::selection` dorada con texto oscuro.
 - El contraste se apoya en blanco/`--muted` sobre negro; `--muted` (#8e8e8e) no debe usarse por debajo de `--text-sm` ni para información crítica. `--gold-echo` **nunca** lleva información: no cumple contraste y es puramente decorativo.
 
 ---
 
-## 8. Convenciones de código
+## 10. Convenciones de código
 
 - **Stack:** Vite + React 19 (JSX, sin TypeScript por ahora), CSS Modules, GSAP/ScrollTrigger + Lenis, R3F/three solo en el hero. **Sin Tailwind ni librerías de UI** — el sistema es propio.
-- **Nomenclatura en español** para clases, componentes y variables (`.tarjeta`, `.encabezado`, `.mascara`, `CampoIconos`, `useReveal`). Los tokens también.
+- **Routing:** React Router + prerender (§3). Enlaces internos siempre con el `Link` del router.
+- **Nomenclatura en español** para clases, componentes, rutas y variables (`.tarjeta`, `.mascara`, `CampoIconos`, `useReveal`, `/proyectos`). Los tokens también.
+- **Páginas en `src/paginas/`**: `Home.jsx`, `Servicios.jsx`, `FichaServicio.jsx`, `Proyectos.jsx`, `FichaProyecto.jsx`. Las secciones del home siguen en `src/sections/`.
 - **Un módulo CSS por sección/componente**, junto al archivo `.jsx`. Lo compartido va a `global.css`.
-- **Contenido en `src/data/`** (`servicios.js`, `planes.js`, `equipo.js`), separado del maquetado.
+- **Contenido en `src/data/`** (`servicios.js`, `proyectos.js`, `planes.js`, `equipo.js`), separado del maquetado.
 - **Media queries por componente**, con breakpoints según lo que el layout necesita (habituales: 1080, 900, 860, 720, 640, 560px). 860px es el corte de "mobile" para nav y hero 3D.
 - **Comentarios en español** explicando el porqué de las decisiones no obvias, no el qué.
-- **Build estático** (`vite build`) para subir por SFTP a hosting DirectAdmin; sin SSR. El backend es un único `server/contacto.php`.
+- **Build estático** (`vite build`) para subir por SFTP a hosting DirectAdmin; sin SSR, con prerender por ruta y `.htaccess` con rewrite como fallback. El backend es un único `server/contacto.php`.
 
 ---
 
-## 9. Al agregar algo nuevo
+## 11. Al agregar algo nuevo
 
-1. ¿Existe ya un token, una `.card`, un `.eyebrow`, un `Button`, una `.mascara` o `.titular` que sirva? Úsalo antes de crear nada.
-2. **Fondo: `--bg` por defecto.** No hay alternancia que continuar. `--bg-soft` solo si hay una razón concreta para que esa superficie se despegue, y sabiendo que hoy el único caso es el CTA.
-3. Decidí primero el **tipo de sección**: contenido (`--space-section` + `.container` + encabezado estándar + `useReveal`) o full-viewport (`100svh`, centrado, sin eyebrow, timeline propia).
-4. Un momento con carácter por sección, como máximo. Si el titular es grande, el gesto por defecto es `.mascara`.
-5. Escala del display: **redefiní `--text-display` en el elemento**, no pelees especificidad contra `.titular`.
-6. Toda animación dentro de `matchMedia` de reduced-motion, con estado inicial vía `gsap.set` y `clearProps` al terminar (salvo dentro de `.mascara`).
-7. Dorado solo si comunica algo. `--gold-echo` solo para eco decorativo.
-8. Verificá el layout en 1440 / 1024 / 768 / 375px antes de dar por cerrado, y que no aparezca scroll horizontal.
+1. ¿Existe ya un token, una `.card`, un `Button`, una `.mascara` o `.titular` que sirva? Úsalo antes de crear nada.
+2. **¿Sección del home o página propia?** Página propia solo si tiene índice y fichas (hoy: servicios y proyectos). Todo lo demás vive en el home.
+3. **Fondo: `--bg` por defecto.** No hay alternancia que continuar. `--bg-soft` solo si hay una razón concreta para que esa superficie se despegue, y sabiendo que hoy el único caso es el CTA.
+4. Decidí el **tipo de sección**: contenido (`--space-section` + `.container` + titular partido + `useReveal`) o full-viewport (`100svh`, centrado, timeline propia).
+5. Si es sección de contenido, seguí el estándar del §4: **sin eyebrow, titular en 3-4 líneas con el fragmento final dorado, bajada después del contenido**.
+6. Un momento con carácter por sección, como máximo. El `.mascara` del titular no cuenta: es el piso, no el gesto.
+7. Escala del display: **redefiní `--text-display` en el elemento**, no pelees especificidad contra `.titular`.
+8. Toda animación dentro de `matchMedia` de reduced-motion, con estado inicial vía `gsap.set`, dentro de un `gsap.context()` con `revert()` en el cleanup, y `clearProps` al terminar (salvo dentro de `.mascara`).
+9. Dorado solo si comunica algo. `--gold-echo` solo para eco decorativo.
+10. Si el bloque muestra trabajo de un cliente, revisá las reglas de contenido del §8 antes de escribir copy.
+11. Verificá el layout en 1440 / 1024 / 768 / 375px antes de dar por cerrado, y que no aparezca scroll horizontal.
 
 ---
 
-## 10. Pendientes de diseño
+## 12. Pendientes
 
-- **Secciones sin rediseñar**: Proceso, Servicios, Trabajos, Planes, Equipo y Contacto siguen en el lenguaje anterior. Contacto está decidido como quiz de 3 pasos (servicio / datos / mensaje) manteniendo `contacto.php` como backend. Equipo pasa de grilla de avatares a secuencia con más personalidad por persona.
-- **Densidad visual**: fuera del hero el sitio se lee plano. Primer paso acordado: grano/ruido sutil global (capa fija, `feTurbulence` inline, opacidad ~0.03). El tono de los íconos y la textura por sección quedan congelados hasta terminar las secciones que faltan — es probable que el vacío se resuelva solo al reconstruirlas.
-- **Interstitiales**: se contemplan 1–2 más como transición (candidato: post-Trabajos, antes de Planes).
-- **Assets reales**: fotos del equipo (hoy iniciales en círculo) y los 6 trabajos (hoy gradientes placeholder en `.mediaFondo`). El maquetado y el parallax ya están listos para recibirlos.
-- **Etiquetas Open Graph / Twitter** — no existen todavía; falta la imagen social. El favicon ya usa el logo.
-- **Asimetría editorial** — palanca disponible, sin usar (ver §5).
+### Infraestructura
+
+| Fase | Qué | Estado |
+| --- | --- | --- |
+| 3a | Rutas, layout compartido, ciclo de vida Lenis/ScrollTrigger, `.htaccess` | **Hecha** |
+| 3b | Transición entre páginas | **Hecha** |
+| 3c | Prerender + SEO por ruta | **Hecha** |
+| 4 | Sección F en el home |
+| 5 | Servicios: sección home + `/servicios` + fichas |
+| 6 | Sección E en el home + `/proyectos` + ficha piloto Villa Verla |
+| 7 | Resto de fichas de proyecto + Planes |
+| 8 | Equipo + Contacto (quiz de 3 pasos, en todas las páginas) |
+
+### Contenido (no bloquea la infraestructura, sí bloquea el lanzamiento)
+
+- **Párrafo de 2-3 líneas por cliente** — 5 en total (Villa Verla, Automotriz Carmona, La Rusia Barra Nikkei, Veterinaria Larraín, Alfalfa Cakes).
+- **Copy definitivo de la frase de F.** El placeholder de trabajo es "QUIERO MÁS SEGUIDORES" → "NO QUEREMOS MÁS SEGUIDORES. QUEREMOS MÁS CLIENTES."
+- **Resúmenes por servicio.**
+- **Permisos y logos de clientes.** Confirmar también si hay más clientes de los cinco listados.
+- **Piezas reales**: posts, reels, historias, informes y webs, en imagen y video. El informe se puede editar para que se vea más profesional.
+- **Fotos del equipo** (hoy son iniciales en círculo).
+
+### Diseño
+
+- **Componente carrusel** — no existe (§5).
+- **Contacto**: quiz de 3 pasos (servicio / datos / mensaje) manteniendo `contacto.php` como backend, más el campo `origen`.
+- **Equipo**: pasa de grilla de avatares a secuencia con más personalidad por persona.
+- **Interstitiales**: se contemplan 1–2 más como transición. Candidato: post-E, antes de Planes.
+- **Prueba social**: Smart no tiene testimonios. La competencia directa de la región (Agencia Óptima) sí los tiene, con nombre y empresa. Es un hueco identificado, sin decisión todavía sobre si se llena y dónde.
+- **El acrónimo SMART**: si a Abby le importa el juego con el nombre, decidir si sobrevive como línea de footer o dentro de Servicios. Como sección está descartado.
+- **Etiquetas Open Graph / Twitter** — no existen; falta la imagen social. El favicon ya usa el logo.
+- **Asimetría editorial** — palanca disponible, sin usar (§6).
 - **Calibración fina** de los diales del spotlight del hero.
-- **Decisión sobre preloader** — sin resolver.
+- **Decisión sobre preloader** — sin resolver. Con transición entre páginas (Fase 3b) la pregunta cambia: puede que el preloader sobre.
 - **Revisión de la voz inclusiva** por parte de la clienta.
 - **Migración a TypeScript** — opcional, post-lanzamiento.
 
-> Nota de proceso: un rediseño visual grande no se da por aprobado ni se construye completo sin que el sitio se vea renderizado (navegador o capturas) en checkpoints intermedios. Ya se intentó una vez de otra forma y hubo que revertir todo.
+> **Nota de proceso:** un rediseño visual grande no se da por aprobado ni se construye completo sin que el sitio se vea renderizado (navegador o capturas) en checkpoints intermedios. Ya se intentó una vez de otra forma y hubo que revertir todo.

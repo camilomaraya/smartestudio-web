@@ -1,14 +1,20 @@
+import { useLocation } from 'react-router'
 import { scrollToSection } from '../lib/lenis'
+import { irAAncla } from '../lib/navegacion'
 import { useReveal } from '../hooks/useReveal'
+import { useTransicion } from '../hooks/useTransicion'
+import EnlaceRuta from './EnlaceRuta'
 import styles from './Footer.module.css'
 
+// Mismos tres tipos que en Nav.jsx. El footer vive en el Layout, así que
+// sus anclas del home tienen que navegar cuando se está en otra ruta.
 const enlaces = [
-  { label: 'Servicios', href: '#servicios' },
-  { label: 'Proceso', href: '#proceso' },
-  { label: 'Trabajos', href: '#trabajos' },
-  { label: 'Planes', href: '#planes' },
-  { label: 'Equipo', href: '#equipo' },
-  { label: 'Contacto', href: '#contacto' },
+  { label: 'Servicios', ancla: 'servicios' },
+  { label: 'Proceso', ancla: 'proceso' },
+  { label: 'Proyectos', ruta: '/proyectos' },
+  { label: 'Planes', ancla: 'planes' },
+  { label: 'Equipo', ancla: 'equipo' },
+  { label: 'Contacto', ancla: 'contacto', local: true },
 ]
 
 // TODO: reemplazar los "#" por las URLs reales de cada red.
@@ -71,10 +77,19 @@ const redes = [
 
 export default function Footer() {
   const scope = useReveal()
+  const { pathname } = useLocation()
+  const { navegarCon } = useTransicion()
 
-  const irA = (event, href) => {
-    event.preventDefault()
-    scrollToSection(href)
+  const irA = (evento, enlace) => {
+    evento.preventDefault()
+
+    // Contacto vive en el Layout: está en todas las rutas, no navega nunca.
+    if (enlace.local) {
+      scrollToSection(`#${enlace.ancla}`)
+      return
+    }
+    // navegarCon: desde otra ruta esto es navegación y lleva cortina.
+    irAAncla(enlace.ancla, { pathname, navigate: navegarCon })
   }
 
   return (
@@ -93,10 +108,14 @@ export default function Footer() {
         <nav aria-label="Navegación del pie de página">
           <ul className={styles.lista}>
             {enlaces.map((enlace) => (
-              <li key={enlace.href}>
-                <a href={enlace.href} onClick={(e) => irA(e, enlace.href)}>
-                  {enlace.label}
-                </a>
+              <li key={enlace.label}>
+                {enlace.ruta ? (
+                  <EnlaceRuta to={enlace.ruta}>{enlace.label}</EnlaceRuta>
+                ) : (
+                  <a href={`#${enlace.ancla}`} onClick={(evento) => irA(evento, enlace)}>
+                    {enlace.label}
+                  </a>
+                )}
               </li>
             ))}
           </ul>
