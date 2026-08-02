@@ -1,8 +1,40 @@
+/* Cierre editorial a viewport completo. Único uso de --bg-soft en el
+   recorrido rediseñado: funciona como acento final. */
 .cta {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding-block: var(--space-section);
   background-color: var(--bg-soft);
   border-block: 1px solid var(--line);
   overflow: hidden;
+}
+
+.ctaHeadline {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+/* Máscara del reveal, igual que en hero e interstitial: el padding/margin
+   compensado evita cortar acentos y descendentes. */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+/* Sin nowrap: a escala display el titular puede quebrar, y balance
+   reparte las líneas en vez de dejar una huérfana. */
+.linea {
+  display: block;
+  text-wrap: balance;
+}
+
+.dorado {
+  color: var(--gold);
 }
 
 .marquee {
@@ -57,16 +89,8 @@
   }
 }
 
-.contenido {
-  margin-top: var(--space-7);
+.ctaAccion {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--space-5);
-}
-
-.bajada {
-  font-size: var(--text-lg);
-  color: var(--muted);
+  justify-content: center;
+  margin-top: var(--space-8);
 }

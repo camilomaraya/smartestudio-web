@@ -81,7 +81,13 @@ export default function Footer() {
     <footer ref={scope} className={styles.footer}>
       <div className={`container ${styles.inner}`} data-reveal-group>
         <div className={styles.marca}>
-          <img src="/logo-placeholder.svg" alt="Smart Estudio" width="140" height="36" />
+          <img
+            src="/logo-smart.png"
+            alt="Smart Estudio"
+            width="512"
+            height="512"
+            className={styles.logo}
+          />
         </div>
 
         <nav aria-label="Navegación del pie de página">

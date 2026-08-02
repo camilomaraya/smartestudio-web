@@ -50,7 +50,7 @@ export default function Hero() {
 
       <div className={`container ${styles.contenido}`}>
         <p className="eyebrow" data-hero="eyebrow">
-          Agencia de marketing digital · La Serena–Coquimbo
+          Agencia de marketing digital
         </p>
         <h1 className={styles.titular}>
           <span className={styles.mascara}>

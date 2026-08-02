@@ -70,13 +70,13 @@ Las secciones alternan fondo para marcar respiración, y las de fondo suave llev
 | Sección | Fondo |
 | --- | --- |
 | Hero | `--bg` |
-| Manifiesto | `--bg-soft` |
+| Manifiesto (interstitial) | `--bg` |
 | Proceso | `--bg` |
 | Servicios | `--bg-soft` |
 | Trabajos | `--bg` |
 | Planes | `--bg-soft` |
 | Equipo | `--bg` |
-| CTA | `--bg-soft` |
+| CTA (cierre) | `--bg-soft` |
 | Contacto | `--bg` |
 
 **Regla derivada:** dentro de una sección `--bg-soft`, las tarjetas invierten el relleno a `--bg` (ver `.tarjeta` en `Servicios.module.css` y `Planes.module.css`). Así la tarjeta siempre contrasta con su fondo, en cualquier posición del ritmo.
@@ -104,7 +104,7 @@ El encabezado usa `flex-direction: column` con `gap: var(--space-3)` y `margin-b
 
 Viven en `src/styles/global.css` y se componen con la clase del módulo (`class="card ${styles.tarjeta}"`), no se duplican:
 
-- **`.eyebrow`** — etiqueta de sección: Space Grotesk, mayúsculas, `letter-spacing: .18em`, dorada, con una línea dorada de 28×2px antes vía `::before`. Aparece en todas las secciones.
+- **`.eyebrow`** — etiqueta de sección: Space Grotesk, mayúsculas, `letter-spacing: .18em`, dorada, con una línea dorada de 28×2px antes vía `::before`. Aparece en todas las secciones salvo el interstitial, que abre directo con el contexto.
 - **`.card`** — fondo `--bg-soft`, borde `--line`, radio `md`, padding `--space-6`. Al hover: `translateY(-4px)`, borde dorado y `--shadow-lift`.
 - **`.card-numero`** — numeración/etiqueta dorada en Space Grotesk.
 - **`.visually-hidden`** — texto solo para lectores de pantalla.
@@ -112,7 +112,7 @@ Viven en `src/styles/global.css` y se componen con la clase del módulo (`class=
 ### Componentes
 
 - **`Button`** (`src/components/ui/Button.jsx`) — dos variantes: `primary` (fondo dorado, texto `--bg`, glow al hover) y `ghost` (transparente, borde `--line`, se vuelve dorado al hover). Píldora, Space Grotesk 600, `min-height: 44px`, `translateY(-2px)` al hover y `scale(.98)` al presionar. Renderiza `<a>` si recibe `href`, si no `<button>`.
-- **`Nav`** (`src/components/Nav.jsx`) — sin barra: dos círculos dorados de 50px fijos a `--gutter` de las esquinas superiores (iniciales "SE" a la izquierda, que llevan al inicio; hamburguesa a la derecha). No cambian con el scroll. La hamburguesa abre un panel fullscreen `--bg` sólido con los enlaces en Archivo Expanded 900 a `clamp(2rem, 5vw, 3.5rem)`, centrados verticalmente y alineados a la izquierda del container, más un pie con CTA y redes en Space Grotesk. Igual en desktop y mobile; bajo 375px los círculos bajan a 44px. El panel entra con fade (0.4s) + stagger de enlaces (0.08s, `y: 30 → 0`) y sale con fade de 0.3s; cierra con `Escape`, al scrollear o al elegir un enlace, con focus trap sobre círculos + panel.
+- **`Nav`** (`src/components/Nav.jsx`) — sin barra: el logo suelto a la izquierda (sin contenedor, porque es apaisado y blanco) y un único círculo dorado de 50px con la hamburguesa a la derecha, ambos fijos a `--gutter` de las esquinas superiores y alineados por centro óptico. No cambian con el scroll. La hamburguesa abre un panel fullscreen `--bg` sólido con los enlaces en Archivo Expanded 900 a `clamp(2rem, 5vw, 3.5rem)`, centrados verticalmente y alineados a la izquierda del container, más un pie con CTA y redes en Space Grotesk. Igual en desktop y mobile; bajo 375px los círculos bajan a 44px. El panel entra con fade (0.4s) + stagger de enlaces (0.08s, `y: 30 → 0`) y sale con fade de 0.3s; cierra con `Escape`, al scrollear o al elegir un enlace, con focus trap sobre círculos + panel.
 - **Tarjeta de trabajo** (`Trabajos.module.css`) — `aspect-ratio: 4/5`, overflow oculto, capa `.media` que hace zoom `scale(1.06)` al hover y capa interna `.mediaFondo` sobredimensionada (`inset: -8% 0`) que lleva el parallax. Ahí van las imágenes/videos reales. Overlay inferior con gradiente para legibilidad del label.
 
 ---
@@ -145,11 +145,12 @@ const scope = useReveal()
 Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 
 - **Hero** — intro al montar: eyebrow → titular → bajada → CTAs. El titular sube por línea desde una máscara con `overflow: hidden` (`yPercent: 110 → 0`, `power4.out`); el `padding/margin-block: ±0.08em` de `.mascara` evita cortar acentos y descendentes.
+- **Manifiesto** — interstitial tipográfico a viewport completo: "Conectar" en `--font-titular` sube desde una máscara (`yPercent: 110 → 0`, `power4.out`) después de que entran el eyebrow y el contexto, y el eco en `--gold-echo` llega 0.4s más tarde y más lento, como reverberación. Dispara con `start: 'top 70%'`, una sola vez.
 - **Proceso** — acrónimo SMART en cascada: cada letra dorada entra 0.1s antes que su texto, con filas escalonadas cada 0.14s.
 - **Trabajos** — reveal con `scale: .96 → 1` y parallax `scrub` de ±5% sobre `.mediaFondo`.
 - **Planes** — el plan destacado entra un beat después que el resto (stagger por función).
 - **Equipo** — avatares con `scale: .85 → 1`.
-- **CTA** — marquee infinito de 30s (`translateX(-50%)` sobre 4 copias = loop perfecto), con `playbackRate` modulado por `lenis.velocity` vía Web Animations API. Las frases alternan blanco y dorado.
+- **CTA** — cierre a viewport completo: headline en `--font-titular` que sube desde la máscara (`power4.out`, 0.9s) al entrar, botón 0.4s después, y debajo el marquee infinito de 30s (`translateX(-50%)` sobre 4 copias = loop perfecto), con `playbackRate` modulado por `lenis.velocity` vía Web Animations API. Las frases alternan blanco y dorado.
 - **Hero 3D** — ver abajo.
 
 ---
@@ -208,8 +209,9 @@ El canvas tiene `pointer-events: none`: el tracking del cursor se hace en `windo
 
 ## 10. Pendientes de diseño
 
-- **Assets reales**: logo (hoy `public/logo-placeholder.svg`), fotos del equipo (hoy iniciales en círculo) y los 6 trabajos (hoy gradientes placeholder en `.mediaFondo`). El maquetado y el parallax ya están listos para recibirlos.
-- **Favicon y etiquetas Open Graph / Twitter** — no existen todavía; falta también la imagen social.
+- **Assets reales**: fotos del equipo (hoy iniciales en círculo) y los 6 trabajos (hoy gradientes placeholder en `.mediaFondo`). El maquetado y el parallax ya están listos para recibirlos.
+- **Logo**: `public/logo-smart.png` (512×512, logotipo en la franja central del lienzo). Se usa en nav, footer y favicon. `logo-placeholder.svg` ya no se referencia y puede borrarse.
+- **Etiquetas Open Graph / Twitter** — no existen todavía; falta la imagen social. El favicon ya usa el logo.
 - **Calibración fina** de los diales del spotlight del hero.
 - **Decisión sobre preloader** — sin resolver.
 - **Revisión de la voz inclusiva** por parte de la clienta.

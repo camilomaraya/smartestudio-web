@@ -55,6 +55,9 @@
   --gutter: clamp(1rem, 4vw, 2.5rem);
   /* Ya no hay barra: es el espacio que reservan los círculos fijos de la nav */
   --nav-height: 70px;
+  /* Ancho de la caja del PNG del logo. El logotipo ocupa el 53.5% × 36.3%
+     de ese cuadro (el resto es aire transparente, ver Nav.module.css). */
+  --ancho-logo: clamp(140px, 17vw, 240px);
 
   /* Bordes */
   --radius-sm: 8px;

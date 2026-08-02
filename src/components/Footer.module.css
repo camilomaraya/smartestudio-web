@@ -12,6 +12,19 @@
   gap: var(--space-6);
 }
 
+/* Mismo recorte que en la nav: el logotipo ocupa el 53.5% × 36.3% del lienzo,
+   con 23.2% de aire a los lados y 31.8% arriba y abajo. */
+.logo {
+  --ancho-logo: 240px;
+  width: var(--ancho-logo);
+  height: auto;
+  /* Ver Nav.module.css: el max-width global encogería la imagen y
+     desalinearía los márgenes negativos. */
+  max-width: none;
+  margin-block: calc(var(--ancho-logo) * -0.318);
+  margin-inline: calc(var(--ancho-logo) * -0.232);
+}
+
 .lista {
   display: flex;
   flex-wrap: wrap;

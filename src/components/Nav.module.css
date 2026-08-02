@@ -1,16 +1,69 @@
 /* ============================================
-   Círculos fijos (hamburguesa + logo)
-   No cambian con el scroll: son siempre iguales.
+   Marca fija (izquierda)
+   El logo es apaisado y blanco: va suelto, sin contenedor. El único
+   círculo de la página es el de la acción.
+   ============================================ */
+.marca {
+  position: fixed;
+  /* Alineado por arriba con el círculo: a esta escala el logotipo es más alto
+     que los 50px del círculo y centrarlo lo sacaría del viewport. */
+  top: var(--gutter);
+  /* Un respiro extra respecto al gutter para que no quede pegado al borde */
+  left: calc(var(--gutter) + var(--space-4));
+  z-index: 100;
+  display: block;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.marca:hover {
+  opacity: 0.75;
+}
+
+.marca:active {
+  transform: scale(0.92);
+}
+
+/* El logotipo ocupa 274×186 dentro de un lienzo de 512×512, centrado: queda
+   23.2% de aire transparente a cada lado y 31.8% arriba y abajo. Los márgenes
+   negativos lo recortan, así el logo se alinea al gutter y la caja del botón
+   coincide con lo que se ve. El margen vertical además centra el logotipo
+   con el círculo de la hamburguesa. */
+.logo {
+  display: block;
+  width: var(--ancho-logo);
+  height: auto;
+  /* El `img { max-width: 100% }` global se resuelve contra el ancho del botón,
+     que a su vez depende de esta imagen: el navegador rompe el ciclo
+     encogiéndola y los márgenes negativos dejan de calzar. */
+  max-width: none;
+  /* Los márgenes negativos recortan el aire transparente, así la caja del
+     botón coincide con el logotipo visible y no arrastra el vacío del PNG. */
+  margin-block: calc(var(--ancho-logo) * -0.318);
+  margin-inline: calc(var(--ancho-logo) * -0.232);
+}
+
+/* ============================================
+   Círculo fijo de la hamburguesa
+   No cambia con el scroll: es siempre igual.
    ============================================ */
 .circulo {
+  --diametro: 50px;
   position: fixed;
-  top: var(--gutter);
+  /* Centrado con el logo, que es más alto: comparten eje horizontal
+     en lugar de arrancar ambos en el gutter. */
+  top: calc(var(--gutter) + (var(--ancho-logo) * 0.363 - var(--diametro)) / 2);
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 50px;
-  height: 50px;
+  width: var(--diametro);
+  height: var(--diametro);
   padding: 0;
   background-color: var(--gold);
   border: 0;
@@ -26,14 +79,6 @@
 
 .circuloHamburguesa {
   right: var(--gutter);
-}
-
-.circuloLogo {
-  left: var(--gutter);
-  font-family: var(--font-utility);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  letter-spacing: 0.08em;
 }
 
 /* Tres líneas de 18×2 con gap 5px: 16px de alto total,
@@ -88,8 +133,10 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  /* Reserva el alto de los círculos para que no pisen el primer enlace */
-  padding-block: calc(var(--gutter) + 50px + var(--space-6)) var(--space-7);
+  /* Reserva el alto del logo (36.3% de su caja), que es el elemento fijo más
+     alto, para que no pise el primer enlace con el panel abierto. */
+  padding-block: calc(var(--gutter) + var(--ancho-logo) * 0.363 + var(--space-6))
+    var(--space-7);
 }
 
 .lista {
@@ -156,14 +203,10 @@
   color: var(--gold);
 }
 
-/* Viewports muy angostos: círculos algo más chicos, aún sobre 44px */
+/* Viewports muy angostos: círculo algo más chico, aún sobre 44px.
+   El ancho del logo ya lo resuelve el clamp de --ancho-logo. */
 @media (max-width: 375px) {
   .circulo {
-    width: 44px;
-    height: 44px;
-  }
-
-  .panelInner {
-    padding-block: calc(var(--gutter) + 44px + var(--space-6)) var(--space-7);
+    --diametro: 44px;
   }
 }

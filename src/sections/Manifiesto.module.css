@@ -1,45 +1,64 @@
-/* Declaración editorial: centrada, con mucho aire */
+/* Interstitial tipográfico: una palabra ocupa el viewport y el eco la repite
+   en dorado fantasma. Negro puro, sin bordes: corta el ritmo de secciones. */
 .manifiesto {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding-block: var(--space-section);
-  background-color: var(--bg-soft);
-  border-block: 1px solid var(--line);
+  background-color: var(--bg);
+  text-align: center;
 }
 
-.inner {
-  max-width: var(--container-narrow);
+.interstitialContenido {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: var(--space-5);
 }
 
-.titulo {
-  font-size: var(--text-3xl);
+/* Prepara el golpe: misma familia que los titulares, pero en voz baja */
+.contexto {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: clamp(1rem, 2.5vw, 1.5rem);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--space-3);
 }
 
-/* Lead: mayor que el cuerpo normal, medida limitada */
-.texto {
-  max-width: 52ch;
-  font-size: var(--text-xl);
-  line-height: 1.55;
-}
-
-.remate {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--space-2) var(--space-3);
-  font-family: var(--font-utility);
-  font-weight: 600;
-  font-size: var(--text-lg);
-  color: var(--white);
-}
-
-.dorado {
+/* .titular toma su tamaño de --text-display: redefinir la variable en el
+   propio elemento evita pelear especificidad con la clase global. */
+/* Calibrado midiendo el render: "Conectar" en Big Shoulders ocupa ~3.67× su
+   font-size de ancho, así que 20rem llena el container de 1200px sin tocarlo.
+   El mínimo de 5rem mantiene la escala monumental también en 375px. */
+.statement {
+  --text-display: clamp(5rem, 21vw, 20rem);
   color: var(--gold);
 }
 
-.separador {
-  color: var(--gold);
+/* Máscara del reveal, igual que en el hero: el padding/margin compensado
+   evita cortar acentos y descendentes al recortar la línea. */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.statementLinea {
+  display: block;
+}
+
+/* La reverberación: el dorado al 25% ya vive en el color, así que la
+   animación solo lleva la opacidad del elemento de 0 a 1. */
+.echo {
+  --text-display: clamp(1.5rem, 5vw, 3rem);
+  max-width: 20ch;
+  /* El line-height de 0.9 del statement se come el aire: hace falta más */
+  margin-top: var(--space-6);
+  color: var(--gold-echo);
 }

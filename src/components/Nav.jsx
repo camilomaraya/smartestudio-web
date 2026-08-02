@@ -166,12 +166,11 @@ export default function Nav() {
       <button
         ref={logoRef}
         type="button"
-        className={`${styles.circulo} ${styles.circuloLogo}`}
+        className={styles.marca}
         aria-label="Smart Estudio — ir al inicio"
         onClick={(evento) => irA(evento, '#inicio')}
       >
-        {/* El logo real (140×36) no cabe legible en 50px: sirven las iniciales. */}
-        <span aria-hidden="true">SE</span>
+        <img src="/logo-smart.png" alt="" className={styles.logo} width="512" height="512" />
       </button>
 
       <button
