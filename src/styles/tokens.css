@@ -10,6 +10,8 @@
   --gold-soft: #ffe39a;
   --white: #ffffff;
   --muted: #8e8e8e;
+  /* Gris apagado: palabra tachada de la sección F, texto que ya no vale */
+  --gray-dim: #6b6459;
   --line: rgba(255, 255, 255, 0.1);
   /* Dorado fantasma: titulares en eco / diálogo tipográfico detrás del contenido */
   --gold-echo: rgba(243, 193, 58, 0.25);

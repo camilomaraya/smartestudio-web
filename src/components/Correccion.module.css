@@ -1,0 +1,117 @@
+/* Sección F: la frase se corrige y después se reemplaza, atada al scroll.
+   La sección se fija (pin) y los tres estados avanzan con el progreso. */
+.correccion {
+  /* Escala propia de la sección: la columna de texto es ~mitad de ancho, así
+     que la escala display global queda enorme acá. Un solo valor que afinar. */
+  --text-display-f: clamp(2rem, 4.5vw, 4.5rem);
+
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: var(--space-section);
+  background-color: var(--bg);
+  text-align: left;
+}
+
+.contenido {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+/* Los dos bloques comparten celda: la sección mide lo que mide el más alto
+   y el cambio de estado no produce reflow. */
+.columnaTexto {
+  display: grid;
+}
+
+.frase {
+  grid-area: 1 / 1;
+  /* Mecanismo oficial de escala del display (DESIGN.md §5): se redefine el
+     token en el propio elemento, no se pelea especificidad contra .titular. */
+  --text-display: var(--text-display-f);
+  color: var(--white);
+}
+
+/* Reposo = ESTADO 3: el mensaje final a la vista y el bloque A oculto.
+   Si el JS falla o hay movimiento reducido, se lee lo correcto — nunca la
+   frase ingenua. El JS invierte esto con gsap.set al inicializar. */
+.bloqueA {
+  opacity: 0;
+}
+
+.bloqueB {
+  opacity: 1;
+}
+
+/* Espacio reservado: marco vacío a propósito, no un hueco por llenar.
+   La altura manda y el ancho sale de la proporción (por eso justify-self
+   center, que libera el ancho del stretch de la grilla): así el marco nunca
+   empuja la sección por encima del viewport, que es lo que el pin necesita. */
+.columnaReservada {
+  height: min(56svh, 520px);
+  aspect-ratio: 4 / 5;
+  width: auto;
+  justify-self: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+/* Máscara del reveal por línea, mismo patrón que el resto del sitio
+   (Manifiesto, CTA, hero). */
+.linea {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.lineaInner {
+  display: block;
+}
+
+/* Reposo = corregido: gris apagado y tacho tendido. El JS reconstruye el
+   estado ingenuo y el scrub lo vuelve a corregir. */
+.tachada {
+  position: relative;
+  display: inline-block;
+  color: var(--gray-dim);
+}
+
+.tacho {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0.52em;
+  height: 0.06em;
+  background: var(--gray-dim);
+  transform: scaleX(1);
+  transform-origin: left center;
+}
+
+/* Ocupa su espacio desde el inicio (solo la oculta el clip-path): revelarla
+   no mueve nada del resto de la línea. */
+.entra {
+  display: inline-block;
+  color: var(--gold);
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+}
+
+/* Acento del bloque B: las dos palabras que cargan el mensaje final. */
+.acento {
+  color: var(--gold);
+}
+
+@media (max-width: 900px) {
+  .contenido {
+    grid-template-columns: 1fr;
+  }
+
+  .columnaReservada {
+    display: none;
+  }
+}

@@ -5,7 +5,7 @@ import { getLenis, scrollToSection } from '../lib/lenis'
 import { useTransicion } from '../hooks/useTransicion'
 import Hero from '../sections/Hero'
 import Manifiesto from '../sections/Manifiesto'
-import Proceso from '../sections/Proceso'
+import Correccion from '../components/Correccion'
 import Servicios from '../sections/Servicios'
 import Trabajos from '../sections/Trabajos'
 import Planes from '../sections/Planes'
@@ -110,7 +110,7 @@ export default function Home() {
     <div id="inicio">
       <Hero />
       <Manifiesto />
-      <Proceso />
+      <Correccion />
       <Servicios />
       <Trabajos />
       <Planes />

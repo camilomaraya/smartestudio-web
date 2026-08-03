@@ -10,7 +10,6 @@ import styles from './Footer.module.css'
 // sus anclas del home tienen que navegar cuando se está en otra ruta.
 const enlaces = [
   { label: 'Servicios', ancla: 'servicios' },
-  { label: 'Proceso', ancla: 'proceso' },
   { label: 'Proyectos', ruta: '/proyectos' },
   { label: 'Planes', ancla: 'planes' },
   { label: 'Equipo', ancla: 'equipo' },

@@ -5,7 +5,7 @@ Este documento es la referencia al agregar páginas, secciones o componentes, pa
 
 > **Cómo leer este documento.** La mayoría describe lo que el código ya implementa. Lo que todavía no está construido va marcado con **`[pendiente]`** y el número de fase. Si algo lleva `[pendiente]`, **no existe en el código todavía**: es la regla que debe cumplir cuando se construya, no algo que se pueda importar hoy.
 >
-> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, CTA amplificado, grano global y toda la **infraestructura multipágina**: rutas y layout compartido (3a), transición entre páginas (3b) y prerender + SEO por ruta (3c). Próxima fase: **4** (sección F en el home). Servicios, Planes, Equipo y Contacto todavía son secciones de la versión anterior y se reconstruyen en las fases 5 a 8. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
+> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global y toda la **infraestructura multipágina**: rutas y layout compartido (3a), transición entre páginas (3b) y prerender + SEO por ruta (3c). Próxima fase: **5** (Servicios). Planes, Equipo y Contacto todavía son secciones de la versión anterior y se reconstruyen en las fases 7 y 8. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
 
 ---
 
@@ -39,6 +39,7 @@ Fuente única de verdad: `src/styles/tokens.css`. **Ningún valor de color, espa
 | `--gold-echo` | `rgba(243,193,58,.25)` | Dorado fantasma. Solo para el eco de los interstitiales: texto que reverbera detrás del statement, no información |
 | `--white` | `#ffffff` | Texto principal |
 | `--muted` | `#8e8e8e` | Texto secundario, bajadas, listas de apoyo |
+| `--gray-dim` | `#6b6459` | Gris apagado de la palabra tachada de F: texto que ya no vale. No es `--muted`, que es información secundaria pero vigente. Nunca lleva información |
 | `--line` | `rgba(255,255,255,.1)` | Todos los bordes y separadores |
 
 El único color fuera de la paleta es el rojo de error del formulario (`#f2685c`, en `Contacto.module.css`).
@@ -162,7 +163,7 @@ Open Graph y Twitter siguen pendientes: falta la imagen social. El dominio de la
 | --- | --- | --- | --- |
 | Hero | `--bg` | Full-viewport (WebGL) | Hecho |
 | Manifiesto (interstitial) | `--bg` | Full-viewport tipográfico | Hecho |
-| **F** — la frase que se corrige | `--bg` | Full-viewport tipográfico | `[pendiente — Fase 4]` |
+| **F** — la frase que se corrige | `--bg` | Full-viewport tipográfico, **fijada (pin)** | Hecho |
 | Servicios | `--bg` | Contenido | `[pendiente — Fase 5]` |
 | **E** — preview del "detrás" | `--bg` | Contenido (columna central) | `[pendiente — Fase 6]` |
 | Planes | `--bg` | Contenido | `[pendiente — Fase 7]` |
@@ -170,7 +171,7 @@ Open Graph y Twitter siguen pendientes: falta la imagen social. El dominio de la
 | CTA (cierre) | `--bg-soft` | Full-viewport tipográfico | Hecho |
 | Contacto (quiz) | `--bg` | Contenido | `[pendiente — Fase 8]` |
 
-**F reemplaza a la antigua sección Proceso** (el acrónimo SMART), que se elimina: se llamaba "Proceso" pero no describía ningún proceso, eran cinco adjetivos sin secuencia. Si el juego con el nombre de la agencia importa, puede sobrevivir como una línea en el footer o dentro de Servicios, sin ocupar pantalla.
+**F reemplazó a la antigua sección Proceso** (el acrónimo SMART), ya eliminada del código junto con su ancla en nav y footer: se llamaba "Proceso" pero no describía ningún proceso, eran cinco adjetivos sin secuencia. Si el juego con el nombre de la agencia importa, puede sobrevivir como una línea en el footer o dentro de Servicios, sin ocupar pantalla.
 
 **E reemplaza a la antigua sección Trabajos.**
 
@@ -226,7 +227,7 @@ Reglas del titular de sección:
 Viven en `src/styles/global.css` y se componen con la clase del módulo (`class="card ${styles.tarjeta}"`), no se duplican:
 
 - **`.titular`** — la voz monumental: `--font-titular`, `font-weight: 900`, `font-size: var(--text-display)`, `line-height: var(--lh-display)`, mayúsculas. Para escalar un titular puntual por encima o por debajo de la escala base, **no se pelea especificidad contra `.titular`**: se **redefine `--text-display` en el propio elemento** (`.miTitular { --text-display: clamp(2rem, 7vw, 5rem) }`). El token es local al elemento y `.titular` lo lee. Este es el mecanismo oficial de ajuste de escala del display.
-- **`.mascara`** — patrón de reveal por línea. Contenedor con `overflow: hidden` y `padding/margin-block: ±0.08em` (para no cortar acentos ni descendentes); adentro, un `<span>` por línea que entra con `yPercent: 110 → 0`, `power4.out`. Se usa en hero, interstitial, CTA y en los titulares de sección: **es el gesto estándar de entrada de cualquier titular.** Los elementos dentro de `.mascara` son la excepción a la regla de `clearProps` (§6).
+- **`.mascara`** — patrón de reveal por línea. Contenedor con `overflow: hidden` y `padding/margin-block: ±0.08em` (para no cortar acentos ni descendentes); adentro, un `<span>` por línea que entra con `yPercent: 110 → 0`, `power4.out`. Se usa en hero, interstitial, CTA y en los titulares de sección: **es el gesto estándar de entrada de cualquier titular.** Los elementos dentro de `.mascara` son la excepción a la regla de `clearProps` (§6). **Resuelve líneas, no palabras sueltas:** para revelar un `span` inline dentro de una línea va `clip-path`, no una máscara (el porqué, en "La sección F" del §6).
 - **`.card`** — fondo `--bg-soft`, borde `--line`, radio `md`, padding `--space-6`. Al hover: `translateY(-4px)`, borde dorado y `--shadow-lift`.
 - **`.card-numero`** — numeración/etiqueta dorada en Space Grotesk.
 - **`.visually-hidden`** — texto solo para lectores de pantalla.
@@ -258,7 +259,7 @@ Stack: **Lenis** (scroll suave) + **GSAP/ScrollTrigger**. Instancia única de Le
 ### Reglas no negociables
 
 1. **Todo lo animado nace visible.** El estado oculto se aplica con `gsap.set()`, nunca con CSS. Si el JS falla, la página se ve completa.
-2. **Todo va dentro de `gsap.matchMedia('(prefers-reduced-motion: no-preference)')`.** Con movimiento reducido: sin Lenis, sin reveals, sin marquee (`global.css` además recorta transiciones y animaciones a 0.01ms).
+2. **Todo va dentro de `gsap.matchMedia('(prefers-reduced-motion: no-preference)')`.** Con movimiento reducido: sin Lenis, sin reveals, sin marquee, sin el pin de F (`global.css` además recorta transiciones y animaciones a 0.01ms). Se verifica **ejecutando** ese camino, no deduciéndolo: la forma barata es invertir la consulta a `reduce` en el componente, mirar el resultado y revertir.
 3. **`clearProps: 'opacity,transform'` al terminar**, para que los estilos inline no pisen los hovers CSS. **Excepción:** los `<span>` dentro de `.mascara` conservan su transform final; limpiarlos los devuelve al `yPercent` del CSS.
 4. **Reveals una sola vez** (`once: true`, `start: 'top 85%'`). Nada re-anima al volver a subir. Las secciones full-viewport disparan más tarde (`start: 'top 70%'`), porque su contenido está centrado y no arriba.
 
@@ -321,8 +322,7 @@ Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 
 - **Hero** — intro al montar: eyebrow → titular → bajada → CTAs. El titular sube por línea desde `.mascara`. Copy: "DE AQUÍ SALEN BUENAS IDEAS", con "BUENAS IDEAS" en dorado (split de color dentro del mismo titular).
 - **Manifiesto** — interstitial tipográfico full-viewport, patrón statement/eco. Timeline propia con `start: 'top 70%'`, `once`. Timing calibrado: statement `duration: 1.4` en `t=0.4` (lento a propósito, para darle peso), eco en `t=1.5`.
-- **F** `[pendiente — Fase 4]` — la frase se **reescribe al entrar**: parte de lo que el cliente cree que necesita y se transforma en lo que en realidad necesita. Las palabras que salen quedan tachadas y en gris oscuro; las que entran, en dorado. Una sola frase en `.titular`, cero assets, cero dependencias.
-  **Regla crítica:** si el JS falla, la frase debe verse **en su estado final**, no en el inicial. Si no, el visitante lee exactamente el mensaje contrario al que se quiere dar. Esta es la única excepción real a "todo nace visible": acá lo que nace visible es el resultado, y la animación reconstruye el estado inicial para después corregirlo.
+- **F** — la sección **se fija y la frase se corrige atada al scroll**. Tres estados en dos bloques de texto apilados en la misma celda de grid (`grid-area: 1/1`, para que la sección mida lo que el más alto y el cambio no produzca reflow): el bloque A son los estados 1 y 2 —"QUIERO MÁS SEGUIDORES", donde SEGUIDORES se tacha y queda en `--gray-dim` mientras CLIENTES entra en dorado— y el bloque B es el estado 3, la frase que reemplaza a la anterior. Dos columnas: texto a la izquierda, **espacio reservado** a la derecha. Las decisiones que la sostienen están abajo, en "La sección F"; ninguna es cosmética.
 - **E** `[pendiente — Fase 6]` — columna central angosta por donde pasan piezas reales de contenido (post, reel, historia, informe, web), con texto tipográfico alternando izquierda y derecha que explica el trabajo invisible detrás de cada una. El zigzag es el gesto; parallax leve sobre las piezas. Cierra con enlace a `/proyectos`.
 - **Índice de proyectos** `[pendiente]` — el carrusel por bloque es el gesto; nada más compite.
 - **Planes** — el plan destacado entra un beat después que el resto (stagger por función). *(Sección de la versión anterior.)*
@@ -330,9 +330,42 @@ Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 - **CTA** — cierre full-viewport: headline "Comencemos a trabajar" ("trabajar" en dorado) en `.titular`, subiendo desde `.mascara` (`power4.out`, 0.9s), botón 0.4s después, y debajo el marquee infinito de 30s (`translateX(-50%)` sobre 4 copias = loop perfecto), con `playbackRate` modulado por `lenis.velocity` vía Web Animations API. Las frases alternan blanco y dorado.
 - **Hero 3D** — ver §7.
 
+### La sección F (`components/Correccion.jsx`)
+
+Es la pieza más cargada de trampas del sitio y **el primer pin del proyecto**. Cada punto de acá se documenta con el síntoma, no solo con la regla: sin el síntoma, el siguiente que pase lo deshace porque "se ve igual".
+
+**1. El estado en reposo del CSS es el estado FINAL, no el inicial.** El bloque B nace visible y el bloque A nace en `opacity: 0`; el JS invierte eso con `gsap.set()` al inicializar y la timeline vuelve al reposo. Es al revés que en todo el resto del sitio, y es la única excepción real a "todo nace visible" (§6, regla 1).
+*Síntoma si se invierte:* con el JS caído, el visitante se queda leyendo **"QUIERO MÁS SEGUIDORES"** —exactamente el mensaje contrario al que la sección existe para dar— y nada indica que estaba por corregirse. Un fallo silencioso que además publicita lo opuesto al servicio.
+
+**2. `aria-hidden="true"` en el bloque A completo, no solo en la palabra tachada.** La corrección es un gesto **puramente visual**: el tacho es una línea dibujada, no tiene equivalente sonoro.
+*Síntoma si se expone:* un lector de pantalla lee el mensaje **dos veces, con dos redacciones distintas y sin ninguna señal de que la primera quedó superada** — "quiero más clientes… no queremos más seguidores, queremos más clientes". Suena a error de contenido, no a recurso retórico. Solo el bloque B (el `h2`) queda expuesto.
+El `aria-hidden` de `.tachada` **se conserva aunque hoy sea redundante por herencia**: si alguna vez el bloque A dejara de estar oculto entero, la palabra tachada tiene que seguir fuera del árbol por sí sola.
+
+**3. `clip-path` para la palabra dorada, no `.mascara`.** `.mascara` es `display: block` y resuelve el reveal **a nivel de línea**; la palabra que entra es un `span` inline en medio de una línea.
+*Síntoma si se usa `.mascara`:* convertir el span en bloque lo saca del flujo de la línea y descuadra la baseline contra la palabra tachada de al lado. Con `clip-path` la palabra ocupa su espacio desde el principio y solo se revela: **cero reflow al aparecer**.
+
+**4. Dos ScrollTriggers separados, y no se pueden fusionar.** Uno de entrada (`once`, máscaras por línea, conserva su `clearProps: 'transform'`) y otro de `pin` + `scrub`. La timeline del scrub **no lleva `clearProps` en ninguna parte**.
+*Síntoma si se mezclan:* el scrub reproduce la timeline **hacia atrás** al subir, y `clearProps` borra los estilos inline al terminar — la timeline se queda sin estado que revertir y al subir la frase no vuelve, queda congelada en el último estado.
+
+**5. Los colores se resuelven con `getComputedStyle`, no se pasan como `var()` al tween.** GSAP no interpola custom properties de color.
+*Síntoma si se pasa `var(--gray-dim)` directo:* el color no se interpola, **salta de golpe al final del tween**; con scrub ese salto queda amarrado a un punto exacto del scroll y se ve entero, en vez de la transición gradual que el gesto necesita. Los tokens siguen siendo la fuente de verdad: se **leen** al inicializar y se pasan ya resueltos.
+
+**6. En el marco reservado manda la ALTURA; el ancho sale de la proporción.** `height: min(56svh, 520px)` + `aspect-ratio` + `justify-self: center` (que lo libera del stretch de la grilla).
+*Síntoma al revés:* con `aspect-ratio` aplicado sobre el ancho de columna, el marco medía 720px y **empujaba la sección a 886px contra un viewport de 639px**. Con el pin en `start: 'top top'`, la sección fijada excede el viewport y **el contenido de abajo queda cortado bajo el fold, sin forma de scrollear hasta él** porque justamente está pinneada.
+
+**7. El pin depende de que ningún ancestro tenga `transform`, `filter`, `will-change` ni `contain`.** No agregar ninguno a `main`, `#root` ni `#inicio`.
+*Síntoma:* cualquiera de esas propiedades crea un contexto de contención que **rompe el `position: fixed`** con el que ScrollTrigger fija la sección. No lanza error: el pin simplemente deja de pegar y la sección scrollea de largo con la timeline a medias. Verificada la cadena completa de ancestros al construir.
+Lenis usa **scroll nativo** (`new Lenis()` sin wrapper, sincronizado con `lenis.on('scroll', ScrollTrigger.update)` + el ticker de GSAP), así que **no hace falta `scrollerProxy`**. Si algún día Lenis pasa a scrollear un wrapper con transform, este pin es lo primero que se cae.
+
+**Datos y tipos de token.** El copy vive como estructura de datos (`BLOQUE_A` / `BLOQUE_B`: array de líneas, cada línea un array de tokens), para que cambiar la frase sea editar datos y no maquetado. Cuatro tipos: `estable`, `tachada`, `entra` y **`acento`** (dorado sin animación, el del bloque B). `acento` existe aparte a propósito: reusar `entra` habría enganchado las palabras del bloque B al `gsap.set` del `clip-path`.
+
+**Movimiento reducido: sin pin y sin scrub.** Todo el bloque vive dentro de `matchMedia('(prefers-reduced-motion: no-preference)')`, así que con movimiento reducido no se crea el pin ni el `pin-spacer` y la sección queda como un bloque normal de `100svh` **mostrando el estado 3**. Es la decisión, no un olvido: el mensaje final ya es el reposo. **Probado en ejecución**, no deducido.
+
+**Escala.** La columna de texto es ~mitad de ancho, así que la sección define su propio `--text-display-f` y lo aplica vía `--text-display` en el elemento (§5). **No se toca `--text-display` global**, que lo usa Manifiesto.
+
 ### Nota de composición pendiente
 
-Hero e interstitial quedaron **centrados**. Funciona, pero la asimetría editorial (titulares corridos al borde, contrapesos vacíos) es una palanca que todavía no se usa. Es el recurso disponible si alguna pantalla necesita más tensión sin sumar elementos.
+Hero e interstitial quedaron **centrados**. F es la primera pantalla que usa la **asimetría editorial** —texto corrido a la izquierda, contrapeso vacío a la derecha— y confirma que la palanca funciona a esta escala. Sigue disponible para cualquier pantalla que necesite más tensión sin sumar elementos.
 
 ---
 
@@ -395,7 +428,7 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 - **Foco visible global**: `outline: 2px solid var(--gold)` con `offset: 3px` en `:focus-visible`. Los inputs lo reemplazan por borde dorado; no se quita el foco sin sustituto.
 - **Jerarquía de encabezados:** **un `h1` por ruta** (ver la tabla del §3), `h2` por sección o por bloque de índice. Los statements de interstitial son decorativos a nivel semántico o `h2` según su rol; no compiten con el `h1`.
 - **Cambio de ruta**: `useRutaScroll` mueve el foco al `<main>` (`tabIndex={-1}`, con `preventScroll` para no pelear con el reset de scroll) y actualiza el `document.title`. Solo en navegaciones reales, no en la primera carga: ahí robar el foco sería intrusivo.
-- Elementos decorativos (canvas, separadores, eco del interstitial, palabras tachadas de F) marcados `aria-hidden="true"`.
+- Elementos decorativos (canvas, separadores, eco del interstitial, marco reservado de F) marcados `aria-hidden="true"`. En F **el bloque tachado entero** queda fuera del árbol, no solo la palabra: ver el punto 2 de "La sección F" (§6).
 - El **carrusel** debe ser navegable con teclado y anunciar posición (§5).
 - `::selection` dorada con texto oscuro.
 - El contraste se apoya en blanco/`--muted` sobre negro; `--muted` (#8e8e8e) no debe usarse por debajo de `--text-sm` ni para información crítica. `--gold-echo` **nunca** lleva información: no cumple contraste y es puramente decorativo.
@@ -441,7 +474,7 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 | 3a | Rutas, layout compartido, ciclo de vida Lenis/ScrollTrigger, `.htaccess` | **Hecha** |
 | 3b | Transición entre páginas | **Hecha** |
 | 3c | Prerender + SEO por ruta | **Hecha** |
-| 4 | Sección F en el home |
+| 4 | Sección F en el home (pin + scrub, tres estados) | **Hecha** |
 | 5 | Servicios: sección home + `/servicios` + fichas |
 | 6 | Sección E en el home + `/proyectos` + ficha piloto Villa Verla |
 | 7 | Resto de fichas de proyecto + Planes |
@@ -450,7 +483,8 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 ### Contenido (no bloquea la infraestructura, sí bloquea el lanzamiento)
 
 - **Párrafo de 2-3 líneas por cliente** — 5 en total (Villa Verla, Automotriz Carmona, La Rusia Barra Nikkei, Veterinaria Larraín, Alfalfa Cakes).
-- **Copy definitivo de la frase de F.** El placeholder de trabajo es "QUIERO MÁS SEGUIDORES" → "NO QUEREMOS MÁS SEGUIDORES. QUEREMOS MÁS CLIENTES."
+- **Copy definitivo de la frase de F.** Lo que hay hoy en el código es placeholder: "QUIERO MÁS SEGUIDORES" → "NO QUEREMOS MÁS SEGUIDORES. QUEREMOS MÁS CLIENTES." Cambiarlo es editar `BLOQUE_A` / `BLOQUE_B` en `Correccion.jsx`, nada más.
+- **Qué va en la columna derecha de F.** Hoy es un **espacio reservado**: un marco vacío a propósito, no un hueco por llenar de apuro. La decisión de contenido está abierta —una pieza real de cliente, un dato, o nada— y hasta tomarla el marco se sostiene solo. Si se resuelve que va vacío, el marco se queda; si entra contenido, revisar que no empuje la sección más allá del viewport (punto 6 de "La sección F", §6).
 - **Resúmenes por servicio.**
 - **Permisos y logos de clientes.** Confirmar también si hay más clientes de los cinco listados.
 - **Piezas reales**: posts, reels, historias, informes y webs, en imagen y video. El informe se puede editar para que se vea más profesional.
@@ -465,7 +499,7 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 - **Prueba social**: Smart no tiene testimonios. La competencia directa de la región (Agencia Óptima) sí los tiene, con nombre y empresa. Es un hueco identificado, sin decisión todavía sobre si se llena y dónde.
 - **El acrónimo SMART**: si a Abby le importa el juego con el nombre, decidir si sobrevive como línea de footer o dentro de Servicios. Como sección está descartado.
 - **Etiquetas Open Graph / Twitter** — no existen; falta la imagen social. El favicon ya usa el logo.
-- **Asimetría editorial** — palanca disponible, sin usar (§6).
+- **Asimetría editorial** — estrenada en F (§6); hero e interstitial siguen centrados y podrían aprovecharla.
 - **Calibración fina** de los diales del spotlight del hero.
 - **Decisión sobre preloader** — sin resolver. Con transición entre páginas (Fase 3b) la pregunta cambia: puede que el preloader sobre.
 - **Revisión de la voz inclusiva** por parte de la clienta.

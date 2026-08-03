@@ -17,7 +17,6 @@ import styles from './Nav.module.css'
  */
 const enlaces = [
   { label: 'Servicios', ancla: 'servicios' },
-  { label: 'Proceso', ancla: 'proceso' },
   { label: 'Proyectos', ruta: '/proyectos' },
   { label: 'Planes', ancla: 'planes' },
   { label: 'Equipo', ancla: 'equipo' },
