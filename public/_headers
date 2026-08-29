@@ -1,0 +1,12 @@
+# Cabeceras para el staging de Cloudflare Pages.
+#
+# Este archivo SOLO lo interpreta Cloudflare. En el hosting DirectAdmin de
+# producción es un archivo inerte que nadie lee, y por eso el noindex vive
+# acá y no en un <meta name="robots"> de index.html ni en un robots.txt:
+# esos dos viajarían al build de producción y dejarían el sitio real fuera
+# de Google sin que nadie se diera cuenta.
+#
+# Al publicar en smartestudio.cl este archivo se sube igual y no molesta.
+
+/*
+  X-Robots-Tag: noindex, nofollow

@@ -1,0 +1,12 @@
+# Reescritura para Cloudflare Pages: el equivalente del .htaccess, que
+# Cloudflare no lee.
+#
+# Los archivos estáticos se evalúan ANTES que esta regla, así que las 12
+# rutas prerenderizadas se siguen sirviendo como HTML real y esto solo
+# alcanza a las URLs que no existen, que caen en el catch-all del router
+# (paginas/NoEncontrada.jsx).
+#
+# Devuelve 200 y no 404 a propósito: mismo comportamiento que el .htaccess
+# de DirectAdmin, para que staging y producción no difieran en esto.
+
+/*    /index.html   200
