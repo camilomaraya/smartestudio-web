@@ -1,4 +1,6 @@
 import { tituloDeRuta } from '../hooks/useRutaScroll'
+import { servicioPorSlug } from '../data/servicios'
+import { proyectoPorSlug } from '../data/proyectos'
 
 /*
  * SEO por ruta para el prerender (Fase 3c).
@@ -25,12 +27,25 @@ const DESCRIPCIONES = {
 }
 
 /*
- * Las fichas llevan placeholder con la estructura final. En la Fase 6 el
- * `resumen` del cliente o del servicio (§8) reemplaza a estas dos funciones:
- * un mismo párrafo escrito una vez sirve para el índice, la cabecera de la
- * ficha y esta meta description.
+ * Todas las fichas usan el `resumen` real de sus datos: el mismo párrafo que
+ * sirve en el índice y en la cabecera de la ficha (§8). Un párrafo escrito
+ * una vez, tres lugares servidos.
+ *
+ * El respaldo genérico queda para un slug que no exista en los datos: esa
+ * ruta no se prerenderiza y termina en el 404, pero la función no puede
+ * devolver undefined si alguien la llama con cualquier cosa.
  */
 function descripcionDeFicha(seccion, slug) {
+  if (seccion === 'servicios') {
+    const servicio = servicioPorSlug(slug)
+    if (servicio) return servicio.resumen
+  }
+
+  if (seccion === 'proyectos') {
+    const proyecto = proyectoPorSlug(slug)
+    if (proyecto) return proyecto.resumen
+  }
+
   const nombre = slug.replace(/-/g, ' ')
   if (seccion === 'proyectos') {
     return `Proyecto ${nombre} — el trabajo que hicimos con esta marca en Smart Estudio, agencia de marketing digital en La Serena–Coquimbo.`

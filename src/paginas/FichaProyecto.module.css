@@ -1,0 +1,259 @@
+.cuerpo {
+  padding-bottom: var(--space-section);
+}
+
+/* ============================================
+   Datos del proyecto
+   ============================================ */
+.datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-7);
+  padding-block: var(--space-6);
+  border-block: 1px solid var(--line);
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.dato dt {
+  font-family: var(--font-utility);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dato dd {
+  font-size: var(--text-base);
+}
+
+.servicios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.enlaceServicio {
+  color: var(--gold);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.enlaceServicio:hover,
+.enlaceServicio:focus-visible {
+  border-bottom-color: var(--gold);
+}
+
+/* ============================================
+   Pieza destacada + frase
+   ============================================ */
+.destacada {
+  margin-top: var(--space-8);
+}
+
+.destacadaImagen {
+  width: 100%;
+  max-height: 70svh;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+}
+
+.destacadaPie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.destacadaTitulo {
+  font-family: var(--font-utility);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.tipo {
+  font-family: var(--font-utility);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+/* La frase que desarrolla la pieza destacada: bloque de lectura, ancho
+   angosto, escala mayor que el cuerpo. */
+.frase {
+  max-width: var(--container-narrow);
+  margin-block: var(--space-8);
+  font-size: var(--text-xl);
+  line-height: 1.5;
+}
+
+/* ============================================
+   Zigzag de piezas
+   ============================================ */
+.piezas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+  padding-block: var(--space-7);
+  border-top: 1px solid var(--line);
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-7);
+  align-items: center;
+}
+
+/* El zigzag se resuelve invirtiendo el orden visual, no reordenando el DOM:
+   el orden de lectura y el de tabulación quedan siempre media→texto. */
+.invertida .piezaMedia {
+  order: 2;
+}
+
+.piezaMedia {
+  display: flex;
+  justify-content: center;
+}
+
+.piezaImagen {
+  /* Manda la altura y el ancho sale de la proporción: un reel vertical y un
+     post 4:5 tienen que convivir sin que uno domine la fila. */
+  height: clamp(320px, 52svh, 560px);
+  width: auto;
+  max-width: 100%;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.piezaTexto {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.piezaTitulo {
+  font-size: var(--text-xl);
+}
+
+.piezaDetras {
+  color: var(--muted);
+}
+
+/* ============================================
+   Galería y otros proyectos
+   ============================================ */
+.galeria,
+.otros {
+  padding-block: var(--space-7);
+  border-top: 1px solid var(--line);
+}
+
+.subtitulo {
+  margin-bottom: var(--space-5);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  /* Anula el Archivo Expanded de global.css: acá es etiqueta, no titular. */
+  font-stretch: normal;
+}
+
+.otrosLista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-5);
+}
+
+.otroEnlace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.otroImagen {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  transition: border-color var(--transition-fast);
+}
+
+.otroNombre {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: var(--text-lg);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  transition: color var(--transition-fast);
+}
+
+.otroRubro {
+  font-family: var(--font-utility);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.otroEnlace:hover .otroNombre,
+.otroEnlace:focus-visible .otroNombre {
+  color: var(--gold);
+}
+
+.otroEnlace:hover .otroImagen,
+.otroEnlace:focus-visible .otroImagen {
+  border-color: var(--gold);
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-7);
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color var(--transition-fast);
+}
+
+.volver:hover,
+.volver:focus-visible {
+  color: var(--gold);
+}
+
+@media (max-width: 860px) {
+  .fila {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  /* En una columna el zigzag no existe: la media siempre va arriba. */
+  .invertida .piezaMedia {
+    order: 0;
+  }
+
+  .piezas {
+    gap: var(--space-8);
+  }
+
+  .piezaImagen {
+    height: clamp(280px, 44svh, 420px);
+  }
+}

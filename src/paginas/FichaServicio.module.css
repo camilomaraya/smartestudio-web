@@ -1,0 +1,161 @@
+.cuerpo {
+  padding-bottom: var(--space-section);
+}
+
+/* "Cómo trabajamos" pesa más que "Qué incluye": un párrafo que explica el
+   criterio, y al lado la lista utilitaria que lo aterriza. */
+.principal {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr);
+  gap: var(--space-8);
+  padding-block: var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
+.subtitulo {
+  margin-bottom: var(--space-5);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  /* Anula el Archivo Expanded que global.css da a h1-h3: acá es etiqueta,
+     no titular. */
+  font-stretch: normal;
+}
+
+.detalle {
+  max-width: var(--container-narrow);
+  font-size: var(--text-lg);
+}
+
+.incluye {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  font-family: var(--font-utility);
+  font-size: var(--text-sm);
+  color: var(--white);
+}
+
+.incluye li {
+  display: flex;
+  gap: var(--space-3);
+}
+
+.incluye li::before {
+  content: '';
+  flex-shrink: 0;
+  width: 14px;
+  height: 1px;
+  margin-top: 0.7em;
+  background-color: var(--gold);
+}
+
+/* ============================================
+   Complementarios asociados a esta ficha
+   ============================================ */
+.complementarios {
+  padding-block: var(--space-7);
+  border-top: 1px solid var(--line);
+}
+
+.grupo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.grupoTitulo {
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-stretch: normal;
+}
+
+/* Lo que se coordina con terceros se dice, no se disimula. */
+.marcaExterna {
+  color: var(--gold-deep);
+  letter-spacing: 0.08em;
+}
+
+.grupoLista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+/* ============================================
+   Otros servicios
+   ============================================ */
+.otros {
+  padding-block: var(--space-7);
+  border-top: 1px solid var(--line);
+}
+
+.otrosLista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-5);
+}
+
+.otroEnlace {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding-block: var(--space-2);
+}
+
+.otroNombre {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: var(--text-xl);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1.04;
+  transition: color var(--transition-fast);
+}
+
+.otroGancho {
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.otroEnlace:hover .otroNombre,
+.otroEnlace:focus-visible .otroNombre {
+  color: var(--gold);
+}
+
+.volver {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: var(--space-7);
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color var(--transition-fast);
+}
+
+.volver:hover,
+.volver:focus-visible {
+  color: var(--gold);
+}
+
+@media (max-width: 860px) {
+  .principal {
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+  }
+}

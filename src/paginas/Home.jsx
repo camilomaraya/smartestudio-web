@@ -7,7 +7,7 @@ import Hero from '../sections/Hero'
 import Manifiesto from '../sections/Manifiesto'
 import Correccion from '../components/Correccion'
 import Servicios from '../sections/Servicios'
-import Trabajos from '../sections/Trabajos'
+import Detras from '../sections/Detras'
 import Planes from '../sections/Planes'
 import Equipo from '../sections/Equipo'
 import CTA from '../sections/CTA'
@@ -40,6 +40,8 @@ export default function Home() {
      * de contar frames a ciegas.
      */
     let hecho = false
+    let cancelado = false
+    let frame = 0
     const scrollear = () => {
       if (hecho) return
       hecho = true
@@ -54,45 +56,88 @@ export default function Home() {
        * lo que determina a dónde hay que ir.
        * Tope de 30 frames (~0.5s) para no quedar esperando indefinidamente.
        */
-      let posicionPrevia = -1
+      let posicionPrevia = null
       let estables = 0
       let intentos = 0
+
+      /*
+       * Salta y CONFIRMA. Un solo scrollTo no alcanza: entre el salto y el
+       * frame siguiente hay varios actores que pueden dejar el scroll en
+       * otro lado —el reset de ruta de useRutaScroll, el `refresh()` de
+       * ScrollTrigger restaurando la posición que midió al empezar, el pin
+       * de la sección F creando su pin-spacer, el canvas del hero tomando
+       * su alto—. Cuál de ellos gana depende del orden en que caigan los
+       * frames, y por eso el fallo era intermitente: a veces la sección
+       * quedaba centrada y a veces el visitante aterrizaba arriba de todo.
+       *
+       * En vez de adivinar el instante correcto, se verifica el resultado y
+       * se reintenta. Es idempotente y barato: si el primer salto quedó
+       * bien, la comprobación del frame siguiente no hace nada.
+       */
+      let reintentos = 0
+      const saltar = () => {
+        if (cancelado) return
+        const elemento = document.getElementById(destino)
+        if (!elemento) return terminar()
+
+        // Lenis cachea el límite de scroll (alto del documento menos el
+        // viewport) y clampea cualquier destino a ese valor. Al llegar desde
+        // otra ruta ese límite es el que midió cuando el home todavía no
+        // existía, así que sin este resize el scroll se detiene siempre en el
+        // mismo punto, fuera cual fuera la sección pedida.
+        getLenis()?.resize()
+        // Instantáneo: esto ocurre detrás de la cortina de transición.
+        scrollToSection(`#${destino}`, { inmediato: true })
+
+        frame = requestAnimationFrame(() => {
+          if (cancelado) return
+          const distancia = Math.abs(elemento.getBoundingClientRect().top)
+          // 4px de tolerancia: scrollToSection aplica un offset de -8px y el
+          // redondeo subpíxel del navegador nunca deja el top exacto en 0.
+          const llego = distancia <= 12
+          reintentos += 1
+          if (llego || reintentos >= 8) return terminar()
+          saltar()
+        })
+      }
+
+      /*
+       * Recién ahora la cortina puede levantarse. Es seguro llamarlo
+       * siempre: si no había cortina esperando —navegación normal, o
+       * movimiento reducido, donde nunca se montó— no hace nada.
+       */
+      const terminar = () => {
+        if (cancelado) return
+        avisarScrollListo()
+      }
+
       const cuandoEstable = () => {
+        if (cancelado) return
         const elemento = document.getElementById(destino)
         const posicion = elemento
           ? Math.round(elemento.getBoundingClientRect().top + window.scrollY)
-          : -1
+          : null
 
-        // Cuatro frames iguales, no dos: la posición pasa por valores
-        // intermedios que se repiten un par de frames mientras las
-        // secciones full-viewport toman su alto definitivo.
-        estables = posicion === posicionPrevia ? estables + 1 : 0
+        /*
+         * Cuatro frames iguales, no dos: la posición pasa por valores
+         * intermedios que se repiten un par de frames mientras las secciones
+         * full-viewport toman su alto definitivo.
+         *
+         * `null` (la sección todavía no montó) no cuenta como estable: antes
+         * se usaba -1 y cuatro frames sin elemento se leían como "ya se
+         * asentó", disparando el salto contra una posición que no existía.
+         */
+        estables = posicion !== null && posicion === posicionPrevia ? estables + 1 : 0
         posicionPrevia = posicion
         intentos += 1
 
         if ((estables >= 4 && posicion > 0) || intentos > 40) {
-          /*
-           * Lenis cachea el límite de scroll (alto del documento menos el
-           * viewport) y clampea cualquier destino a ese valor. Al llegar
-           * desde otra ruta ese límite es el que midió cuando el home
-           * todavía no existía, así que sin este resize el scroll se
-           * detenía siempre en el mismo punto, fuera cual fuera la sección
-           * pedida.
-           */
-          getLenis()?.resize()
-          // Instantáneo: esto ocurre detrás de la cortina de transición.
-          scrollToSection(`#${destino}`, { inmediato: true })
-          /*
-           * Recién ahora la cortina puede levantarse. Es seguro llamarlo
-           * siempre: si no había cortina esperando —navegación normal, o
-           * movimiento reducido, donde nunca se montó— no hace nada.
-           */
-          avisarScrollListo()
+          saltar()
           return
         }
-        requestAnimationFrame(cuandoEstable)
+        frame = requestAnimationFrame(cuandoEstable)
       }
-      requestAnimationFrame(cuandoEstable)
+      frame = requestAnimationFrame(cuandoEstable)
     }
 
     ScrollTrigger.addEventListener('refresh', scrollear)
@@ -101,6 +146,11 @@ export default function Home() {
     const respaldo = setTimeout(scrollear, 500)
 
     return () => {
+      // `cancelado` corta las cadenas de rAF: sin esto, el doble montaje de
+      // StrictMode deja la cadena de la primera pasada corriendo contra un
+      // Home ya desmontado, peleándose por el scroll con la segunda.
+      cancelado = true
+      cancelAnimationFrame(frame)
       ScrollTrigger.removeEventListener('refresh', scrollear)
       clearTimeout(respaldo)
     }
@@ -112,7 +162,7 @@ export default function Home() {
       <Manifiesto />
       <Correccion />
       <Servicios />
-      <Trabajos />
+      <Detras />
       <Planes />
       <Equipo />
       <CTA />

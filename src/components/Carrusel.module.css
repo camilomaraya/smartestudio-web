@@ -1,0 +1,149 @@
+.carrusel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/*
+ * Scroll horizontal nativo con snap: sin JS el carrusel sigue siendo
+ * arrastrable y las piezas siguen visibles. Los controles se suman encima.
+ */
+.pista {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  /* La barra se oculta: la posición ya se comunica con los controles. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.pista::-webkit-scrollbar {
+  display: none;
+}
+
+.pista:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 4px;
+  border-radius: var(--radius-sm);
+}
+
+.pieza {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  /* La ALTURA manda y el ancho sale de la proporción de cada pieza: así un
+     reel vertical y un post 4:5 conviven en la misma fila sin que uno
+     desborde. Mismo criterio que el marco de la sección F (§6). */
+  height: clamp(300px, 46svh, 460px);
+}
+
+.imagen {
+  height: 100%;
+  width: auto;
+  max-width: none;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-soft);
+}
+
+.pie {
+  font-family: var(--font-utility);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ============================================
+   Controles
+   ============================================ */
+.controles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.botones {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--white);
+  font-size: var(--text-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    opacity var(--transition-fast);
+}
+
+.boton:hover:not(:disabled),
+.boton:focus-visible:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.boton:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.posicion {
+  display: flex;
+  gap: var(--space-1);
+  font-family: var(--font-utility);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+/* El dorado marca el dato que cambia; el total es contexto. */
+.actual {
+  color: var(--gold);
+}
+
+.puntos {
+  display: flex;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.punto {
+  display: block;
+  width: 24px;
+  height: 2px;
+  padding: 0;
+  border: none;
+  background-color: var(--line);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.puntoActivo {
+  background-color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .pieza {
+    height: clamp(260px, 42svh, 380px);
+  }
+
+  /* Los puntos se van: con 5 piezas en 375px compiten con los botones. */
+  .puntos {
+    display: none;
+  }
+}

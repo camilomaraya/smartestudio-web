@@ -5,7 +5,7 @@ Este documento es la referencia al agregar páginas, secciones o componentes, pa
 
 > **Cómo leer este documento.** La mayoría describe lo que el código ya implementa. Lo que todavía no está construido va marcado con **`[pendiente]`** y el número de fase. Si algo lleva `[pendiente]`, **no existe en el código todavía**: es la regla que debe cumplir cuando se construya, no algo que se pueda importar hoy.
 >
-> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global y toda la **infraestructura multipágina**: rutas y layout compartido (3a), transición entre páginas (3b) y prerender + SEO por ruta (3c). Próxima fase: **5** (Servicios). Planes, Equipo y Contacto todavía son secciones de la versión anterior y se reconstruyen en las fases 7 y 8. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
+> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global, toda la **infraestructura multipágina** —rutas y layout compartido (3a), transición entre páginas (3b), prerender + SEO por ruta (3c)— **Servicios completo** (5) y **Proyectos completo** (6): sección E en el home, índice `/proyectos`, las cinco fichas y el componente carrusel. El sitio ya no tiene páginas stub. Próxima fase: **7** (Planes) y **8** (Equipo + Contacto), que hoy siguen siendo secciones de la versión anterior — funcionan, pero desentonan con el rediseño. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
 
 ---
 
@@ -164,8 +164,8 @@ Open Graph y Twitter siguen pendientes: falta la imagen social. El dominio de la
 | Hero | `--bg` | Full-viewport (WebGL) | Hecho |
 | Manifiesto (interstitial) | `--bg` | Full-viewport tipográfico | Hecho |
 | **F** — la frase que se corrige | `--bg` | Full-viewport tipográfico, **fijada (pin)** | Hecho |
-| Servicios | `--bg` | Contenido | `[pendiente — Fase 5]` |
-| **E** — preview del "detrás" | `--bg` | Contenido (columna central) | `[pendiente — Fase 6]` |
+| Servicios | `--bg` | Contenido | Hecho |
+| **E** — preview del "detrás" | `--bg` | Contenido (columna central) | Hecho |
 | Planes | `--bg` | Contenido | `[pendiente — Fase 7]` |
 | Equipo | `--bg` | Contenido | `[pendiente — Fase 8]` |
 | CTA (cierre) | `--bg-soft` | Full-viewport tipográfico | Hecho |
@@ -247,7 +247,7 @@ El gesto propio de los interstitiales tipográficos, ya implementado en Manifies
 - **`Nav`** (`src/components/Nav.jsx`) — sin barra: el logo suelto a la izquierda (sin contenedor, porque es apaisado y blanco) y un único círculo dorado de 50px con la hamburguesa a la derecha, ambos fijos a `--gutter` de las esquinas superiores y alineados por centro óptico. No cambian con el scroll. La hamburguesa abre un panel fullscreen `--bg` sólido con los enlaces en Archivo Expanded 900 a `clamp(2rem, 5vw, 3.5rem)`, centrados verticalmente y alineados a la izquierda del container, más un pie con CTA y redes en Space Grotesk. Igual en desktop y mobile; bajo 375px los círculos bajan a 44px. El panel entra con fade (0.4s) + stagger de enlaces (0.08s, `y: 30 → 0`) y sale con fade de 0.3s; cierra con `Escape`, al scrollear o al elegir un enlace, con focus trap sobre círculos + panel.
   El nav tiene **tres tipos de enlace**: anclas que solo existen en el home (pasan por `irAAncla`, que navega primero si estás en otra ruta), la sección de contacto (scroll directo siempre, porque vive en el Layout y está en todas las rutas) y rutas reales (`/proyectos`, vía `EnlaceRuta`). El logo lleva al inicio del home. Footer aplica el mismo criterio.
 - **Logo** — `public/logo-smart.png` (512×512, logotipo en la franja central del lienzo). Se usa en nav, footer y favicon. Token `--ancho-logo: clamp(140px, 17vw, 240px)`. **Ojo:** el `img { max-width: 100% }` global rompe los márgenes negativos que compensan el aire del PNG; los módulos que lo usan necesitan `max-width: none`.
-- **Carrusel** `[pendiente — Fase 6]` — **no existe todavía.** Lo necesitan el índice de proyectos (uno por bloque, 3-5 imágenes) y las fichas (uno grande y varios intercalados). Requisitos: navegable con teclado, con estado visible de posición, sin autoplay que compita con el scroll, y degradando a la primera imagen visible si el JS falla. Se decide entonces si se implementa a mano o con librería.
+- **`Carrusel`** (`components/Carrusel.jsx`) — implementado a mano, sin librería. La pista es **scroll horizontal nativo con `scroll-snap`**, no un transform manejado por JS: sin JS las piezas siguen visibles y arrastrables, y los controles se suman encima. La posición se lee del `scrollLeft` real —el hijo cuyo `offsetLeft` está más cerca del borde—, no de un índice que el JS crea tener, así que el dedo, la rueda y los botones dejan siempre el mismo estado. **No se calcula por ancho promedio a propósito:** las piezas tienen proporciones distintas (un reel 9:16 y un post 4:5 no miden igual) y esa cuenta se desalinea. Sin autoplay; posición anunciada como texto además de los puntos, porque un punto dorado no le dice nada a un lector de pantalla.
 - **Tarjeta de trabajo** (`Trabajos.module.css`) — **obsoleta.** El formato `aspect-ratio: 4/5` en grilla no se usa en el diseño nuevo: el índice es lista vertical con carrusel y el home muestra E. Lo que **sí se rescata** es su mecanismo de parallax —capa `.media` con zoom `scale(1.06)` al hover y capa interna `.mediaFondo` sobredimensionada (`inset: -8% 0`) que lleva el `scrub`—, reutilizable en las piezas de E y en los carruseles. El módulo se elimina o se renombra a `Proyectos.module.css` cuando se construya la Fase 6.
 
 ---
@@ -271,13 +271,15 @@ Stack: **Lenis** (scroll suave) + **GSAP/ScrollTrigger**. Instancia única de Le
 4. **Lenis no se destruye** al navegar: vive en el layout compartido (§3).
 5. **Las anclas del home desde otra ruta** navegan con `state.scrollTo` y `Home` hace el scroll al montar (`lib/navegacion.js`).
 
-### Tres trampas que ya costaron caro
+### Cuatro trampas que ya costaron caro
 
-Encontradas depurando las fases 3a y 3b. Las tres reaparecen sola en cuanto se anima algo nuevo:
+Encontradas depurando las fases 3a, 3b y 5. Las cuatro reaparecen solas en cuanto se anima o se navega algo nuevo:
 
 1. **`fromTo` con `y: 0` explícito en los titulares con `.mascara`, nunca `set` + `to` de solo `yPercent`.** GSAP guarda `y` (px) y `yPercent` como componentes separadas **y las suma**: bajo el doble montaje de StrictMode, la segunda pasada lee el `translateY` que dejó la primera como `y` y le suma otra vez el porcentaje. El titular termina al doble de desplazamiento, invisible detrás de su propia máscara.
 2. **Después de cambiar de ruta, cualquier `scrollTo` necesita `getLenis()?.resize()` antes.** Lenis cachea el límite de scroll y **clampea todo destino a ese valor**; al llegar desde otra ruta ese límite es el que midió en la ruta anterior, así que el scroll se detiene siempre en el mismo punto sin importar la sección pedida. **Esto va a reaparecer en la Fase 6** con los enlaces internos de las fichas.
-3. **La transición se salta si `document.hidden`, y `visibilitychange` salta la timeline a su estado final.** Con la pestaña en segundo plano el navegador congela los `rAF`: sin esto la timeline queda a medias, la navegación sin completar y el flag de "en curso" trabado, con lo que ningún enlace vuelve a responder.
+3. **El reset de scroll entre rutas necesita `lenis.resize()` + `force: true`, no solo `scrollTo(0)`.** Lenis cachea el límite de scroll y su estado interno sigue apuntando a la posición de la ruta anterior; sin remedir, su siguiente frame reescribe esa posición —clampeada al alto nuevo— encima del reset.
+*Síntoma:* entrar a una ficha desde un home scrolleado deja al visitante a mitad de la página nueva, sin haber visto la cabecera, y el número no es azaroso: es exactamente `altoNuevo − viewport`. Encontrado y corregido en la Fase 5 (`useRutaScroll.js`); estaba desde la 3a. Como `ScrollTrigger.refresh()` restaura la posición que encontró al empezar, el reset se **reafirma después** del refresh, salvo cuando la ruta pide un ancla.
+4. **La transición se salta si `document.hidden`, y `visibilitychange` salta la timeline a su estado final.** Con la pestaña en segundo plano el navegador congela los `rAF`: sin esto la timeline queda a medias, la navegación sin completar y el flag de "en curso" trabado, con lo que ningún enlace vuelve a responder.
 
 ### Transición entre páginas
 
@@ -323,6 +325,7 @@ Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 - **Hero** — intro al montar: eyebrow → titular → bajada → CTAs. El titular sube por línea desde `.mascara`. Copy: "DE AQUÍ SALEN BUENAS IDEAS", con "BUENAS IDEAS" en dorado (split de color dentro del mismo titular).
 - **Manifiesto** — interstitial tipográfico full-viewport, patrón statement/eco. Timeline propia con `start: 'top 70%'`, `once`. Timing calibrado: statement `duration: 1.4` en `t=0.4` (lento a propósito, para darle peso), eco en `t=1.5`.
 - **F** — la sección **se fija y la frase se corrige atada al scroll**. Tres estados en dos bloques de texto apilados en la misma celda de grid (`grid-area: 1/1`, para que la sección mida lo que el más alto y el cambio no produzca reflow): el bloque A son los estados 1 y 2 —"QUIERO MÁS SEGUIDORES", donde SEGUIDORES se tacha y queda en `--gray-dim` mientras CLIENTES entra en dorado— y el bloque B es el estado 3, la frase que reemplaza a la anterior. Dos columnas: texto a la izquierda, **espacio reservado** a la derecha. Las decisiones que la sostienen están abajo, en "La sección F"; ninguna es cosmética.
+- **Servicios** — el gesto es **el índice trazándose**: cada regla horizontal se dibuja de izquierda a derecha (`scaleX: 0 → 1`) y su fila entra un beat después. La precedencia importa: primero la línea, después el contenido — al revés el gesto no se lee, parece un reveal más. Cuatro filas de nombre grande, no tarjetas: la grilla de `.card` era el formato viejo y compite con el vacío. La regla es un `<span>` propio y no un `border-top` porque un borde no se puede escalar desde un origen.
 - **E** `[pendiente — Fase 6]` — columna central angosta por donde pasan piezas reales de contenido (post, reel, historia, informe, web), con texto tipográfico alternando izquierda y derecha que explica el trabajo invisible detrás de cada una. El zigzag es el gesto; parallax leve sobre las piezas. Cierra con enlace a `/proyectos`.
 - **Índice de proyectos** `[pendiente]` — el carrusel por bloque es el gesto; nada más compite.
 - **Planes** — el plan destacado entra un beat después que el resto (stagger por función). *(Sección de la versión anterior.)*
@@ -409,7 +412,11 @@ El canvas tiene `pointer-events: none`: el tracking del cursor se hace en `windo
 
 `tipo`: post / reel / historia / informe / web. `formato`: imagen o video. `detras`: el texto del zigzag de la sección E.
 
-**`src/data/servicios.js`** — ampliar el existente con `slug`, `resumen` y flag `externalizado`.
+**`src/data/servicios.js`** `[hecho — Fase 5]` — `slug`, `titulo`, `gancho` (línea corta para la fila del home, donde no cabe el resumen), `resumen`, `incluye` (array) y `detalle`. Expone además `servicioPorSlug()`, `complementariosDe()` y `SLUGS_SERVICIOS`, que es de donde el prerender saca las rutas.
+
+> **`rutasPrerender.js` importa con extensión `.js` explícita**, a diferencia del resto del código: `scripts/prerender.mjs` lo carga con Node directamente, sin pasar por Vite, y el resolvedor de ESM de Node no completa extensiones. Sin ella el build muere en `ERR_MODULE_NOT_FOUND` antes de compilar nada. Vale para cualquier módulo que ese script llegue a importar.
+
+Los complementarios llevan un campo `servicio` que los ancla a la ficha donde tienen sentido; los que van en `null` cierran el índice como bloque subordinado.
 
 Los cuatro principales llevan ficha propia: community management, diseño gráfico e identidad, fotografía y video, publicidad digital. Los externalizados (web, SEO, analítica) quedan como lista dentro de la ficha que corresponda, **sin página propia** — refleja la jerarquía real del negocio.
 
@@ -475,20 +482,35 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 | 3b | Transición entre páginas | **Hecha** |
 | 3c | Prerender + SEO por ruta | **Hecha** |
 | 4 | Sección F en el home (pin + scrub, tres estados) | **Hecha** |
-| 5 | Servicios: sección home + `/servicios` + fichas |
-| 6 | Sección E en el home + `/proyectos` + ficha piloto Villa Verla |
-| 7 | Resto de fichas de proyecto + Planes |
-| 8 | Equipo + Contacto (quiz de 3 pasos, en todas las páginas) |
+| 5 | Servicios: sección home + `/servicios` + fichas | **Hecha** |
+| 6 | Sección E en el home + `/proyectos` + las cinco fichas + carrusel | **Hecha** |
+| 7 | Planes (rehacer la sección de la versión anterior) | |
+| 8 | Equipo + Contacto (quiz de 3 pasos, en todas las páginas) | |
 
 ### Contenido (no bloquea la infraestructura, sí bloquea el lanzamiento)
 
 - **Párrafo de 2-3 líneas por cliente** — 5 en total (Villa Verla, Automotriz Carmona, La Rusia Barra Nikkei, Veterinaria Larraín, Alfalfa Cakes).
 - **Copy definitivo de la frase de F.** Lo que hay hoy en el código es placeholder: "QUIERO MÁS SEGUIDORES" → "NO QUEREMOS MÁS SEGUIDORES. QUEREMOS MÁS CLIENTES." Cambiarlo es editar `BLOQUE_A` / `BLOQUE_B` en `Correccion.jsx`, nada más.
 - **Qué va en la columna derecha de F.** Hoy es un **espacio reservado**: un marco vacío a propósito, no un hueco por llenar de apuro. La decisión de contenido está abierta —una pieza real de cliente, un dato, o nada— y hasta tomarla el marco se sostiene solo. Si se resuelve que va vacío, el marco se queda; si entra contenido, revisar que no empuje la sección más allá del viewport (punto 6 de "La sección F", §6).
-- **Resúmenes por servicio.**
-- **Permisos y logos de clientes.** Confirmar también si hay más clientes de los cinco listados.
+- **Copy definitivo de los servicios.** La Fase 5 dejó `resumen`, `gancho`, `incluye` y `detalle` escritos como **placeholder en la voz de marca** (`src/data/servicios.js`), para poder calibrar el maquetado con largos reales. Reemplazarlos es editar datos: ningún componente se toca. Ojo con el registro — el sitio **tutea** ("puedes", "quieres"), no vosea.
+- **⚠ Permisos de clientes — BLOQUEANTE.** Solo **Villa Verla** está confirmado (es proyecto propio de Camilo). Los otros cuatro están en `permiso: true` en `src/data/proyectos.js` **solo para poder maquetar**, cada uno con su `TODO PERMISO`. Antes de publicar hay que confirmarlos o ponerlos en `false`: `proyectosPublicables()` los filtra de todo el sitio —home, índice, fichas y rutas del prerender— con ese solo booleano. Confirmar también si hay más clientes de los cinco listados, y los logos.
+- **Piezas reales de los proyectos.** Hoy son 24 SVG de relleno en `public/placeholders/`, generados por `scripts/generar-placeholders.mjs` con las proporciones reales de cada formato (4:5, 9:16, 16:9, A4). Reemplazarlos es copiar los archivos reales y cambiar las rutas en `src/data/proyectos.js`; al terminar, borrar esa carpeta y el script.
+- **Copy de los proyectos.** `resumen` y los `detras` de cada pieza son placeholder en la voz de marca. Mismo criterio de registro que servicios: el sitio **tutea**.
 - **Piezas reales**: posts, reels, historias, informes y webs, en imagen y video. El informe se puede editar para que se vea más profesional.
 - **Fotos del equipo** (hoy son iniciales en círculo).
+
+### Cómo verificar un reveal sin perder una tarde
+
+Dos falsos negativos que ya costaron un diagnóstico entero cada uno. Los dos hacen que **todo quede en `opacity: 0` y parezca roto cuando no lo está**:
+
+1. **Un `scrollIntoView()` o `window.scrollTo()` desde la consola no dispara ningún ScrollTrigger.** ScrollTrigger se entera del scroll por `lenis.on('scroll', …)` (`lib/lenis.js`), y Lenis ignora los scrolls nativos que no pasaron por él. Hay que scrollear de verdad: rueda, barra, o un enlace de ancla (que usa `scrollToSection()`).
+2. **Con la pestaña en segundo plano el navegador congela los `requestAnimationFrame`.** Como Lenis corre sobre el ticker de GSAP, el scroll deja de avanzar y ningún trigger dispara. Se detecta contando frames: si un bucle de `rAF` no llega a ~5 en medio segundo, la pestaña no se está pintando y **cualquier medición de animación de esa sesión no vale**. Los síntomas colaterales son capturas en negro y timeouts del renderer.
+
+### Errores conocidos
+
+- **Anclas del home desde otra ruta: fallo intermitente NO reproducible.** Durante la Fase 5 se observaron varias veces navegaciones a `#planes` que llegaban al home y aterrizaban arriba en vez de en la sección. Al instrumentar para diagnosticarlo **dejó de reproducirse**, y el control contra el `Home.jsx` original pasó 8/8 igual que la versión endurecida: **no hay evidencia de que el cambio de la Fase 5 lo haya corregido, porque no se logró provocar el fallo a voluntad**. La sospecha que queda es que los fallos fueron artefactos del HMR de Vite en dev —módulos recargados en caliente dejando triggers del pin de F duplicados—, no del código que se publica: en el build de producción da 9/9 en tres anclas distintas. Lo que sí se hizo es quitarle filo al mecanismo (ver abajo). Si el síntoma reaparece **en producción**, esto vuelve a ser un error abierto y el punto de partida es que el reintento de `saltar()` no está confirmando.
+
+> **El salto al ancla confirma y reintenta, no salta a ciegas.** `Home.jsx` verifica en el frame siguiente que la sección quedó donde debía y repite hasta 8 veces si no. El motivo es que entre el `scrollTo` y el frame siguiente hay varios actores que pueden mover el scroll —el reset de ruta, el `refresh()` de ScrollTrigger restaurando lo que midió, el pin de F creando su `pin-spacer`, el canvas del hero tomando alto— y cuál gana depende del orden de los frames. Confirmar es barato e idempotente; adivinar el instante correcto no funciona. Dos correcciones de paso: una posición `null` (sección aún sin montar) ya no cuenta como "estable" —antes cuatro frames sin elemento disparaban el salto contra una posición inexistente— y las cadenas de `rAF` se cancelan en el cleanup, para que el doble montaje de StrictMode no deje una pasada huérfana peleando por el scroll con la siguiente.
 
 ### Diseño
 

@@ -1,104 +1,159 @@
+/* Sección de contenido sobre --bg: la alternancia de fondos de la versión
+   anterior quedó descartada (DESIGN.md §4), el ritmo lo marca el contraste
+   con las secciones full-viewport que la rodean. */
 .servicios {
   padding-block: var(--space-section);
-  background-color: var(--bg-soft);
-  border-block: 1px solid var(--line);
 }
 
-.encabezado {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-7);
-}
-
-.titulo {
+.titular {
   font-size: var(--text-3xl);
+  margin-bottom: var(--space-8);
 }
 
-.grilla {
+/* Máscara del reveal por línea: el padding compensado evita cortar
+   acentos y descendentes. */
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.linea {
+  display: block;
+}
+
+.acento {
+  color: var(--gold);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  position: relative;
+}
+
+/* Regla propia en vez de border-top: un borde no se puede escalar desde la
+   izquierda, y el trazado es la mitad del gesto. La última fila cierra el
+   índice con la suya abajo. */
+.regla {
+  display: block;
+  height: 1px;
+  background-color: var(--line);
+}
+
+.item:last-child::after {
+  content: '';
+  display: block;
+  height: 1px;
+  background-color: var(--line);
+}
+
+.fila {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
   gap: var(--space-5);
+  padding-block: var(--space-6);
+  transition: padding-inline var(--transition-fast);
 }
 
-/* Compone la .card global; sobre sección soft, el relleno va en --bg */
-.tarjeta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  background-color: var(--bg);
-}
-
-.nombre {
-  font-size: var(--text-xl);
-}
-
-.descripcion {
-  color: var(--muted);
-}
-
-/* Bloque subordinado: jerarquía menor que las tarjetas principales */
-.complementarios {
-  margin-top: var(--space-7);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--line);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.complementariosTitulo {
+.numero {
   font-family: var(--font-utility);
   font-weight: 600;
   font-size: var(--text-sm);
   letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.grupos {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-6);
-  align-items: start;
-}
-
-.grupo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-.grupoTitulo {
-  font-family: var(--font-utility);
-  font-weight: 600;
-  font-size: var(--text-xs);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--gold);
 }
 
-.grupoLista {
+.cuerpo {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  font-size: var(--text-sm);
+}
+
+.nombre {
+  font-size: var(--text-2xl);
+  transition: color var(--transition-fast);
+}
+
+.gancho {
+  font-size: var(--text-base);
+  color: var(--muted);
+  transition: color var(--transition-fast);
+}
+
+.flecha {
+  align-self: center;
+  font-size: var(--text-xl);
+  color: var(--muted);
+  transition:
+    transform var(--transition-fast),
+    color var(--transition-fast);
+}
+
+/* El hover mueve la fila hacia dentro: el índice reacciona como una lista
+   física, sin fondo ni caja que sumar. */
+.fila:hover,
+.fila:focus-visible {
+  padding-inline: var(--space-4);
+}
+
+.fila:hover .nombre,
+.fila:focus-visible .nombre {
+  color: var(--gold);
+}
+
+.fila:hover .gancho,
+.fila:focus-visible .gancho {
+  color: var(--white);
+}
+
+.fila:hover .flecha,
+.fila:focus-visible .flecha {
+  transform: translateX(6px);
+  color: var(--gold);
+}
+
+.bajada {
+  max-width: var(--container-narrow);
+  margin-top: var(--space-7);
+  font-size: var(--text-lg);
   color: var(--muted);
 }
 
-/* "Coordinamos": único grupo externo, tono aún más tenue */
-.grupoExterno .grupoTitulo {
-  color: var(--gold-deep);
+.verTodo {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--gold);
+  transition: color var(--transition-fast);
 }
 
-@media (max-width: 860px) {
-  .grupos {
-    grid-template-columns: 1fr;
+.verTodo:hover,
+.verTodo:focus-visible {
+  color: var(--gold);
+}
+
+@media (max-width: 640px) {
+  .fila {
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    padding-block: var(--space-5);
   }
-}
 
-@media (max-width: 720px) {
-  .grilla {
-    grid-template-columns: 1fr;
+  /* La flecha pasa bajo el texto, alineada con él: en dos columnas
+     apretadas, una tercera columna deja el nombre sin ancho. */
+  .flecha {
+    grid-column: 2;
+    align-self: start;
+    justify-self: start;
+  }
+
+  .nombre {
+    font-size: var(--text-xl);
   }
 }

@@ -2,6 +2,8 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 import { useLocation } from 'react-router'
 import { ScrollTrigger } from '../lib/gsap'
 import { getLenis } from '../lib/lenis'
+import { servicioPorSlug } from '../data/servicios'
+import { proyectoPorSlug } from '../data/proyectos'
 
 /*
  * useLayoutEffect no existe en el servidor: durante el prerender React
@@ -18,9 +20,27 @@ const SECCIONES = {
   proyectos: 'Proyectos',
 }
 
-// "villa-verla" → "Villa verla". Provisional: cuando exista src/data/
-// el nombre real sale de ahí, no del slug.
-function desdeSlug(slug) {
+/*
+ * Nombre legible de una ficha.
+ *
+ * Sale de los datos, no del slug: "Diseño gráfico e identidad" y "La Rusia
+ * Barra Nikkei", no "Diseno-grafico" ni "La-rusia" capitalizados a mano.
+ * Esto alimenta el título de la pestaña y el nombre que muestra la cortina
+ * de transición, así que un slug mal capitalizado se vería en ambos.
+ *
+ * El respaldo desde el slug queda para lo que no esté en los datos.
+ */
+function desdeSlug(seccion, slug) {
+  if (seccion === 'servicios') {
+    const servicio = servicioPorSlug(slug)
+    if (servicio) return servicio.titulo
+  }
+
+  if (seccion === 'proyectos') {
+    const proyecto = proyectoPorSlug(slug)
+    if (proyecto) return proyecto.nombre
+  }
+
   const texto = slug.replace(/-/g, ' ')
   return texto.charAt(0).toUpperCase() + texto.slice(1)
 }
@@ -34,7 +54,7 @@ export function nombreDeRuta(pathname) {
   if (pathname === '/') return 'Inicio'
 
   const [seccion, slug] = pathname.split('/').filter(Boolean)
-  if (slug) return desdeSlug(slug)
+  if (slug) return desdeSlug(seccion, slug)
   return SECCIONES[seccion] ?? MARCA
 }
 
@@ -49,7 +69,7 @@ export function tituloDeRuta(pathname) {
   const nombre = SECCIONES[seccion]
 
   if (!nombre) return `Página no encontrada — ${MARCA}`
-  if (slug) return `${desdeSlug(slug)} — ${nombre} — ${MARCA}`
+  if (slug) return `${desdeSlug(seccion, slug)} — ${nombre} — ${MARCA}`
   return `${nombre} — ${MARCA}`
 }
 
@@ -61,7 +81,7 @@ export function tituloDeRuta(pathname) {
  * ScrollTrigger vuelve a medir.
  */
 export function useRutaScroll(mainRef) {
-  const { pathname } = useLocation()
+  const { pathname, state } = useLocation()
   const primeraRuta = useRef(true)
 
   // El navegador no debe restaurar posiciones por su cuenta.
@@ -71,15 +91,34 @@ export function useRutaScroll(mainRef) {
     }
   }, [])
 
-  // Antes de pintar la ruta nueva. Con Lenis activo hay que pasar por él:
-  // un window.scrollTo se revierte en su siguiente frame.
-  useLayoutEffectSeguro(() => {
+  /*
+   * Antes de pintar la ruta nueva. Con Lenis activo hay que pasar por él:
+   * un window.scrollTo se revierte en su siguiente frame.
+   *
+   * `resize()` antes del salto y `force: true` no son decoración:
+   *
+   * - Lenis cachea el límite de scroll y lo usa para clampear. Al cambiar de
+   *   ruta ese límite todavía es el del documento anterior, y su estado
+   *   interno sigue apuntando a la posición vieja. Sin remedir, el siguiente
+   *   frame de Lenis reescribe esa posición —clampeada al alto nuevo— encima
+   *   del reset, y la página abre por la mitad.
+   * - `force` salta aunque Lenis se considere detenido o fuera de límites.
+   *
+   * Síntoma cuando falta: entrar a una ficha desde un home scrolleado deja
+   * al visitante a mitad de la página nueva, sin haber visto la cabecera.
+   */
+  const irArriba = () => {
     const lenis = getLenis()
     if (lenis) {
-      lenis.scrollTo(0, { immediate: true })
+      lenis.resize()
+      lenis.scrollTo(0, { immediate: true, force: true })
     } else {
       window.scrollTo(0, 0)
     }
+  }
+
+  useLayoutEffectSeguro(() => {
+    irArriba()
   }, [pathname])
 
   useEffect(() => {
@@ -91,6 +130,17 @@ export function useRutaScroll(mainRef) {
     const primero = requestAnimationFrame(() => {
       segundo = requestAnimationFrame(() => {
         ScrollTrigger.refresh()
+
+        /*
+         * Reafirmar arriba después de remedir. `refresh()` restaura la
+         * posición de scroll que encontró al empezar, y al venir de una ruta
+         * más alta esa posición es la vieja clampeada al alto nuevo.
+         *
+         * No corre cuando la ruta pide un ancla: ahí Home hace su propio
+         * salto tras el refresh (lib/navegacion.js) y esto lo pisaría,
+         * dejando al visitante arriba en vez de en la sección que pidió.
+         */
+        if (!state?.scrollTo) irArriba()
       })
     })
 

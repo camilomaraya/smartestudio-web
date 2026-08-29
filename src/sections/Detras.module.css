@@ -1,0 +1,171 @@
+.detras {
+  padding-block: var(--space-section);
+}
+
+.titular {
+  font-size: var(--text-3xl);
+  margin-bottom: var(--space-9);
+}
+
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.linea {
+  display: block;
+}
+
+.acento {
+  color: var(--gold);
+}
+
+.filas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);
+}
+
+/*
+ * Columna central angosta: la pieza no ocupa media pantalla, ocupa una
+ * columna estrecha por la que van pasando los formatos. El vacío alrededor
+ * es parte de la composición.
+ */
+.fila {
+  display: grid;
+  grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+}
+
+/* El zigzag invierte el orden visual, no el del DOM: lectura y tabulación
+   quedan siempre pieza→texto. */
+.invertida {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 380px);
+}
+
+.invertida .media {
+  order: 2;
+}
+
+.media {
+  display: flex;
+  justify-content: center;
+}
+
+/* El marco recorta; la imagen de adentro es la que se mueve con el scrub.
+   Sobredimensionada en vertical para que el parallax no descubra el borde. */
+.marco {
+  display: block;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  line-height: 0;
+}
+
+.imagen {
+  width: 100%;
+  height: auto;
+  transform: scale(1.12);
+  transition: transform var(--transition-fast);
+}
+
+/* Los verticales se contienen en altura: un 9:16 a 380px de ancho mide
+   675px de alto y rompería el ritmo de la sección. */
+.reel,
+.historia {
+  width: auto;
+  height: clamp(360px, 56svh, 520px);
+  margin-inline: auto;
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  max-width: 46ch;
+}
+
+.tipo {
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.titulo {
+  font-size: var(--text-xl);
+}
+
+.explicacion {
+  color: var(--muted);
+}
+
+.cliente {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-family: var(--font-utility);
+  font-weight: 500;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--white);
+  transition: color var(--transition-fast);
+}
+
+.cliente:hover,
+.cliente:focus-visible {
+  color: var(--gold);
+}
+
+.cierre {
+  max-width: var(--container-narrow);
+  margin-top: var(--space-9);
+  font-size: var(--text-lg);
+  color: var(--muted);
+}
+
+.enlaceCierre {
+  color: var(--white);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--gold);
+  transition: color var(--transition-fast);
+}
+
+.enlaceCierre:hover,
+.enlaceCierre:focus-visible {
+  color: var(--gold);
+}
+
+@media (max-width: 860px) {
+  .fila,
+  .invertida {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  /* En una columna no hay zigzag que sostener: la pieza siempre arriba. */
+  .invertida .media {
+    order: 0;
+  }
+
+  .filas {
+    gap: var(--space-8);
+  }
+
+  .media {
+    max-width: 380px;
+  }
+
+  .reel,
+  .historia {
+    height: clamp(320px, 48svh, 440px);
+  }
+}
