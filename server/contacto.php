@@ -97,6 +97,17 @@ $empresa = limpiar((string) ($entrada['empresa'] ?? ''));
 $mensaje = trim((string) ($entrada['mensaje'] ?? ''));
 $turnstileToken = (string) ($entrada['turnstileToken'] ?? '');
 
+// Campos del cuestionario. Ambos son opcionales a propósito: un formulario
+// enviado sin JavaScript puede no traerlos, y eso no debe impedir el envío.
+$servicio = limpiar((string) ($entrada['servicio'] ?? ''));
+$origen = limpiar((string) ($entrada['origen'] ?? ''));
+
+// Se recortan porque van al asunto y al cuerpo del correo: son datos que
+// llegan del cliente y no hay motivo para aceptar textos arbitrariamente
+// largos en un encabezado.
+$servicio = mb_substr($servicio, 0, 80);
+$origen = mb_substr($origen, 0, 120);
+
 if ($nombre === '' || $email === '' || $mensaje === '') {
     http_response_code(400);
     echo json_encode(['ok' => false, 'mensaje' => 'Completa nombre, email y mensaje.']);
@@ -139,10 +150,21 @@ try {
     }
     $mail->addReplyTo($email, $nombre);
 
-    $mail->Subject = 'Nuevo contacto desde el sitio — ' . $nombre;
+    // El servicio va en el asunto: es lo primero que conviene ver en la
+    // bandeja para saber de qué se trata sin abrir el correo.
+    $mail->Subject = $servicio !== ''
+        ? "Nuevo contacto ({$servicio}) — {$nombre}"
+        : 'Nuevo contacto desde el sitio — ' . $nombre;
+
     $cuerpo = "Nombre: {$nombre}\nEmail: {$email}\n";
     if ($empresa !== '') {
         $cuerpo .= "Empresa: {$empresa}\n";
+    }
+    if ($servicio !== '') {
+        $cuerpo .= "Le interesa: {$servicio}\n";
+    }
+    if ($origen !== '') {
+        $cuerpo .= "Envió desde: {$origen}\n";
     }
     $cuerpo .= "\nMensaje:\n{$mensaje}\n";
 

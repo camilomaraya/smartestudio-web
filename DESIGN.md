@@ -5,7 +5,7 @@ Este documento es la referencia al agregar páginas, secciones o componentes, pa
 
 > **Cómo leer este documento.** La mayoría describe lo que el código ya implementa. Lo que todavía no está construido va marcado con **`[pendiente]`** y el número de fase. Si algo lleva `[pendiente]`, **no existe en el código todavía**: es la regla que debe cumplir cuando se construya, no algo que se pueda importar hoy.
 >
-> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global, toda la **infraestructura multipágina** —rutas y layout compartido (3a), transición entre páginas (3b), prerender + SEO por ruta (3c)— **Servicios completo** (5), **Proyectos completo** (6) y **Planes** (7): sección E en el home, índice `/proyectos`, las cinco fichas, el componente carrusel y la tabla comparativa de planes. El sitio ya no tiene páginas stub. Próxima y última fase: **8** (Equipo + Contacto), las dos únicas secciones que siguen siendo de la versión anterior — funcionan, pero desentonan con el rediseño. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
+> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global, toda la **infraestructura multipágina** —rutas y layout compartido (3a), transición entre páginas (3b), prerender + SEO por ruta (3c)— **Servicios** (5), **Proyectos** (6), **Planes** (7) y **Equipo + Contacto** (8). **El rediseño está completo: ya no queda ninguna sección de la versión anterior ni ninguna página stub.** Lo que falta para publicar es contenido y configuración, no diseño: ver §12. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
 
 ---
 
@@ -139,7 +139,7 @@ El único ajuste que hizo falta fue cambiar `useLayoutEffect` por su variante is
 
 Envuelve todas las rutas y contiene, en este orden: **nav** (§5) → `<main>` con la ruta → **quiz de contacto** → **footer**.
 
-**El quiz de contacto aparece en todas las páginas**, no solo en el home. Consecuencia: `server/contacto.php` recibe un campo oculto `origen` con la ruta desde la que se envió, para saber qué página convierte. `[pendiente — Fase 8]`
+**El cuestionario de contacto aparece en todas las páginas**, no solo en el home. Consecuencia: `server/contacto.php` recibe `origen` con la ruta desde la que se envió, para saber qué página convierte, y `servicio` con la respuesta del primer paso, que va también en el asunto del correo. Los dos son opcionales en el backend a propósito: un envío sin JavaScript puede no traerlos y eso no debe impedir el mensaje.
 
 Lenis es instancia única y vive en el layout, no en las páginas: no se destruye al cambiar de ruta.
 
@@ -167,9 +167,9 @@ Open Graph y Twitter siguen pendientes: falta la imagen social. El dominio de la
 | Servicios | `--bg` | Contenido | Hecho |
 | **E** — preview del "detrás" | `--bg` | Contenido (columna central) | Hecho |
 | Planes | `--bg` | Contenido | Hecho |
-| Equipo | `--bg` | Contenido | `[pendiente — Fase 8]` |
+| Equipo | `--bg` | Contenido | Hecho |
 | CTA (cierre) | `--bg-soft` | Full-viewport tipográfico | Hecho |
-| Contacto (quiz) | `--bg` | Contenido | `[pendiente — Fase 8]` |
+| Contacto (cuestionario) | `--bg` | Contenido | Hecho |
 
 **F reemplazó a la antigua sección Proceso** (el acrónimo SMART), ya eliminada del código junto con su ancla en nav y footer: se llamaba "Proceso" pero no describía ningún proceso, eran cinco adjetivos sin secuencia. Si el juego con el nombre de la agencia importa, puede sobrevivir como una línea en el footer o dentro de Servicios, sin ocupar pantalla.
 
@@ -247,6 +247,10 @@ El gesto propio de los interstitiales tipográficos, ya implementado en Manifies
 - **`Nav`** (`src/components/Nav.jsx`) — sin barra: el logo suelto a la izquierda (sin contenedor, porque es apaisado y blanco) y un único círculo dorado de 50px con la hamburguesa a la derecha, ambos fijos a `--gutter` de las esquinas superiores y alineados por centro óptico. No cambian con el scroll. La hamburguesa abre un panel fullscreen `--bg` sólido con los enlaces en Archivo Expanded 900 a `clamp(2rem, 5vw, 3.5rem)`, centrados verticalmente y alineados a la izquierda del container, más un pie con CTA y redes en Space Grotesk. Igual en desktop y mobile; bajo 375px los círculos bajan a 44px. El panel entra con fade (0.4s) + stagger de enlaces (0.08s, `y: 30 → 0`) y sale con fade de 0.3s; cierra con `Escape`, al scrollear o al elegir un enlace, con focus trap sobre círculos + panel.
   El nav tiene **tres tipos de enlace**: anclas que solo existen en el home (pasan por `irAAncla`, que navega primero si estás en otra ruta), la sección de contacto (scroll directo siempre, porque vive en el Layout y está en todas las rutas) y rutas reales (`/proyectos`, vía `EnlaceRuta`). El logo lleva al inicio del home. Footer aplica el mismo criterio.
 - **Logo** — `public/logo-smart.png` (512×512, logotipo en la franja central del lienzo). Se usa en nav, footer y favicon. Token `--ancho-logo: clamp(140px, 17vw, 240px)`. **Ojo:** el `img { max-width: 100% }` global rompe los márgenes negativos que compensan el aire del PNG; los módulos que lo usan necesitan `max-width: none`.
+- **Cuestionario de contacto** (`sections/Contacto.jsx`) — **sin JavaScript sigue siendo un formulario completo.** Los tres pasos están siempre en el DOM y el modo paso a paso se activa recién en un efecto, así que el HTML prerenderizado muestra los tres bloques seguidos con un único botón de envío. El cuestionario se suma encima; no es la condición para poder escribir (regla 1 del §6).
+  > ⚠ **`.paso[hidden] { display: none }` es obligatorio.** El atributo `hidden` oculta con un `display: none` de la hoja del navegador, y **cualquier** regla de autor que declare `display` —acá, el `display: flex` del propio `.paso`— lo pisa. Sin esa línea los tres pasos se ven a la vez aunque el indicador diga "Paso 2 de 3". Se detectó mirándolo: por JS el atributo estaba correctamente puesto y la comprobación daba bien.
+
+  Validación por paso antes de avanzar, con aviso en `role="alert"`; el foco va al título del paso nuevo (si no, el lector de pantalla se queda en el botón y no anuncia la pregunta); el progreso se comunica **también en texto**, porque los números dorados no le dicen nada a un lector de pantalla; y lo escrito se conserva al volver atrás. El honeypot y Turnstile siguen intactos: el contrato con el backend no cambió, solo se le sumaron dos campos.
 - **`Carrusel`** (`components/Carrusel.jsx`) — implementado a mano, sin librería. La pista es **scroll horizontal nativo con `scroll-snap`**, no un transform manejado por JS: sin JS las piezas siguen visibles y arrastrables, y los controles se suman encima. La posición se lee del `scrollLeft` real —el hijo cuyo `offsetLeft` está más cerca del borde—, no de un índice que el JS crea tener, así que el dedo, la rueda y los botones dejan siempre el mismo estado. **No se calcula por ancho promedio a propósito:** las piezas tienen proporciones distintas (un reel 9:16 y un post 4:5 no miden igual) y esa cuenta se desalinea. Sin autoplay; posición anunciada como texto además de los puntos, porque un punto dorado no le dice nada a un lector de pantalla.
 - **Tarjeta de trabajo** (`Trabajos.module.css`) — **obsoleta.** El formato `aspect-ratio: 4/5` en grilla no se usa en el diseño nuevo: el índice es lista vertical con carrusel y el home muestra E. Lo que **sí se rescata** es su mecanismo de parallax —capa `.media` con zoom `scale(1.06)` al hover y capa interna `.mediaFondo` sobredimensionada (`inset: -8% 0`) que lleva el `scrub`—, reutilizable en las piezas de E y en los carruseles. El módulo se elimina o se renombra a `Proyectos.module.css` cuando se construya la Fase 6.
 
@@ -328,6 +332,8 @@ Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 - **Servicios** — el gesto es **el índice trazándose**: cada regla horizontal se dibuja de izquierda a derecha (`scaleX: 0 → 1`) y su fila entra un beat después. La precedencia importa: primero la línea, después el contenido — al revés el gesto no se lee, parece un reveal más. Cuatro filas de nombre grande, no tarjetas: la grilla de `.card` era el formato viejo y compite con el vacío. La regla es un `<span>` propio y no un `border-top` porque un borde no se puede escalar desde un origen.
 - **E** `[pendiente — Fase 6]` — columna central angosta por donde pasan piezas reales de contenido (post, reel, historia, informe, web), con texto tipográfico alternando izquierda y derecha que explica el trabajo invisible detrás de cada una. El zigzag es el gesto; parallax leve sobre las piezas. Cierra con enlace a `/proyectos`.
 - **Índice de proyectos** `[pendiente]` — el carrusel por bloque es el gesto; nada más compite.
+- **Equipo** — tres **retratos verticales grandes sin caja**, con el texto debajo; ya no es una grilla de `.card` con avatares circulares. En una agencia de tres personas el equipo *es* el producto, y un círculo de 80px con iniciales no comunica eso. El marco ya tiene su proporción 3:4 y hoy lo ocupa un placeholder con iniciales sobre trama diagonal —misma familia visual que los placeholders de proyectos, para que se lea como "material pendiente" y no como un error—: cuando lleguen las fotos se reemplaza el contenido del marco y el layout no se mueve. **El gesto:** cada retrato se descubre de abajo hacia arriba con `clip-path` y su texto entra después.
+- **Contacto** — **cuestionario de 3 pasos** (qué necesitas / quién eres / contanos). Un formulario de cuatro campos en blanco pide un esfuerzo que mucha gente no hace; tres preguntas cortas bajan el costo de empezar, y la primera respuesta ya dice a qué servicio apunta el interesado. Detalles en §5.
 - **Planes** — **tabla comparativa**, no cuatro tarjetas: los planes describen las mismas categorías con distintas cantidades, y lo que alguien hace frente a planes escalonados es compararlos; en tarjetas hay que ir y volver cuatro veces para responder "¿cuántos reels trae cada uno?". Es una `<table>` real con `th scope` —son datos tabulares y un lector de pantalla debe poder anunciar "Reels profesionales, Smart, 3"—, dentro de un marco desplazable que recibe foco para poder recorrerla con teclado. El gesto se conserva de la versión anterior: las columnas entran escalonadas y **la destacada un beat después**, porque la jerarquía se comunica con el tiempo en vez de sumando otro color.
 - **Equipo** — avatares con `scale: .85 → 1`. *(Sección de la versión anterior.)*
 - **CTA** — cierre full-viewport: headline "Comencemos a trabajar" ("trabajar" en dorado) en `.titular`, subiendo desde `.mascara` (`power4.out`, 0.9s), botón 0.4s después, y debajo el marquee infinito de 30s (`translateX(-50%)` sobre 4 copias = loop perfecto), con `playbackRate` modulado por `lenis.velocity` vía Web Animations API. Las frases alternan blanco y dorado.
@@ -485,7 +491,7 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 | 5 | Servicios: sección home + `/servicios` + fichas | **Hecha** |
 | 6 | Sección E en el home + `/proyectos` + las cinco fichas + carrusel | **Hecha** |
 | 7 | Planes: tabla comparativa | **Hecha** |
-| 8 | Equipo + Contacto (quiz de 3 pasos, en todas las páginas) | |
+| 8 | Equipo + Contacto (cuestionario de 3 pasos, en todas las páginas) | **Hecha** |
 
 ### Contenido (no bloquea la infraestructura, sí bloquea el lanzamiento)
 
@@ -515,8 +521,6 @@ Dos falsos negativos que ya costaron un diagnóstico entero cada uno. Los dos ha
 ### Diseño
 
 - **Componente carrusel** — no existe (§5).
-- **Contacto**: quiz de 3 pasos (servicio / datos / mensaje) manteniendo `contacto.php` como backend, más el campo `origen`.
-- **Equipo**: pasa de grilla de avatares a secuencia con más personalidad por persona.
 - **Interstitiales**: se contemplan 1–2 más como transición. Candidato: post-E, antes de Planes.
 - **Prueba social**: Smart no tiene testimonios. La competencia directa de la región (Agencia Óptima) sí los tiene, con nombre y empresa. Es un hueco identificado, sin decisión todavía sobre si se llena y dónde.
 - **El acrónimo SMART**: si a Abby le importa el juego con el nombre, decidir si sobrevive como línea de footer o dentro de Servicios. Como sección está descartado.

@@ -1,34 +1,92 @@
+import { useRef } from 'react'
 import { equipo } from '../data/equipo'
 import { gsap, useGSAP } from '../lib/gsap'
-import { useReveal } from '../hooks/useReveal'
 import styles from './Equipo.module.css'
 
+/*
+ * Equipo — sección de contenido del estándar nuevo (DESIGN.md §4).
+ *
+ * Deja de ser una grilla de `.card` con avatares circulares chicos: ahora
+ * son tres retratos verticales grandes, sin caja, con el texto debajo. En
+ * una agencia de tres personas el equipo ES el producto, y un círculo de
+ * 80px con iniciales no comunica eso.
+ *
+ * Está pensado para que las fotos reales entren sin rediseñar nada: el
+ * marco ya tiene su proporción 3:4 y hoy lo ocupa un placeholder con
+ * iniciales. Cuando lleguen los retratos, se reemplaza el contenido del
+ * marco y el layout no se mueve.
+ *
+ * El gesto propio: cada retrato se descubre de abajo hacia arriba con una
+ * máscara, y su texto entra después. No es el reveal genérico ni el zigzag
+ * de la sección E — un gesto por sección (§6).
+ */
 export default function Equipo() {
-  const scope = useReveal()
+  const scope = useRef(null)
 
-  // Tarjetas en cascada; los avatares entran con un scale sutil.
   useGSAP(
     () => {
       const mm = gsap.matchMedia()
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const tarjetas = gsap.utils.toArray('[data-equipo-grilla] > *')
-        const fotos = gsap.utils.toArray('[data-equipo-foto]')
+        const lineas = scope.current.querySelectorAll('[data-equipo="linea"]')
+        const retratos = scope.current.querySelectorAll('[data-equipo="retrato"]')
+        const textos = scope.current.querySelectorAll('[data-equipo="texto"]')
+        const bajada = scope.current.querySelector('[data-equipo="bajada"]')
 
-        gsap.set(tarjetas, { opacity: 0, y: 24 })
-        gsap.set(fotos, { scale: 0.85 })
+        gsap.set(lineas, { yPercent: 110, y: 0 })
+        // El retrato nace recortado por abajo y se descubre; la escala
+        // interna evita que el borde superior se vea entrar.
+        gsap.set(retratos, { clipPath: 'inset(100% 0% 0% 0%)' })
+        gsap.set(textos, { opacity: 0, y: 16 })
+        gsap.set(bajada, { opacity: 0, y: 20 })
 
         const tl = gsap.timeline({
-          defaults: { duration: 0.8, ease: 'power3.out' },
-          scrollTrigger: {
-            trigger: '[data-equipo-grilla]',
-            start: 'top 85%',
-            once: true,
-          },
+          scrollTrigger: { trigger: scope.current, start: 'top 75%', once: true },
         })
 
-        tl.to(tarjetas, { opacity: 1, y: 0, stagger: 0.12, clearProps: 'opacity,transform' }, 0)
-        tl.to(fotos, { scale: 1, stagger: 0.12, clearProps: 'transform' }, 0.08)
+        // fromTo con `y: 0` explícito: GSAP suma `y` y `yPercent`, y bajo el
+        // doble montaje de StrictMode la segunda pasada duplicaría el
+        // desplazamiento dejando el titular tapado por su máscara.
+        tl.fromTo(
+          lineas,
+          { yPercent: 110, y: 0 },
+          { yPercent: 0, y: 0, duration: 0.9, stagger: 0.1, ease: 'power4.out' },
+        )
+          .to(
+            retratos,
+            {
+              clipPath: 'inset(0% 0% 0% 0%)',
+              duration: 1,
+              stagger: 0.12,
+              ease: 'power3.inOut',
+              // Sin clearProps: el clip-path final es el estado de reposo y
+              // limpiarlo no cambia nada, pero dejarlo evita un repaint.
+            },
+            0.4,
+          )
+          .to(
+            textos,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.7,
+              stagger: 0.12,
+              ease: 'power3.out',
+              clearProps: 'opacity,transform',
+            },
+            0.75,
+          )
+          .to(
+            bajada,
+            {
+              opacity: 1,
+              y: 0,
+              duration: 0.6,
+              ease: 'power3.out',
+              clearProps: 'opacity,transform',
+            },
+            '>-0.3',
+          )
       })
     },
     { scope },
@@ -37,27 +95,56 @@ export default function Equipo() {
   return (
     <section ref={scope} id="equipo" className={styles.equipo}>
       <div className="container">
-        <div className={styles.encabezado} data-reveal-group>
-          <p className="eyebrow">Equipo</p>
-          <h2 className={styles.titulo}>Quiénes están detrás</h2>
-        </div>
+        <h2 className={styles.titular}>
+          <span className={styles.mascara}>
+            <span className={styles.linea} data-equipo="linea">
+              Detrás de cada
+            </span>
+          </span>
+          <span className={styles.mascara}>
+            <span className={styles.linea} data-equipo="linea">
+              publicación hay
+            </span>
+          </span>
+          <span className={styles.mascara}>
+            <span className={`${styles.linea} ${styles.acento}`} data-equipo="linea">
+              tres personas
+            </span>
+          </span>
+        </h2>
 
-        <ul className={styles.grilla} data-equipo-grilla>
-          {equipo.map((persona) => (
-            <li key={persona.id} className={`card ${styles.tarjeta}`}>
-              {/* Foto real pendiente; placeholder circular con iniciales */}
-              <div className={styles.foto} aria-hidden="true" data-equipo-foto>
-                {persona.nombre
-                  .split(' ')
-                  .map((parte) => parte[0])
-                  .join('')}
-              </div>
-              <h3 className={styles.nombre}>{persona.nombre}</h3>
-              <p className={styles.cargo}>{persona.cargo}</p>
-              <p className={styles.bio}>{persona.bio}</p>
-            </li>
-          ))}
+        <ul className={styles.lista}>
+          {equipo.map((persona) => {
+            const iniciales = persona.nombre
+              .split(' ')
+              .map((parte) => parte[0])
+              .join('')
+
+            return (
+              <li key={persona.id} className={styles.persona}>
+                {/* Marco 3:4 listo para la foto real. Hoy lo ocupa el
+                    placeholder de iniciales; cuando llegue el retrato se
+                    reemplaza acá dentro y el layout no se mueve. */}
+                <div className={styles.retrato} data-equipo="retrato">
+                  <span className={styles.iniciales} aria-hidden="true">
+                    {iniciales}
+                  </span>
+                </div>
+
+                <div className={styles.texto} data-equipo="texto">
+                  <h3 className={styles.nombre}>{persona.nombre}</h3>
+                  <p className={styles.cargo}>{persona.cargo}</p>
+                  <p className={styles.bio}>{persona.bio}</p>
+                </div>
+              </li>
+            )
+          })}
         </ul>
+
+        <p className={styles.bajada} data-equipo="bajada">
+          Somos un equipo chico a propósito: hablas con quien hace el trabajo, sin
+          intermediarios ni cuentas que rebotan entre departamentos.
+        </p>
       </div>
     </section>
   )
