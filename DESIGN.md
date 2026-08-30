@@ -5,7 +5,7 @@ Este documento es la referencia al agregar páginas, secciones o componentes, pa
 
 > **Cómo leer este documento.** La mayoría describe lo que el código ya implementa. Lo que todavía no está construido va marcado con **`[pendiente]`** y el número de fase. Si algo lleva `[pendiente]`, **no existe en el código todavía**: es la regla que debe cumplir cuando se construya, no algo que se pueda importar hoy.
 >
-> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global, toda la **infraestructura multipágina** —rutas y layout compartido (3a), transición entre páginas (3b), prerender + SEO por ruta (3c)— **Servicios completo** (5) y **Proyectos completo** (6): sección E en el home, índice `/proyectos`, las cinco fichas y el componente carrusel. El sitio ya no tiene páginas stub. Próxima fase: **7** (Planes) y **8** (Equipo + Contacto), que hoy siguen siendo secciones de la versión anterior — funcionan, pero desentonan con el rediseño. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
+> **Estado:** rama `rediseno-editorial`. Hecho: tokens, nav mínima, hero editorial, interstitial Manifiesto, **sección F** (la frase que se corrige, con pin + scrub), CTA amplificado, grano global, toda la **infraestructura multipágina** —rutas y layout compartido (3a), transición entre páginas (3b), prerender + SEO por ruta (3c)— **Servicios completo** (5), **Proyectos completo** (6) y **Planes** (7): sección E en el home, índice `/proyectos`, las cinco fichas, el componente carrusel y la tabla comparativa de planes. El sitio ya no tiene páginas stub. Próxima y última fase: **8** (Equipo + Contacto), las dos únicas secciones que siguen siendo de la versión anterior — funcionan, pero desentonan con el rediseño. Cuando este documento describe un patrón nuevo, ese patrón manda por sobre lo que hoy haga una sección vieja.
 
 ---
 
@@ -166,7 +166,7 @@ Open Graph y Twitter siguen pendientes: falta la imagen social. El dominio de la
 | **F** — la frase que se corrige | `--bg` | Full-viewport tipográfico, **fijada (pin)** | Hecho |
 | Servicios | `--bg` | Contenido | Hecho |
 | **E** — preview del "detrás" | `--bg` | Contenido (columna central) | Hecho |
-| Planes | `--bg` | Contenido | `[pendiente — Fase 7]` |
+| Planes | `--bg` | Contenido | Hecho |
 | Equipo | `--bg` | Contenido | `[pendiente — Fase 8]` |
 | CTA (cierre) | `--bg-soft` | Full-viewport tipográfico | Hecho |
 | Contacto (quiz) | `--bg` | Contenido | `[pendiente — Fase 8]` |
@@ -230,7 +230,7 @@ Viven en `src/styles/global.css` y se componen con la clase del módulo (`class=
 - **`.mascara`** — patrón de reveal por línea. Contenedor con `overflow: hidden` y `padding/margin-block: ±0.08em` (para no cortar acentos ni descendentes); adentro, un `<span>` por línea que entra con `yPercent: 110 → 0`, `power4.out`. Se usa en hero, interstitial, CTA y en los titulares de sección: **es el gesto estándar de entrada de cualquier titular.** Los elementos dentro de `.mascara` son la excepción a la regla de `clearProps` (§6). **Resuelve líneas, no palabras sueltas:** para revelar un `span` inline dentro de una línea va `clip-path`, no una máscara (el porqué, en "La sección F" del §6).
 - **`.card`** — fondo `--bg-soft`, borde `--line`, radio `md`, padding `--space-6`. Al hover: `translateY(-4px)`, borde dorado y `--shadow-lift`.
 - **`.card-numero`** — numeración/etiqueta dorada en Space Grotesk.
-- **`.visually-hidden`** — texto solo para lectores de pantalla.
+- **`.visually-hidden`** — texto solo para lectores de pantalla. **Todo contenedor con scroll horizontal que la contenga necesita `position: relative`.** Usa `position: absolute`, así que sin un ancestro posicionado se ancla al viewport y toma las coordenadas de su posición estática dentro del contenido desplazable: los 25 spans de la tabla de Planes llegaban a `right: 715` y metían scroll horizontal en toda la página, con el contenedor recortando bien y `body` midiendo lo correcto. Ver el comentario de `Planes.module.css`, que documenta el síntoma completo.
 - **`.eyebrow`** — *deprecada como encabezado de sección.* El estándar nuevo (§4) no la usa. Se conserva porque sirve como etiqueta de bloques menores dentro de fichas (por ejemplo, "SERVICIOS PRESTADOS"). Si al cerrar la Fase 8 no quedó ningún uso, se elimina de `global.css`.
 
 ### Patrón statement / eco
@@ -328,7 +328,7 @@ Cada sección tiene, como mucho, un gesto propio por encima del reveal base:
 - **Servicios** — el gesto es **el índice trazándose**: cada regla horizontal se dibuja de izquierda a derecha (`scaleX: 0 → 1`) y su fila entra un beat después. La precedencia importa: primero la línea, después el contenido — al revés el gesto no se lee, parece un reveal más. Cuatro filas de nombre grande, no tarjetas: la grilla de `.card` era el formato viejo y compite con el vacío. La regla es un `<span>` propio y no un `border-top` porque un borde no se puede escalar desde un origen.
 - **E** `[pendiente — Fase 6]` — columna central angosta por donde pasan piezas reales de contenido (post, reel, historia, informe, web), con texto tipográfico alternando izquierda y derecha que explica el trabajo invisible detrás de cada una. El zigzag es el gesto; parallax leve sobre las piezas. Cierra con enlace a `/proyectos`.
 - **Índice de proyectos** `[pendiente]` — el carrusel por bloque es el gesto; nada más compite.
-- **Planes** — el plan destacado entra un beat después que el resto (stagger por función). *(Sección de la versión anterior.)*
+- **Planes** — **tabla comparativa**, no cuatro tarjetas: los planes describen las mismas categorías con distintas cantidades, y lo que alguien hace frente a planes escalonados es compararlos; en tarjetas hay que ir y volver cuatro veces para responder "¿cuántos reels trae cada uno?". Es una `<table>` real con `th scope` —son datos tabulares y un lector de pantalla debe poder anunciar "Reels profesionales, Smart, 3"—, dentro de un marco desplazable que recibe foco para poder recorrerla con teclado. El gesto se conserva de la versión anterior: las columnas entran escalonadas y **la destacada un beat después**, porque la jerarquía se comunica con el tiempo en vez de sumando otro color.
 - **Equipo** — avatares con `scale: .85 → 1`. *(Sección de la versión anterior.)*
 - **CTA** — cierre full-viewport: headline "Comencemos a trabajar" ("trabajar" en dorado) en `.titular`, subiendo desde `.mascara` (`power4.out`, 0.9s), botón 0.4s después, y debajo el marquee infinito de 30s (`translateX(-50%)` sobre 4 copias = loop perfecto), con `playbackRate` modulado por `lenis.velocity` vía Web Animations API. Las frases alternan blanco y dorado.
 - **Hero 3D** — ver §7.
@@ -484,7 +484,7 @@ Los cuatro principales llevan ficha propia: community management, diseño gráfi
 | 4 | Sección F en el home (pin + scrub, tres estados) | **Hecha** |
 | 5 | Servicios: sección home + `/servicios` + fichas | **Hecha** |
 | 6 | Sección E en el home + `/proyectos` + las cinco fichas + carrusel | **Hecha** |
-| 7 | Planes (rehacer la sección de la versión anterior) | |
+| 7 | Planes: tabla comparativa | **Hecha** |
 | 8 | Equipo + Contacto (quiz de 3 pasos, en todas las páginas) | |
 
 ### Contenido (no bloquea la infraestructura, sí bloquea el lanzamiento)
