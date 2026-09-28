@@ -1,9 +1,46 @@
 import { useEffect, useRef, useState } from 'react'
-import { Canvas } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { gsap } from '../../lib/gsap'
 import { crearAtlasIconos } from './atlasIconos'
 import CampoIconos from './CampoIconos'
 import styles from './FondoIconos.module.css'
+
+/*
+ * Calidad adaptativa: mide el FPS en ventanas de ~2s y, si un equipo que
+ * pasó los chequeos de FondoIconos igual no llega a 45 FPS, baja el dpr a 1
+ * una sola vez (no vuelve a subir, para no oscilar). Se salta el primer
+ * segundo (compilación del shader) y los frames largos que deja volver a la
+ * pestaña o reanudar el frameloop congelado.
+ */
+const FPS_MINIMO = 45
+const VENTANA = 2
+const CALENTAMIENTO = 1
+
+function VigilanteRendimiento() {
+  const setDpr = useThree((estado) => estado.setDpr)
+  const medicion = useRef({ transcurrido: 0, tiempo: 0, frames: 0, listo: false })
+
+  useFrame((_, delta) => {
+    const m = medicion.current
+    if (m.listo || delta > 0.25) return
+
+    m.transcurrido += delta
+    if (m.transcurrido < CALENTAMIENTO) return
+
+    m.tiempo += delta
+    m.frames++
+    if (m.tiempo < VENTANA) return
+
+    if (m.frames / m.tiempo < FPS_MINIMO) {
+      setDpr(1)
+      m.listo = true
+    }
+    m.tiempo = 0
+    m.frames = 0
+  })
+
+  return null
+}
 
 /*
  * Monta el <Canvas> de R3F con el campo de íconos.
@@ -93,6 +130,7 @@ export default function HeroCanvas() {
         gl={{ alpha: true, antialias: false, powerPreference: 'low-power' }}
       >
         <CampoIconos atlas={atlas} puntero={punteroRef} />
+        <VigilanteRendimiento />
       </Canvas>
       {/* Glow dorado que sigue al cursor (DOM, no WebGL) */}
       <div ref={glowRef} className={styles.glowCursor} aria-hidden="true" />

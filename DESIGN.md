@@ -383,7 +383,7 @@ Hero e interstitial quedaron **centrados**. F es la primera pantalla que usa la 
 `src/sections/hero3d/` — campo de íconos de marketing que reacciona al cursor. Es el único elemento "rico" del sitio y está construido para no costar nada cuando no aplica.
 
 - **`FondoIconos.jsx`** — decide si el dispositivo califica y hace lazy import del chunk de three.
-- **`HeroCanvas.jsx`** — Canvas de R3F, `dpr` máximo 1.75, con IntersectionObserver que congela el frameloop cuando el hero sale del viewport.
+- **`HeroCanvas.jsx`** — Canvas de R3F, `dpr` máximo 1.75, con IntersectionObserver que congela el frameloop cuando el hero sale del viewport. Si el FPS promedio cae bajo 45, baja el `dpr` a 1 una sola vez (`VigilanteRendimiento`, hecho a mano: drei se sacó porque nunca se usó).
 - **`CampoIconos.jsx`** — un `InstancedMesh` de 280 quads (**1 draw call**). Drift ambiente y reacción al cursor se calculan en el vertex shader; la CPU solo lerpea tres valores por frame.
 - **`atlasIconos.js`** — atlas 512×512 dibujado en canvas 2D con glyphs de Font Awesome. **No debe importar three**: lo comparte el fallback y arrastraría three al bundle principal. `crearPatronIconos()` genera además un PNG tileable con los mismos íconos, sin WebGL.
 - **Fallback** (`TexturaEstatica.jsx`) para mobile ≤860px, táctiles de baja potencia, sin WebGL o con movimiento reducido: tile PNG generado en canvas repetido + drift CSS + brillo radial.
@@ -521,6 +521,7 @@ Dos falsos negativos que ya costaron un diagnóstico entero cada uno. Los dos ha
 ### Diseño
 
 - **Componente carrusel** — no existe (§5).
+- **Íconos del hero en móvil `[v2]`** — el 2026-09-09 se sumaron cuatro íconos al campo (comentario, compartir, megáfono, LinkedIn) y se subió `uOpacidad` de 0.3 a 0.45 en `CampoIconos.jsx`. **Los dos cambios son solo de escritorio.** El fondo de móvil no es WebGL: es un PNG estático que genera `crearPatronIconos()` en `atlasIconos.js`, con una distribución hecha a mano (`DISTRIBUCION_PATRON`) que referencia los once íconos originales **por índice** y lleva sus propias opacidades, mucho más bajas (0.11–0.16). Para que el teléfono acompañe hay que tejer los índices 11–14 en esa distribución y subirle el alfa. No se hizo ahora porque la distribución está calibrada a mano para que el tile repita sin cortes y no se quiso pisar.
 - **Interstitiales**: se contemplan 1–2 más como transición. Candidato: post-E, antes de Planes.
 - **Prueba social**: Smart no tiene testimonios. La competencia directa de la región (Agencia Óptima) sí los tiene, con nombre y empresa. Es un hueco identificado, sin decisión todavía sobre si se llena y dónde.
 - **El acrónimo SMART**: si a Abby le importa el juego con el nombre, decidir si sobrevive como línea de footer o dentro de Servicios. Como sección está descartado.
