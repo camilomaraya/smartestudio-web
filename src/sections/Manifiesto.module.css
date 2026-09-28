@@ -1,5 +1,5 @@
-/* Interstitial tipográfico: una palabra ocupa el viewport y el eco la repite
-   en voz baja. Corta el ritmo de secciones. */
+/* Interstitial tipográfico: CONECTAR al centro de una red de canales, el eco
+   lo repite en voz baja. Corta el ritmo de secciones. */
 .manifiesto {
   position: relative;
   min-height: 100vh;
@@ -11,8 +11,52 @@
   padding-block: var(--space-section);
   background-color: var(--bg);
   text-align: center;
-  /* La palabra desborda a propósito: el corte lo hace la sección */
   overflow: hidden;
+}
+
+/* Desfase de los anillos. Registrada para que sea interpolable: sin
+   @property la animación saltaría de golpe en vez de deslizar. */
+@property --fase {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+/* Ondas de señal: anillos que salen desde CONECTAR. La máscara deja el
+   centro limpio para el texto y los apaga hacia afuera. Va primera en el
+   DOM, así queda bajo las líneas y las píldoras sin z-index. */
+.ondas {
+  --paso: clamp(56px, 7vw, 96px);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* El gradiente repite hacia ambos lados, así que correr todos los
+     cortes en --fase desplaza los anillos hacia afuera sin dejar hueco */
+  background-image: repeating-radial-gradient(
+    circle at 50% 50%,
+    transparent var(--fase) calc(var(--fase) + var(--paso) - 1px),
+    rgba(243, 193, 58, 0.14) calc(var(--fase) + var(--paso) - 1px) calc(var(--fase) + var(--paso))
+  );
+  mask-image: radial-gradient(circle at 50% 50%, transparent 14%, #000 28%, transparent 72%);
+}
+
+/* La señal late hacia afuera: un anillo avanza un paso por ciclo, así el
+   bucle no tiene costura. Pausada por defecto; el JS la corre solo con la
+   sección en pantalla (.latiendo) y con movimiento permitido. */
+@media (prefers-reduced-motion: no-preference) {
+  .ondas {
+    animation: ondas 3.5s linear infinite paused;
+  }
+
+  .ondas.latiendo {
+    animation-play-state: running;
+  }
+}
+
+@keyframes ondas {
+  to {
+    --fase: var(--paso);
+  }
 }
 
 /* Prepara el golpe: misma familia que los titulares, pero en voz baja */
@@ -29,11 +73,10 @@
 
 /* .titular toma su tamaño de --text-display: redefinir la variable en el
    propio elemento evita pelear especificidad con la clase global. */
-/* Calibrado midiendo el render: "Conectar" en Big Shoulders ocupa ~3.67× su
-   font-size de ancho, así que 20rem llena el container de 1200px sin tocarlo.
-   El mínimo de 5rem mantiene la escala monumental también en 375px. */
+/* "Conectar" en Big Shoulders ocupa ~3.67× su font-size de ancho: a 14vw
+   ocupa ~la mitad del ancho y deja aire para los canales a los lados. */
 .statement {
-  --text-display: clamp(5rem, 21vw, 20rem);
+  --text-display: clamp(4rem, 14vw, 13rem);
   color: var(--gold);
 }
 
@@ -50,133 +93,32 @@
   display: block;
 }
 
-/* La reverberación: el dorado al 25% ya vive en el color, así que la
-   animación solo lleva la opacidad del elemento de 0 a 1. */
+/* El eco: dorado pleno, la escala ya lo pone en segundo plano. El color
+   es fijo, así que la animación solo lleva la opacidad de 0 a 1. */
 .echo {
   --text-display: clamp(1.5rem, 5vw, 3rem);
   max-width: 20ch;
   /* El line-height de 0.9 del statement se come el aire: hace falta más */
   margin-top: var(--space-6);
-  color: var(--gold-echo);
-}
-
-/* ============================================
-   Banda dorada: se invierte la superficie. El dorado deja de ser el acento
-   y pasa a ser el suelo, una sola vez en todo el sitio.
-   ============================================ */
-.varOro {
-  background-color: var(--gold);
-}
-
-.varOro .statement {
-  color: var(--bg);
-}
-
-.varOro .contexto {
-  color: rgba(10, 10, 10, 0.55);
-}
-
-.varOro .echo {
-  color: rgba(10, 10, 10, 0.45);
-}
-
-/* ============================================
-   TEMPORAL — variantes a comparar (ver Manifiesto.jsx y Home.jsx).
-   Se borran junto con las props al elegir una.
-   ============================================ */
-
-/* Etiqueta de la comparación */
-.etiqueta {
-  position: absolute;
-  bottom: var(--space-5);
-  left: var(--gutter);
-  z-index: 3;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid currentColor;
-  border-radius: var(--radius-pill);
-  font-family: var(--font-utility);
-  font-size: var(--text-sm);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--bg);
-}
-
-.var_cortina .etiqueta {
   color: var(--gold);
-  mix-blend-mode: difference;
 }
 
-/* --- cortina: negro con dorado que sube y lo invierte --- */
-/* "Conectar" mide ~3.67× su font-size: a 15vw ocupa ~55% del ancho y entra
-   entero con aire a los lados. Va en las dos capas para que coincidan. */
-.cortinaStatement {
-  --text-display: clamp(4rem, 15vw, 14rem);
-  white-space: nowrap;
-}
-
-.cortinaBase {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-/* Réplica exacta de la base en negativo, superpuesta y recortada desde
-   abajo. Mismo padding y centrado que .manifiesto para que coincida. */
-.cortinaCapa {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding-block: var(--space-section);
-  background-color: var(--gold);
-  clip-path: inset(0% 0% 0% 0%);
-}
-
-.cortinaCapa .statement {
-  color: var(--bg);
-}
-
-.cortinaCapa .contexto {
-  color: rgba(10, 10, 10, 0.55);
-}
-
-.cortinaCapa .echo {
-  color: rgba(10, 10, 10, 0.45);
-}
-
-/* --- union: CONEC y TAR unidos por un cable que se acorta --- */
-.unionFila {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  white-space: nowrap;
-}
-
-.unionCable {
-  display: block;
-  flex: none;
-  /* Sin JS o con movimiento reducido la palabra queda unida */
-  width: 0;
-  height: 0.07em;
-  background-color: currentColor;
-}
-
-/* --- red: CONECTAR al centro y líneas hacia los canales --- */
-.redLineas {
+/* Sin bloque que tape las líneas (sobre las ondas dejaría un rectángulo
+   liso): se desvanecen al acercarse al texto. */
+.lineas {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  stroke: var(--bg);
-  stroke-width: 1.5;
+  stroke: var(--gold);
+  stroke-opacity: 0.4;
+  stroke-width: 1;
   stroke-dasharray: 1;
   fill: none;
+  mask-image: radial-gradient(ellipse 38% 30% at 50% 50%, transparent 75%, #000 100%);
 }
 
-.redNodos {
+.nodos {
   position: absolute;
   inset: 0;
   margin: 0;
@@ -184,35 +126,258 @@
   list-style: none;
 }
 
-.redNodo {
+.nodo {
   position: absolute;
   /* translate y no transform: GSAP anima scale sin pisar el centrado */
   translate: -50% -50%;
+}
+
+/* Fondo --bg: la píldora tapa las ondas y el extremo de su línea */
+.pildora {
+  display: block;
+  cursor: pointer;
   padding: var(--space-2) var(--space-4);
-  border: 1.5px solid var(--bg);
+  border: 1.5px solid rgba(243, 193, 58, 0.45);
   border-radius: var(--radius-pill);
-  background-color: var(--gold);
+  background-color: var(--bg);
   font-family: var(--font-utility);
   font-weight: 600;
   font-size: clamp(0.7rem, 1.1vw, 0.95rem);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  color: var(--bg);
+  color: var(--white);
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
-/* El fondo dorado tapa el tramo de las líneas que pasa bajo el texto:
-   se ven salir del bloque, no cruzarlo. */
-.redCentro {
+.pildora:hover,
+.pildoraActiva {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.pildora:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* La línea del canal abierto se enciende: la card sale de la red */
+.lineas line {
+  transition: stroke-opacity var(--transition-fast);
+}
+
+.lineas .lineaActiva {
+  stroke-opacity: 1;
+}
+
+.centro {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: var(--space-5) var(--space-6);
-  background-color: var(--gold);
 }
 
-.redStatement {
-  --text-display: clamp(4rem, 14vw, 13rem);
+/* ============================================
+   Card del canal: una sola, se mueve al canal activo. --x / --y llegan
+   inline con la posición de la píldora; --tx / --ty la corren hacia el
+   centro de la sección según el lado.
+   ============================================ */
+.card {
+  --tx: 0;
+  --ty: 0;
+  --aire: 80px;
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  z-index: 3;
+  width: clamp(190px, 15vw, 230px);
+  padding: var(--space-3);
+  border: 1px solid rgba(243, 193, 58, 0.35);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-soft);
+  box-shadow: var(--shadow-lift);
+  text-align: left;
+  translate: var(--tx) var(--ty);
+  scale: 0.96;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 200ms var(--ease-out),
+    scale 200ms var(--ease-out),
+    visibility 0s linear 200ms;
+}
+
+.cardVisible {
+  scale: 1;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 200ms var(--ease-out),
+    scale 200ms var(--ease-out),
+    visibility 0s;
+}
+
+/* Horizontal: al costado de la píldora, del lado del centro */
+.hDerecha {
+  --tx: var(--aire);
+}
+
+.hIzquierda {
+  --tx: calc(-100% - var(--aire));
+}
+
+.hCentro {
+  --tx: -50%;
+}
+
+/* Vertical: arriba abre hacia abajo, abajo hacia arriba, al medio centrada */
+.vAbajo {
+  --ty: -24px;
+}
+
+.vCentro {
+  --ty: -50%;
+}
+
+.vArriba {
+  --ty: calc(-100% + 24px);
+}
+
+/* Canal centrado arriba (Instagram): la card cuelga bajo la píldora */
+.vBajo {
+  --ty: 32px;
+}
+
+.cardMedia {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg);
+}
+
+.cardEtiqueta {
+  margin-top: var(--space-3);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.cardTexto {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  color: var(--white);
+}
+
+/* --- Cards dibujadas: un mensaje y una notificación, sin foto --- */
+.mensaje,
+.notificacion {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.mensajeAutor {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.mensajeAvatar {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: var(--gold);
+  font-weight: 700;
+  color: var(--bg);
+}
+
+.mensajeBurbuja {
+  align-self: flex-start;
+  max-width: 90%;
+  padding: var(--space-3) var(--space-4);
+  border-radius: 18px 18px 18px 4px;
+  background-color: #262626;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: var(--white);
+}
+
+.aviso {
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  background-color: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+.avisoCabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.avisoIcono {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background-color: #25d366;
+  color: var(--white);
+}
+
+.avisoIcono svg {
+  width: 14px;
+  height: 14px;
+}
+
+.avisoTitulo {
+  margin-top: var(--space-2);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--white);
+}
+
+.avisoMensaje {
+  font-size: var(--text-sm);
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Celular: la card no cabe al costado de la píldora; se centra en la
+   sección, sobre el texto, mientras está abierta */
+@media (max-width: 600px) {
+  .card {
+    left: 50%;
+    top: 50%;
+    --tx: -50%;
+    --ty: -50%;
+    width: min(260px, calc(100vw - 2 * var(--gutter)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .cardVisible {
+    scale: 1;
+  }
 }
