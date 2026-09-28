@@ -4,6 +4,7 @@ import { gsap, useGSAP } from '../lib/gsap'
 import { scrollToSection } from '../lib/lenis'
 import { irAAncla } from '../lib/navegacion'
 import { useTransicion } from '../hooks/useTransicion'
+import { redes } from '../data/redes'
 import EnlaceRuta from './EnlaceRuta'
 import styles from './Nav.module.css'
 
@@ -23,18 +24,19 @@ const enlaces = [
   { label: 'Contacto', ancla: 'contacto', local: true },
 ]
 
-// TODO: unificar con las redes del Footer cuando lleguen las URLs reales.
-const redes = [
-  { label: 'Instagram', href: '#' },
-  { label: 'TikTok', href: '#' },
-  { label: 'WhatsApp', href: 'https://wa.me/56981649378' },
-]
+// Píxeles de scroll a partir de los cuales el logo pasa a su versión compacta.
+const UMBRAL_COMPACTO = 80
+// Píxeles mínimos de recorrido para considerar que cambió la dirección.
+const MARGEN_DIRECCION = 8
 
 export default function Nav() {
   // `abierto` es el estado lógico; `visible` mantiene el panel en el DOM
   // mientras corre el fade de salida.
   const [abierto, setAbierto] = useState(false)
   const [visible, setVisible] = useState(false)
+  const [compacto, setCompacto] = useState(false)
+  const [oculto, setOculto] = useState(false)
+  const ultimaY = useRef(0)
 
   const { pathname } = useLocation()
   const { navegarCon } = useTransicion()
@@ -172,6 +174,25 @@ export default function Nav() {
     return () => document.removeEventListener('keydown', alTeclear)
   }, [abierto])
 
+  // Lejos del top el logo se compacta para no pisar los titulares; en móvil
+  // además se oculta mientras se baja (el CSS decide dónde aplica `oculto`).
+  // Lenis mueve el scroll nativo, así que el evento de window llega igual.
+  useEffect(() => {
+    const alScrollear = () => {
+      const y = window.scrollY
+      setCompacto(y > UMBRAL_COMPACTO)
+
+      // Un margen mínimo evita el parpadeo con micro-scrolls y el rebote de iOS.
+      const delta = y - ultimaY.current
+      if (Math.abs(delta) < MARGEN_DIRECCION) return
+      setOculto(y > UMBRAL_COMPACTO && delta > 0)
+      ultimaY.current = y
+    }
+    alScrollear()
+    window.addEventListener('scroll', alScrollear, { passive: true })
+    return () => window.removeEventListener('scroll', alScrollear)
+  }, [])
+
   // Scrollear con el panel abierto lo cierra.
   useEffect(() => {
     if (!abierto) return
@@ -194,7 +215,14 @@ export default function Nav() {
       <button
         ref={logoRef}
         type="button"
-        className={styles.marca}
+        className={[
+          styles.marca,
+          compacto && styles.marcaCompacta,
+          // Con el menú abierto el logo es parte de la trampa de foco: siempre visible.
+          oculto && !abierto && styles.marcaOculta,
+        ]
+          .filter(Boolean)
+          .join(' ')}
         aria-label="Smart Estudio — ir al inicio"
         onClick={irAlInicio}
       >
@@ -256,23 +284,17 @@ export default function Nav() {
           </nav>
 
           <div className={styles.pie}>
-            <a
-              href="#contacto"
-              className={styles.pieEnlace}
-              onClick={(evento) => irA(evento, { ancla: 'contacto', local: true })}
-            >
-              Conversemos
-            </a>
-            <ul className={styles.redes}>
+            <ul className={styles.redes} aria-label="Redes sociales">
               {redes.map((red) => (
                 <li key={red.label}>
                   <a
                     href={red.href}
-                    className={styles.pieEnlace}
-                    target={red.href.startsWith('http') ? '_blank' : undefined}
-                    rel={red.href.startsWith('http') ? 'noreferrer' : undefined}
+                    className={styles.redSocial}
+                    aria-label={red.label}
+                    target="_blank"
+                    rel="noreferrer"
                   >
-                    {red.label}
+                    {red.icono}
                   </a>
                 </li>
               ))}

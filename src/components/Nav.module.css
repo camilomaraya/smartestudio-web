@@ -18,7 +18,8 @@
   cursor: pointer;
   transition:
     transform var(--transition-fast),
-    opacity var(--transition-fast);
+    opacity var(--transition-fast),
+    visibility var(--transition-fast);
 }
 
 .marca:hover {
@@ -46,6 +47,40 @@
      botón coincide con el logotipo visible y no arrastra el vacío del PNG. */
   margin-block: calc(var(--ancho-logo) * -0.318);
   margin-inline: calc(var(--ancho-logo) * -0.232);
+  /* Escala desde el borde izquierdo del logotipo visible (no del PNG, que
+     arrastra 23.2% de aire) y desde el centro vertical: conserva el respiro
+     lateral y el eje compartido con el círculo. Solo transform, sin reflow. */
+  transform-origin: 23.2% center;
+  transition: transform 0.4s var(--ease-out);
+}
+
+/* Lejos del top el logo se reduce para no pisar los titulares. Va en la
+   imagen y no en .marca, que ya usa transform para el :active. */
+.marcaCompacta .logo {
+  transform: scale(0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo {
+    transition: none;
+  }
+}
+
+/* En teléfono hasta el logo compacto estorba: se oculta mientras se baja y
+   vuelve en cuanto se sube. En pantallas mayores la clase no tiene efecto. */
+@media (max-width: 640px) {
+  .marcaOculta {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-120%);
+  }
+}
+
+@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+  .marcaOculta {
+    transform: none;
+  }
 }
 
 /* ============================================
@@ -170,11 +205,6 @@
    Pie del panel
    ============================================ */
 .pie {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-5);
   padding-top: var(--space-5);
   border-top: 1px solid var(--line);
 }
@@ -182,25 +212,37 @@
 .redes {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-5);
+  justify-content: flex-end;
+  gap: var(--space-3);
 }
 
-.pieEnlace {
-  display: inline-flex;
+/* Mismo círculo que las redes del footer, un paso más grande: acá son el
+   único contenido del pie y conviven con enlaces monumentales. */
+.redSocial {
+  display: flex;
   align-items: center;
-  min-height: 44px;
-  font-family: var(--font-utility);
-  font-weight: 500;
-  font-size: var(--text-sm);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
   color: var(--muted);
-  transition: color var(--transition-fast);
+  transition:
+    color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
-.pieEnlace:hover,
-.pieEnlace:focus-visible {
+.redSocial svg {
+  width: 22px;
+  height: 22px;
+}
+
+.redSocial:hover,
+.redSocial:focus-visible {
   color: var(--gold);
+  border-color: var(--gold);
+  transform: translateY(-2px);
 }
 
 /* Viewports muy angostos: círculo algo más chico, aún sobre 44px.
