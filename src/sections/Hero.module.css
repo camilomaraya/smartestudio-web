@@ -88,6 +88,8 @@
 .bajada {
   /* Sube desde 40ch para que la primera oración quepa entera antes del <br> */
   max-width: 50ch;
+  /* Space Grotesk y no Inter: la bajada acompaña al titular con más voz */
+  font-family: var(--font-utility);
   font-size: var(--text-lg);
   /* Más claro que --muted: sobre el campo de íconos el gris medio se perdía */
   color: #c9c9c9;
