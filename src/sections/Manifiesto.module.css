@@ -62,3 +62,65 @@
   margin-top: var(--space-6);
   color: var(--gold-echo);
 }
+
+/* ============================================
+   TEMPORAL — variantes de la revisión 2026-09-09 (?m= en la URL).
+   Se borran junto con el switch de Manifiesto.jsx al elegir una.
+   ============================================ */
+
+/* Común a ?m=oro y ?m=desborde: la palabra sale del container y pasa los
+   bordes. "Conectar" en Big Shoulders mide ~3.67× su font-size de ancho,
+   así que a 32vw desborda ~260px por lado en 1512px. */
+.statementAncho {
+  --text-display: clamp(5rem, 32vw, 34rem);
+  white-space: nowrap;
+}
+
+.manifiesto:has(.statementAncho) {
+  overflow: hidden;
+}
+
+/* ?m=oro — se invierte la superficie: el dorado deja de ser el acento y
+   pasa a ser el suelo, una sola vez en todo el sitio. */
+.varOro {
+  background-color: var(--gold);
+}
+
+.varOro .statement {
+  color: var(--bg);
+}
+
+.varOro .contexto {
+  color: rgba(10, 10, 10, 0.55);
+}
+
+.varOro .echo {
+  color: rgba(10, 10, 10, 0.45);
+}
+
+/* ?m=frase — una sola frase justificada a los dos márgenes. text-align-last
+   fuerza que también la última línea toque ambos bordes. */
+.frase {
+  width: 100%;
+  padding-inline: var(--gutter);
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: clamp(2rem, 7.2vw, 6.5rem);
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  text-align: justify;
+  text-align-last: justify;
+  color: var(--white);
+}
+
+.fraseLinea {
+  display: block;
+}
+
+/* El énfasis por cambio de familia, no por opacidad. */
+.fraseAcento {
+  font-family: var(--font-titular);
+  font-style: normal;
+  color: var(--gold);
+}
