@@ -33,6 +33,24 @@
   gap: var(--space-5);
 }
 
+/* Halo oscuro detrás del bloque de texto: atenúa los íconos solo ahí, para
+   que la bajada se lea; los bordes del hero siguen igual de poblados.
+   z-index -1 dentro del stacking context de .contenido: queda sobre el
+   canvas y bajo el texto. */
+.contenido::before {
+  content: '';
+  position: absolute;
+  inset: -12% -8%;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 50% 50% at 50% 55%,
+    rgba(10, 10, 10, 0.82),
+    rgba(10, 10, 10, 0.5) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
 .titular {
   font-size: var(--text-hero);
 }
@@ -56,10 +74,23 @@
   color: var(--gold);
 }
 
+/* Unidades del imán: la palabra no se parte, la letra se transforma. */
+.palabra {
+  position: relative;
+  display: inline-block;
+}
+
+.letra {
+  display: inline-block;
+  will-change: transform;
+}
+
 .bajada {
-  max-width: 40ch;
+  /* Sube desde 40ch para que la primera oración quepa entera antes del <br> */
+  max-width: 50ch;
   font-size: var(--text-lg);
-  color: var(--muted);
+  /* Más claro que --muted: sobre el campo de íconos el gris medio se perdía */
+  color: #c9c9c9;
 }
 
 .acciones {

@@ -4,9 +4,13 @@ import * as THREE from 'three'
 
 /*
  * Campo de íconos instanciado: un solo InstancedMesh (1 draw call) con
- * ~280 quads. Cada instancia toma su ícono del atlas vía un offset UV
+ * ~390 quads. Cada instancia toma su ícono del atlas vía un offset UV
  * por-instancia; el drift y la reacción al cursor se calculan en el
  * vertex shader (la CPU solo lerpea 3 valores por frame).
+ *
+ * Reparto: tres capas de profundidad, cada una con una grilla con jitter
+ * (un ícono por celda, corrido al azar dentro de ella). A diferencia del
+ * azar puro no deja huecos grandes ni amontonamientos.
  *
  * Reacción al cursor ("spotlight"): la distancia de cada instancia al
  * cursor (en coordenadas de mundo) define una "cercanía" 0..1 que
@@ -17,7 +21,19 @@ import * as THREE from 'three'
  * campo queda estático en gris.
  */
 
-const CANTIDAD = 280
+// Tope de instancias; las que se usan salen de las grillas (malla.count).
+const CANTIDAD_MAX = 480
+
+// Capas de fondo a frente: más chicas atrás, más grandes adelante.
+// `cantidad` es aproximada: la grilla la ajusta al aspecto.
+const CAPAS = [
+  { cantidad: 170, z: -1.6, escala: [0.28, 0.36] },
+  { cantidad: 130, z: -0.8, escala: [0.34, 0.44] },
+  { cantidad: 90, z: 0, escala: [0.42, 0.52] },
+]
+const DISTANCIA_CAMARA = 9 // coincide con camera.position.z de HeroCanvas
+const MARGEN_AREA = 1.15 // el área excede el cuadro: los bordes no quedan vacíos
+const JITTER = 0.8 // fracción de la celda en que se corre cada ícono (±40%)
 
 /*
  * Diales (uniforms):
@@ -42,7 +58,7 @@ function crearMaterial(atlas) {
       uAtlas: { value: new THREE.CanvasTexture(atlas.canvas) },
       uEscalaCelda: { value: new THREE.Vector2(1 / atlas.columnas, 1 / atlas.filas) },
       uColor: { value: new THREE.Color('#6a6a6a') },
-      uOpacidad: { value: 0.3 },
+      uOpacidad: { value: 0.45 },
       uMouse: { value: new THREE.Vector2(0, -100) }, // lejos hasta el primer movimiento
       uFuerza: { value: 0 },
       uRadio: { value: 2.4 },
@@ -139,13 +155,13 @@ export default function CampoIconos({ atlas, puntero }) {
 
   // Atributos por instancia (fijos durante la vida del componente).
   const { celdasUv, fases, alfas, semillas } = useMemo(() => {
-    const celdasUv = new Float32Array(CANTIDAD * 2)
-    const fases = new Float32Array(CANTIDAD)
-    const alfas = new Float32Array(CANTIDAD)
-    // Semillas de posición/escala en [0,1], para re-distribuir en cada resize.
-    const semillas = new Float32Array(CANTIDAD * 4)
+    const celdasUv = new Float32Array(CANTIDAD_MAX * 2)
+    const fases = new Float32Array(CANTIDAD_MAX)
+    const alfas = new Float32Array(CANTIDAD_MAX)
+    // Semillas de jitter/escala/rotación en [0,1], para re-distribuir en cada resize.
+    const semillas = new Float32Array(CANTIDAD_MAX * 4)
 
-    for (let i = 0; i < CANTIDAD; i++) {
+    for (let i = 0; i < CANTIDAD_MAX; i++) {
       const celda = atlas.celdas[Math.floor(Math.random() * atlas.celdas.length)]
       celdasUv[i * 2] = celda[0]
       celdasUv[i * 2 + 1] = celda[1]
@@ -156,25 +172,42 @@ export default function CampoIconos({ atlas, puntero }) {
     return { celdasUv, fases, alfas, semillas }
   }, [atlas])
 
-  // Distribuye las instancias por el área del hero (se recalcula al redimensionar).
+  // Distribuye las instancias en las grillas de cada capa (se recalcula al redimensionar).
   useLayoutEffect(() => {
     const malla = mallaRef.current
     const dummy = new THREE.Object3D()
-    const ancho = viewport.width * 1.15
-    const alto = viewport.height * 1.15
+    let i = 0
 
-    for (let i = 0; i < CANTIDAD; i++) {
-      dummy.position.set(
-        (semillas[i * 4] - 0.5) * ancho,
-        (semillas[i * 4 + 1] - 0.5) * alto,
-        -semillas[i * 4 + 2] * 2, // leve profundidad
-      )
-      const escala = 0.16 + semillas[i * 4 + 3] * 0.26 // tamaño con variación sutil
-      dummy.scale.setScalar(escala)
-      dummy.rotation.z = (semillas[i * 4 + 2] - 0.5) * 0.3 // inclinación mínima
-      dummy.updateMatrix()
-      malla.setMatrixAt(i, dummy.matrix)
-    }
+    CAPAS.forEach((capa) => {
+      // Más lejos de la cámara se ve más mundo: el área crece con la profundidad.
+      const factor = ((DISTANCIA_CAMARA - capa.z) / DISTANCIA_CAMARA) * MARGEN_AREA
+      const ancho = viewport.width * factor
+      const alto = viewport.height * factor
+
+      const columnas = Math.max(1, Math.round(Math.sqrt((capa.cantidad * ancho) / alto)))
+      const filas = Math.max(1, Math.round(capa.cantidad / columnas))
+      const celdaX = ancho / columnas
+      const celdaY = alto / filas
+
+      for (let f = 0; f < filas; f++) {
+        for (let c = 0; c < columnas && i < CANTIDAD_MAX; c++, i++) {
+          const jitterX = (semillas[i * 4] - 0.5) * JITTER
+          const jitterY = (semillas[i * 4 + 1] - 0.5) * JITTER
+          dummy.position.set(
+            -ancho / 2 + (c + 0.5 + jitterX) * celdaX,
+            -alto / 2 + (f + 0.5 + jitterY) * celdaY,
+            capa.z,
+          )
+          const [min, max] = capa.escala
+          dummy.scale.setScalar(min + semillas[i * 4 + 3] * (max - min))
+          dummy.rotation.z = (semillas[i * 4 + 2] - 0.5) * 0.3 // inclinación mínima
+          dummy.updateMatrix()
+          malla.setMatrixAt(i, dummy.matrix)
+        }
+      }
+    })
+
+    malla.count = i
     malla.instanceMatrix.needsUpdate = true
   }, [viewport.width, viewport.height, semillas])
 
@@ -196,7 +229,7 @@ export default function CampoIconos({ atlas, puntero }) {
   })
 
   return (
-    <instancedMesh ref={mallaRef} args={[undefined, undefined, CANTIDAD]} frustumCulled={false}>
+    <instancedMesh ref={mallaRef} args={[undefined, undefined, CANTIDAD_MAX]} frustumCulled={false}>
       <planeGeometry args={[1, 1]}>
         <instancedBufferAttribute attach="attributes-aCeldaUv" args={[celdasUv, 2]} />
         <instancedBufferAttribute attach="attributes-aFase" args={[fases, 1]} />

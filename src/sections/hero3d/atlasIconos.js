@@ -29,6 +29,28 @@ const ICONOS = [
   { codepoint: 0xf39e, familia: 'brands' }, // Facebook (facebook-f)
   { codepoint: 0xe07b, familia: 'brands' }, // TikTok
   { codepoint: 0xf232, familia: 'brands' }, // WhatsApp
+  // Cierran el trío del engagement (el corazón ya estaba) y suman el canal
+  // B2B y la voz de campaña. Siluetas sólidas: a 14-36px y baja opacidad,
+  // los íconos de trazo fino (gráficos, estadísticas) se deshacen.
+  { codepoint: 0xf075, familia: 'solid' }, // comentario (comment)
+  { codepoint: 0xf1e0, familia: 'solid' }, // compartir (share-nodes)
+  { codepoint: 0xf0a1, familia: 'solid' }, // megáfono (bullhorn)
+  { codepoint: 0xf08c, familia: 'brands' }, // LinkedIn
+  // Más variedad para que el campo no se sienta repetido. Mismo criterio:
+  // siluetas sólidas del universo redes/contenido/campaña.
+  { codepoint: 0xf164, familia: 'solid' }, // like (thumbs-up)
+  { codepoint: 0xf005, familia: 'solid' }, // estrella (star)
+  { codepoint: 0xf0f3, familia: 'solid' }, // notificación (bell)
+  { codepoint: 0xf1d8, familia: 'solid' }, // enviar (paper-plane)
+  { codepoint: 0xf03e, familia: 'solid' }, // imagen (image)
+  { codepoint: 0xf03d, familia: 'solid' }, // video
+  { codepoint: 0xf06e, familia: 'solid' }, // alcance (eye)
+  { codepoint: 0xf3c5, familia: 'solid' }, // ubicación (location-dot)
+  { codepoint: 0xf0eb, familia: 'solid' }, // idea (lightbulb)
+  { codepoint: 0xf135, familia: 'solid' }, // lanzamiento (rocket)
+  { codepoint: 0xf06d, familia: 'solid' }, // tendencia (fire)
+  { codepoint: 0xf167, familia: 'brands' }, // YouTube
+  { codepoint: 0xf1bc, familia: 'brands' }, // Spotify
 ]
 
 // Carga única de las fuentes (compartida entre atlas y patrón).
@@ -55,8 +77,8 @@ function fuenteCanvas(familia, tamano) {
    ============================================ */
 
 const CELDA = 128 // px por celda
-const COLUMNAS = 4
-const FILAS = 4 // 4×4 = 16 celdas para 11 íconos (atlas 512×512, potencia de 2)
+const COLUMNAS = 8
+const FILAS = 4 // 8×4 = 32 celdas para 28 íconos (atlas 1024×512, potencia de 2)
 
 export async function crearAtlasIconos() {
   await cargarFuentes()
