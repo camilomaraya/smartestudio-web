@@ -159,7 +159,11 @@ export default function Home() {
   return (
     <div id="inicio">
       <Hero />
-      <Manifiesto />
+      {/* TEMPORAL: variantes del manifiesto para comparar. Cuando se elija
+          una, dejar un solo <Manifiesto id="manifiesto" /> con esa variante. */}
+      <Manifiesto id="manifiesto" variante="cortina" etiqueta="Manifiesto: cortina" />
+      <Manifiesto variante="union" etiqueta="Manifiesto: unión" />
+      <Manifiesto variante="red" etiqueta="Manifiesto: red" />
       <Correccion />
       <Servicios />
       <Detras />

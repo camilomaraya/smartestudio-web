@@ -174,8 +174,8 @@ export default function Nav() {
     return () => document.removeEventListener('keydown', alTeclear)
   }, [abierto])
 
-  // Lejos del top el logo se compacta para no pisar los titulares; en móvil
-  // además se oculta mientras se baja (el CSS decide dónde aplica `oculto`).
+  // Lejos del top el logo se compacta y además se oculta mientras se baja,
+  // en cualquier ancho: al subir vuelve compacto.
   // Lenis mueve el scroll nativo, así que el evento de window llega igual.
   useEffect(() => {
     const alScrollear = () => {

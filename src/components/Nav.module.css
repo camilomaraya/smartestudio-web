@@ -66,18 +66,17 @@
   }
 }
 
-/* En teléfono hasta el logo compacto estorba: se oculta mientras se baja y
-   vuelve en cuanto se sube. En pantallas mayores la clase no tiene efecto. */
-@media (max-width: 640px) {
-  .marcaOculta {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transform: translateY(-120%);
-  }
+/* Hasta el logo compacto pisa el texto donde el contenido arranca a 40px
+   del borde (todo lo que está bajo ~1500px de ancho): se oculta mientras se
+   baja y vuelve, compacto, en cuanto se sube. */
+.marcaOculta {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-120%);
 }
 
-@media (max-width: 640px) and (prefers-reduced-motion: reduce) {
+@media (prefers-reduced-motion: reduce) {
   .marcaOculta {
     transform: none;
   }

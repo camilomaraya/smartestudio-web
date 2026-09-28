@@ -1,6 +1,7 @@
 /* Interstitial tipográfico: una palabra ocupa el viewport y el eco la repite
-   en dorado fantasma. Negro puro, sin bordes: corta el ritmo de secciones. */
+   en voz baja. Corta el ritmo de secciones. */
 .manifiesto {
+  position: relative;
   min-height: 100vh;
   min-height: 100svh;
   display: flex;
@@ -10,12 +11,8 @@
   padding-block: var(--space-section);
   background-color: var(--bg);
   text-align: center;
-}
-
-.interstitialContenido {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  /* La palabra desborda a propósito: el corte lo hace la sección */
+  overflow: hidden;
 }
 
 /* Prepara el golpe: misma familia que los titulares, pero en voz baja */
@@ -64,24 +61,9 @@
 }
 
 /* ============================================
-   TEMPORAL — variantes de la revisión 2026-09-09 (?m= en la URL).
-   Se borran junto con el switch de Manifiesto.jsx al elegir una.
+   Banda dorada: se invierte la superficie. El dorado deja de ser el acento
+   y pasa a ser el suelo, una sola vez en todo el sitio.
    ============================================ */
-
-/* Común a ?m=oro y ?m=desborde: la palabra sale del container y pasa los
-   bordes. "Conectar" en Big Shoulders mide ~3.67× su font-size de ancho,
-   así que a 32vw desborda ~260px por lado en 1512px. */
-.statementAncho {
-  --text-display: clamp(5rem, 32vw, 34rem);
-  white-space: nowrap;
-}
-
-.manifiesto:has(.statementAncho) {
-  overflow: hidden;
-}
-
-/* ?m=oro — se invierte la superficie: el dorado deja de ser el acento y
-   pasa a ser el suelo, una sola vez en todo el sitio. */
 .varOro {
   background-color: var(--gold);
 }
@@ -98,29 +80,139 @@
   color: rgba(10, 10, 10, 0.45);
 }
 
-/* ?m=frase — una sola frase justificada a los dos márgenes. text-align-last
-   fuerza que también la última línea toque ambos bordes. */
-.frase {
-  width: 100%;
-  padding-inline: var(--gutter);
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: clamp(2rem, 7.2vw, 6.5rem);
-  line-height: 1.02;
-  letter-spacing: -0.02em;
+/* ============================================
+   TEMPORAL — variantes a comparar (ver Manifiesto.jsx y Home.jsx).
+   Se borran junto con las props al elegir una.
+   ============================================ */
+
+/* Etiqueta de la comparación */
+.etiqueta {
+  position: absolute;
+  bottom: var(--space-5);
+  left: var(--gutter);
+  z-index: 3;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-utility);
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-align: justify;
-  text-align-last: justify;
-  color: var(--white);
+  color: var(--bg);
 }
 
-.fraseLinea {
-  display: block;
-}
-
-/* El énfasis por cambio de familia, no por opacidad. */
-.fraseAcento {
-  font-family: var(--font-titular);
-  font-style: normal;
+.var_cortina .etiqueta {
   color: var(--gold);
+  mix-blend-mode: difference;
+}
+
+/* --- cortina: negro con dorado que sube y lo invierte --- */
+/* "Conectar" mide ~3.67× su font-size: a 15vw ocupa ~55% del ancho y entra
+   entero con aire a los lados. Va en las dos capas para que coincidan. */
+.cortinaStatement {
+  --text-display: clamp(4rem, 15vw, 14rem);
+  white-space: nowrap;
+}
+
+.cortinaBase {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Réplica exacta de la base en negativo, superpuesta y recortada desde
+   abajo. Mismo padding y centrado que .manifiesto para que coincida. */
+.cortinaCapa {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-block: var(--space-section);
+  background-color: var(--gold);
+  clip-path: inset(0% 0% 0% 0%);
+}
+
+.cortinaCapa .statement {
+  color: var(--bg);
+}
+
+.cortinaCapa .contexto {
+  color: rgba(10, 10, 10, 0.55);
+}
+
+.cortinaCapa .echo {
+  color: rgba(10, 10, 10, 0.45);
+}
+
+/* --- union: CONEC y TAR unidos por un cable que se acorta --- */
+.unionFila {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.unionCable {
+  display: block;
+  flex: none;
+  /* Sin JS o con movimiento reducido la palabra queda unida */
+  width: 0;
+  height: 0.07em;
+  background-color: currentColor;
+}
+
+/* --- red: CONECTAR al centro y líneas hacia los canales --- */
+.redLineas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: var(--bg);
+  stroke-width: 1.5;
+  stroke-dasharray: 1;
+  fill: none;
+}
+
+.redNodos {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.redNodo {
+  position: absolute;
+  /* translate y no transform: GSAP anima scale sin pisar el centrado */
+  translate: -50% -50%;
+  padding: var(--space-2) var(--space-4);
+  border: 1.5px solid var(--bg);
+  border-radius: var(--radius-pill);
+  background-color: var(--gold);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: clamp(0.7rem, 1.1vw, 0.95rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--bg);
+}
+
+/* El fondo dorado tapa el tramo de las líneas que pasa bajo el texto:
+   se ven salir del bloque, no cruzarlo. */
+.redCentro {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-5) var(--space-6);
+  background-color: var(--gold);
+}
+
+.redStatement {
+  --text-display: clamp(4rem, 14vw, 13rem);
 }

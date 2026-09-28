@@ -3,123 +3,216 @@ import { gsap, useGSAP } from '../lib/gsap'
 import styles from './Manifiesto.module.css'
 
 /*
- * TEMPORAL — comparación de variantes de diseño (revisión 2026-09-09).
- * Se elige con `?m=` en la URL:
- *   (sin parámetro) base     — lo que está publicado hoy
- *   ?m=oro                   — banda dorada, CONECTAR en negativo desbordando
- *   ?m=frase                 — la frase entera justificada de borde a borde
- *   ?m=desborde              — igual que base, pero CONECTAR pasa los bordes
- * Cuando se decida una, se borra el switch y queda solo la ganadora.
+ * TEMPORAL — comparación de variantes (ver Home.jsx):
+ *   cortina  entra en negro y, al scrollear, el dorado sube y lo invierte
+ *   union    CONEC y TAR llegan separados por un cable que se acorta al
+ *            scrollear hasta que la palabra se une
+ *   red      CONECTAR al centro y líneas que se trazan hacia los canales
+ * Cuando se elija una, borrar las demás y las props `variante`/`etiqueta`.
  */
-function leerVariante() {
-  if (typeof window === 'undefined') return 'base'
-  const m = new URLSearchParams(window.location.search).get('m')
-  return ['oro', 'frase', 'desborde'].includes(m) ? m : 'base'
+
+const NODOS = [
+  { texto: 'Tu marca', x: 12, y: 18 },
+  { texto: 'Instagram', x: 50, y: 10 },
+  { texto: 'Tu público', x: 88, y: 20 },
+  { texto: 'Reels', x: 13, y: 52 },
+  { texto: 'Comunidad', x: 88, y: 54 },
+  { texto: 'Campañas', x: 16, y: 86 },
+  { texto: 'TikTok', x: 52, y: 92 },
+  { texto: 'Ventas', x: 86, y: 84 },
+]
+
+function Contexto() {
+  return (
+    <p className={styles.contexto} data-inter="entrada">
+      Nuestro trabajo es
+    </p>
+  )
 }
 
-export default function Manifiesto() {
-  const scope = useRef(null)
-  const variante = leerVariante()
+function Eco() {
+  return (
+    <p className={`titular ${styles.echo}`} data-inter="echo">
+      Tu marca con tu público
+    </p>
+  )
+}
 
-  // Secuencia propia: el contexto prepara, el statement golpea desde la
-  // máscara y el eco llega después, más lento, como reverberación.
+// Intro compartida: contexto → statement desde la máscara → eco.
+function introEstandar(scope, tl) {
+  const entrada = scope.querySelectorAll('[data-inter="entrada"]')
+  const statement = scope.querySelector('[data-inter="statement"]')
+  const echo = scope.querySelector('[data-inter="echo"]')
+
+  if (entrada.length) {
+    gsap.set(entrada, { opacity: 0, y: 20 })
+    tl.to(entrada, { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out', stagger: 0.1 })
+  }
+  if (statement) {
+    gsap.set(statement, { yPercent: 110 })
+    tl.to(statement, { yPercent: 0, duration: 1.4, ease: 'power4.out' }, 0.4)
+  }
+  if (echo) {
+    gsap.set(echo, { opacity: 0, y: 24 })
+    tl.to(echo, { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out' }, 1.5)
+  }
+}
+
+export default function Manifiesto({ variante = 'cortina', etiqueta, id }) {
+  const scope = useRef(null)
+
   useGSAP(
     () => {
       const mm = gsap.matchMedia()
 
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const entrada = scope.current.querySelectorAll('[data-inter="entrada"]')
-        const statement = scope.current.querySelector('[data-inter="statement"]')
-        const echo = scope.current.querySelector('[data-inter="echo"]')
-
-        // Estado inicial vía JS: si el JS falla, la sección queda visible.
-        if (entrada.length) gsap.set(entrada, { opacity: 0, y: 20 })
-        if (statement) gsap.set(statement, { yPercent: 110 })
-        if (echo) gsap.set(echo, { opacity: 0, y: 24 })
-
+        const raiz = scope.current
         const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: scope.current,
-            start: 'top 70%',
-            once: true,
-          },
+          scrollTrigger: { trigger: raiz, start: 'top 70%', once: true },
         })
 
-        if (entrada.length) {
-          tl.to(entrada, {
-            opacity: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power3.out',
-            stagger: 0.1,
-            clearProps: 'opacity,transform',
-          })
-        }
-        // El statement conserva su transform: la máscara es estructura.
-        // Sube lento (1.4s) para ganar peso; el eco espera a que asiente.
-        if (statement) {
-          tl.to(statement, { yPercent: 0, duration: 1.4, ease: 'power4.out' }, 0.4)
-        }
-        if (echo) {
-          tl.to(
-            echo,
+        // Cortina: la capa dorada sube desde abajo atada al scroll.
+        if (variante === 'cortina') {
+          introEstandar(raiz, tl)
+          gsap.fromTo(
+            '[data-cortina="capa"]',
+            { clipPath: 'inset(100% 0% 0% 0%)' },
             {
-              opacity: 1,
-              y: 0,
-              duration: 0.9,
-              ease: 'power3.out',
-              clearProps: 'opacity,transform',
+              clipPath: 'inset(0% 0% 0% 0%)',
+              ease: 'none',
+              scrollTrigger: { trigger: raiz, start: 'top 40%', end: 'center 35%', scrub: 0.6 },
             },
+          )
+        }
+
+        // Unión: el cable entre las dos mitades se acorta con el scroll.
+        if (variante === 'union') {
+          introEstandar(raiz, tl)
+          gsap.fromTo(
+            '[data-union="cable"]',
+            { width: '32vw' },
+            {
+              width: 0,
+              ease: 'none',
+              scrollTrigger: { trigger: raiz, start: 'top 60%', end: 'center center', scrub: 0.6 },
+            },
+          )
+        }
+
+        // Red: el centro entra, después las líneas se trazan en cascada y
+        // cada canal aparece cuando su línea llega.
+        if (variante === 'red') {
+          introEstandar(raiz, tl)
+          const lineas = raiz.querySelectorAll('[data-red="linea"]')
+          const nodos = raiz.querySelectorAll('[data-red="nodo"]')
+          gsap.set(lineas, { strokeDashoffset: 1 })
+          gsap.set(nodos, { opacity: 0, scale: 0.8 })
+          tl.to(lineas, { strokeDashoffset: 0, duration: 0.7, ease: 'power2.inOut', stagger: 0.08 }, 1)
+          tl.to(
+            nodos,
+            { opacity: 1, scale: 1, duration: 0.4, ease: 'back.out(2)', stagger: 0.08 },
             1.5,
           )
         }
       })
     },
-    { scope },
+    { scope, dependencies: [variante] },
   )
 
-  /* Variante 2: una sola frase justificada a los dos márgenes. El énfasis
-     lo marca el cambio de familia (Big Shoulders dorado dentro de Archivo),
-     no un apartado con opacidad — así el "eco" deja de ser ilegible. */
-  if (variante === 'frase') {
+  const clases = [styles.manifiesto, styles.varOro, styles[`var_${variante}`]]
+    .filter(Boolean)
+    .join(' ')
+  const marca = etiqueta && <p className={styles.etiqueta}>{etiqueta}</p>
+
+  if (variante === 'cortina') {
+    const contenido = (
+      <>
+        <p className={styles.contexto}>Nuestro trabajo es</p>
+        <p className={`titular ${styles.statement} ${styles.cortinaStatement}`}>Conectar</p>
+        <p className={`titular ${styles.echo}`}>Tu marca con tu público</p>
+      </>
+    )
     return (
-      <section ref={scope} id="manifiesto" className={styles.manifiesto}>
-        <p className={styles.frase}>
-          <span className={styles.mascara}>
-            <span className={styles.fraseLinea} data-inter="statement">
-              Nuestro trabajo es <em className={styles.fraseAcento}>conectar</em> tu marca con tu
-              público
+      <section ref={scope} id={id} className={`${styles.manifiesto} ${styles.var_cortina}`}>
+        {marca}
+        <div className={styles.cortinaBase}>
+          <Contexto />
+          <h2 className={`titular ${styles.statement} ${styles.cortinaStatement}`}>
+            <span className={styles.mascara}>
+              <span className={styles.statementLinea} data-inter="statement">
+                Conectar
+              </span>
             </span>
-          </span>
-        </p>
+          </h2>
+          <Eco />
+        </div>
+        <div className={styles.cortinaCapa} data-cortina="capa" aria-hidden="true">
+          {contenido}
+        </div>
       </section>
     )
   }
 
-  /* Variantes 1 y 3: misma estructura de tres piezas; cambian superficie
-     y escala. En ambas el statement sale del container y pasa los bordes. */
-  const desborda = variante === 'oro' || variante === 'desborde'
+  if (variante === 'union') {
+    return (
+      <section ref={scope} id={id} className={clases}>
+        {marca}
+        <Contexto />
+        <h2 className={`titular ${styles.statement} ${styles.union}`} aria-label="Conectar">
+          <span className={styles.mascara}>
+            <span className={styles.unionFila} data-inter="statement" aria-hidden="true">
+              <span>Conec</span>
+              <span className={styles.unionCable} data-union="cable" />
+              <span>tar</span>
+            </span>
+          </span>
+        </h2>
+        <Eco />
+      </section>
+    )
+  }
 
+  // red
   return (
-    <section
-      ref={scope}
-      id="manifiesto"
-      className={`${styles.manifiesto} ${variante === 'oro' ? styles.varOro : ''}`}
-    >
-      <div className={`${desborda ? '' : 'container'} ${styles.interstitialContenido}`}>
-        <p className={styles.contexto} data-inter="entrada">
-          Nuestro trabajo es
-        </p>
-        <h2 className={`titular ${styles.statement} ${desborda ? styles.statementAncho : ''}`}>
+    <section ref={scope} id={id} className={clases}>
+      {marca}
+      {/* Coordenadas en % sin viewBox: el trazo no se deforma con el
+          aspecto de la sección y pathLength sigue valiendo para dibujarlo. */}
+      <svg className={styles.redLineas} aria-hidden="true">
+        {NODOS.map((nodo) => (
+          <line
+            key={nodo.texto}
+            x1="50%"
+            y1="50%"
+            x2={`${nodo.x}%`}
+            y2={`${nodo.y}%`}
+            pathLength="1"
+            data-red="linea"
+          />
+        ))}
+      </svg>
+      <ul className={styles.redNodos} aria-hidden="true">
+        {NODOS.map((nodo) => (
+          <li
+            key={nodo.texto}
+            className={styles.redNodo}
+            style={{ left: `${nodo.x}%`, top: `${nodo.y}%` }}
+            data-red="nodo"
+          >
+            {nodo.texto}
+          </li>
+        ))}
+      </ul>
+      <div className={styles.redCentro}>
+        <Contexto />
+        <h2 className={`titular ${styles.statement} ${styles.redStatement}`}>
           <span className={styles.mascara}>
             <span className={styles.statementLinea} data-inter="statement">
               Conectar
             </span>
           </span>
         </h2>
-        <p className={`titular ${styles.echo}`} data-inter="echo">
-          Tu marca con tu público
-        </p>
+        <Eco />
       </div>
     </section>
   )
