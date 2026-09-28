@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
+import Celular, { animarCelular } from './Celular'
 import styles from './Correccion.module.css'
 
 /*
@@ -189,6 +190,9 @@ export default function Correccion() {
           // Marca el final en t=4: el tramo entre 3.5 y 4 es el hold que deja
           // leer el mensaje nuevo antes de que la sección se suelte.
           .set({}, {}, 4)
+
+        // El teléfono acompaña los mismos tiempos (ver Celular.jsx)
+        animarCelular(seccion, tl)
       })
     },
     { scope },
@@ -213,8 +217,8 @@ export default function Correccion() {
           </h2>
         </div>
 
-        {/* Espacio reservado: marco vacío a propósito, sin contenido todavía. */}
-        <div className={styles.columnaReservada} aria-hidden="true" />
+        {/* El teléfono reacciona a la frase: decorativo, aria-hidden */}
+        <Celular />
       </div>
     </section>
   )

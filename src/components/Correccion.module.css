@@ -47,19 +47,6 @@
   opacity: 1;
 }
 
-/* Espacio reservado: marco vacío a propósito, no un hueco por llenar.
-   La altura manda y el ancho sale de la proporción (por eso justify-self
-   center, que libera el ancho del stretch de la grilla): así el marco nunca
-   empuja la sección por encima del viewport, que es lo que el pin necesita. */
-.columnaReservada {
-  height: min(56svh, 520px);
-  aspect-ratio: 4 / 5;
-  width: auto;
-  justify-self: center;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-}
-
 /* Máscara del reveal por línea, mismo patrón que el resto del sitio
    (Manifiesto, CTA, hero). */
 .linea {
@@ -109,9 +96,5 @@
 @media (max-width: 900px) {
   .contenido {
     grid-template-columns: 1fr;
-  }
-
-  .columnaReservada {
-    display: none;
   }
 }
