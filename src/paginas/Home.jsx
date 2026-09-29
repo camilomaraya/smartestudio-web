@@ -13,7 +13,9 @@ import ProyectosCollage from '../sections/variantes-proyectos/ProyectosCollage'
 import ProyectosCarrusel from '../sections/variantes-proyectos/ProyectosCarrusel'
 import PlanesEscalera from '../sections/variantes-planes/PlanesEscalera'
 import PlanesRecomendador from '../sections/variantes-planes/PlanesRecomendador'
-import Equipo from '../sections/Equipo'
+import EquipoAcordeon from '../sections/variantes-equipo/EquipoAcordeon'
+import EquipoCredenciales from '../sections/variantes-equipo/EquipoCredenciales'
+import EquipoQuien from '../sections/variantes-equipo/EquipoQuien'
 import CTA from '../sections/CTA'
 
 export default function Home() {
@@ -182,7 +184,12 @@ export default function Home() {
           sections/Planes.jsx y borrar sections/variantes-planes. */}
       <PlanesEscalera id="planes" etiqueta="Planes: escalera" />
       <PlanesRecomendador etiqueta="Planes: arma tu plan" />
-      <Equipo />
+      {/* TEMPORAL: variantes de Equipo para comparar. Al elegir una,
+          dejarla (con id="equipo") en lugar de sections/Equipo.jsx y borrar
+          sections/variantes-equipo. */}
+      <EquipoAcordeon id="equipo" etiqueta="Equipo: acordeón" />
+      <EquipoCredenciales etiqueta="Equipo: credenciales" />
+      <EquipoQuien etiqueta="Equipo: ¿quién hace qué?" />
       <CTA />
     </div>
   )

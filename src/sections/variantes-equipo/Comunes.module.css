@@ -1,0 +1,68 @@
+/* TEMPORAL — ver Comunes.jsx. */
+.titular {
+  font-size: var(--text-3xl);
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.mascara {
+  display: block;
+  overflow: hidden;
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+
+.linea {
+  display: block;
+}
+
+.acento {
+  color: var(--gold);
+}
+
+.bajada {
+  max-width: 58ch;
+  margin: var(--space-8) auto 0;
+  font-family: var(--font-utility);
+  font-size: var(--text-lg);
+  text-align: center;
+  text-wrap: balance;
+  color: var(--muted);
+}
+
+/* Mismo placeholder que Equipo.jsx: trama diagonal = material pendiente */
+.retrato {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-soft);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 22px,
+    rgba(255, 255, 255, 0.03) 22px,
+    rgba(255, 255, 255, 0.03) 23px
+  );
+}
+
+.retrato img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.iniciales {
+  font-family: var(--font-titular);
+  font-weight: 900;
+  font-size: clamp(3rem, 7vw, 5rem);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: var(--gray-dim);
+}
