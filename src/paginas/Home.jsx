@@ -6,8 +6,11 @@ import { useTransicion } from '../hooks/useTransicion'
 import Hero from '../sections/Hero'
 import Manifiesto from '../sections/Manifiesto'
 import Correccion from '../components/Correccion'
-import Servicios from '../sections/Servicios'
-import Detras from '../sections/Detras'
+import ServiciosPreview from '../sections/variantes-servicios/ServiciosPreview'
+import ServiciosApilados from '../sections/variantes-servicios/ServiciosApilados'
+import ProyectosCinta from '../sections/variantes-proyectos/ProyectosCinta'
+import ProyectosCollage from '../sections/variantes-proyectos/ProyectosCollage'
+import ProyectosCarrusel from '../sections/variantes-proyectos/ProyectosCarrusel'
 import Planes from '../sections/Planes'
 import Equipo from '../sections/Equipo'
 import CTA from '../sections/CTA'
@@ -161,8 +164,18 @@ export default function Home() {
       <Hero />
       <Manifiesto id="manifiesto" />
       <Correccion />
-      <Servicios />
-      <Detras />
+      {/* TEMPORAL: variantes de Servicios para comparar. Al elegir una, dejar
+          solo esa (con id="servicios") en lugar de sections/Servicios.jsx y
+          borrar sections/variantes-servicios. */}
+      <ServiciosPreview id="servicios" etiqueta="Servicios: vista previa" />
+      <ServiciosApilados etiqueta="Servicios: apilados" />
+      <ServiciosApilados largo etiqueta="Servicios: apilados, texto largo" />
+      {/* TEMPORAL: variantes de Proyectos para comparar. Al elegir una,
+          dejarla (con id="detras") en lugar de sections/Detras.jsx y borrar
+          sections/variantes-proyectos. */}
+      <ProyectosCinta id="detras" etiqueta="Proyectos: cinta" />
+      <ProyectosCollage etiqueta="Proyectos: collage" />
+      <ProyectosCarrusel etiqueta="Proyectos: carrusel" />
       <Planes />
       <Equipo />
       <CTA />

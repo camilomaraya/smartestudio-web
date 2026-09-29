@@ -1,0 +1,82 @@
+/* TEMPORAL — variante «Carrusel arrastrable» (ver el .jsx). */
+.carrusel {
+  position: relative;
+  padding-block: var(--space-section);
+  overflow: hidden;
+}
+
+.ventana {
+  margin-top: var(--space-7);
+  padding-inline: var(--gutter);
+  cursor: grab;
+  /* Deja el scroll vertical al navegador en táctil; el horizontal es del
+     arrastre */
+  touch-action: pan-y;
+}
+
+.ventana:active {
+  cursor: grabbing;
+}
+
+.pista {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-5);
+  width: max-content;
+  /* El rótulo va debajo de cada pieza, fuera de su alto: se le deja lugar */
+  padding-bottom: var(--space-8);
+  --alto-pieza: clamp(240px, 42svh, 400px);
+}
+
+.foto {
+  transform-origin: center bottom;
+  user-select: none;
+}
+
+.controles {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-top: var(--space-6);
+  margin-bottom: var(--space-7);
+}
+
+.barra {
+  flex: 1;
+  height: 2px;
+  background-color: var(--line);
+}
+
+.relleno {
+  display: block;
+  height: 100%;
+  background-color: var(--gold);
+  transform-origin: left center;
+  transform: scaleX(0.04);
+}
+
+.flechas {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.flecha {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: none;
+  font-size: var(--text-lg);
+  cursor: pointer;
+  transition:
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.flecha:hover,
+.flecha:focus-visible {
+  border-color: var(--gold);
+  color: var(--gold);
+}

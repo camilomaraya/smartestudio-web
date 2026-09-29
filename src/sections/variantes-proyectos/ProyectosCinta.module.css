@@ -1,0 +1,58 @@
+/* TEMPORAL — variante «Cinta» (ver el .jsx). */
+.cinta {
+  position: relative;
+  padding-block: var(--space-section);
+  overflow: hidden;
+}
+
+.cintas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-block: var(--space-7);
+}
+
+/* Base (movimiento reducido): cada cinta se recorre a mano */
+.ventana {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pista {
+  display: flex;
+  gap: var(--space-4);
+  width: max-content;
+  padding-inline: var(--gutter);
+}
+
+.ventana:first-child .pista {
+  --alto-pieza: clamp(200px, 30svh, 300px);
+}
+
+.ventana:last-child .pista {
+  --alto-pieza: clamp(160px, 24svh, 240px);
+}
+
+/* La pieza bajo el cursor crece un poco */
+.pieza {
+  transition: scale var(--transition-fast);
+}
+
+.pieza:hover,
+.pieza:focus-visible {
+  scale: 1.04;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ventana {
+    overflow: visible;
+  }
+
+  .pista {
+    /* El margen lo da la cinta entera, que desborda la pantalla */
+    padding-inline: 0;
+    padding-right: var(--space-4);
+    will-change: transform;
+  }
+}
