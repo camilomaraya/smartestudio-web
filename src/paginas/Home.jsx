@@ -11,7 +11,8 @@ import ServiciosApilados from '../sections/variantes-servicios/ServiciosApilados
 import ProyectosCinta from '../sections/variantes-proyectos/ProyectosCinta'
 import ProyectosCollage from '../sections/variantes-proyectos/ProyectosCollage'
 import ProyectosCarrusel from '../sections/variantes-proyectos/ProyectosCarrusel'
-import Planes from '../sections/Planes'
+import PlanesEscalera from '../sections/variantes-planes/PlanesEscalera'
+import PlanesRecomendador from '../sections/variantes-planes/PlanesRecomendador'
 import Equipo from '../sections/Equipo'
 import CTA from '../sections/CTA'
 
@@ -176,7 +177,11 @@ export default function Home() {
       <ProyectosCinta id="detras" etiqueta="Proyectos: cinta" />
       <ProyectosCollage etiqueta="Proyectos: collage" />
       <ProyectosCarrusel etiqueta="Proyectos: carrusel" />
-      <Planes />
+      {/* TEMPORAL: variantes de Planes para comparar. Al elegir una, dejarla
+          (con id="planes", ancla del botón del hero) en lugar de
+          sections/Planes.jsx y borrar sections/variantes-planes. */}
+      <PlanesEscalera id="planes" etiqueta="Planes: escalera" />
+      <PlanesRecomendador etiqueta="Planes: arma tu plan" />
       <Equipo />
       <CTA />
     </div>
