@@ -5,6 +5,9 @@
   position: relative;
   padding-block: var(--space-section);
   border-top: 1px solid var(--line);
+  /* Gris entre el CTA y el footer, los dos negros: separa las tres partes
+     y la ventana del chat (negro puro) resalta encima */
+  background-color: var(--bg-soft);
 }
 
 .grilla {

@@ -1,8 +1,9 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../lib/gsap'
 import { proyectosPublicables } from '../data/proyectos'
 import EnlaceRuta from '../components/EnlaceRuta'
 import boton from '../components/ui/Button.module.css'
+import { DialogoPieza, Etiqueta, PanelPieza } from './variantes-proyectos/VistaPrevia'
 import styles from './Proyectos.module.css'
 
 /*
@@ -34,15 +35,61 @@ function todasLasPiezas() {
   return salida
 }
 
-const piezas = todasLasPiezas()
+// `n`: posición en la lista única, para ubicar cada pieza entre sus copias
+const piezas = todasLasPiezas().map((pieza, n) => ({ ...pieza, n }))
 // Cada copia repite su grupo dos veces: con ~10 piezas chicas una sola
 // pasada medía menos que una pantalla ancha y dejaba un hueco al final
 const CINTAS = [piezas.filter((_, i) => i % 2 === 0), piezas.filter((_, i) => i % 2 === 1)].map(
   (grupo) => [...grupo, ...grupo],
 )
 
-export default function Proyectos() {
+/*
+ * TEMPORAL — `vista` compara las dos vistas previas al tocar una pieza
+ * (ver variantes-proyectos/VistaPrevia.jsx): 'abrir' o 'detener'. Sin
+ * `vista`, tocar una pieza lleva directo a su ficha.
+ */
+export default function Proyectos({ id, vista, etiqueta }) {
   const scope = useRef(null)
+  // Control de la cinta desde las vistas previas: frenarla y soltarla
+  const control = useRef(null)
+  const detenida = useRef(false)
+  const [abierta, setAbierta] = useState(null) // { n, origen }
+  const [elegida, setElegida] = useState(null) // { n, clave }
+
+  const frenar = () => {
+    detenida.current = true
+    control.current?.frenar()
+  }
+  const soltar = () => {
+    detenida.current = false
+    control.current?.soltar()
+  }
+
+  const alTocarPieza = (evento, pieza, clave) => {
+    if (vista === 'abrir') {
+      evento.preventDefault()
+      frenar()
+      setAbierta({ n: pieza.n, origen: evento.currentTarget })
+    } else if (vista === 'detener') {
+      // Segundo toque sobre la misma pieza: sigue a la ficha
+      if (elegida?.clave === clave) return
+      evento.preventDefault()
+      frenar()
+      setElegida({ n: pieza.n, clave })
+    }
+  }
+
+  const cerrarPanel = () => {
+    setElegida(null)
+    soltar()
+  }
+
+  useEffect(() => {
+    if (!elegida) return undefined
+    const alTeclear = (evento) => evento.key === 'Escape' && cerrarPanel()
+    document.addEventListener('keydown', alTeclear)
+    return () => document.removeEventListener('keydown', alTeclear)
+  })
 
   useGSAP(
     () => {
@@ -65,7 +112,18 @@ export default function Proyectos() {
         }))
         let sentido = 1
 
-        const velocidadBase = (e) => (e.encima ? 0 : sentido)
+        const velocidadBase = (e) => (e.encima || detenida.current ? 0 : sentido)
+
+        control.current = {
+          frenar: () =>
+            estado.forEach((e) =>
+              gsap.to(e.tween, { timeScale: 0, duration: 0.5, overwrite: true }),
+            ),
+          soltar: () =>
+            estado.forEach((e) =>
+              gsap.to(e.tween, { timeScale: velocidadBase(e), duration: 0.8, overwrite: true }),
+            ),
+        }
 
         estado.forEach((e, i) => {
           pistas[i].addEventListener('pointerenter', () => {
@@ -83,14 +141,15 @@ export default function Proyectos() {
           start: 'top bottom',
           end: 'bottom top',
           // Fuera de pantalla no corren: no hay por qué gastar frames
-          onToggle: (self) => estado.forEach((e) => (self.isActive ? e.tween.play() : e.tween.pause())),
+          onToggle: (self) =>
+            estado.forEach((e) => (self.isActive ? e.tween.play() : e.tween.pause())),
           onUpdate: (self) => {
             sentido = self.direction
             // Empujón proporcional a la velocidad del scroll, con tope, que
             // después se asienta de nuevo en la velocidad base
             const empujon = 1 + Math.min(Math.abs(self.getVelocity()) / 300, 8)
             estado.forEach((e) => {
-              if (e.encima) return
+              if (e.encima || detenida.current) return
               // Mata el empujón anterior (tweens sobre el timeScale del
               // tween de la cinta, no la cinta misma)
               gsap.killTweensOf(e.tween)
@@ -101,13 +160,21 @@ export default function Proyectos() {
             })
           },
         })
+
+        return () => {
+          control.current = null
+        }
       })
     },
     { scope },
   )
 
   return (
-    <section ref={scope} id="proyectos" className={styles.proyectos}>
+    <section
+      ref={scope}
+      id={id}
+      className={`${styles.proyectos} ${elegida ? styles.conElegida : ''}`}
+    >
       <div className="container">
         <h2 className={styles.titular}>
           <span className={styles.mascara}>
@@ -125,46 +192,69 @@ export default function Proyectos() {
 
       <div className={styles.cintas}>
         {CINTAS.map((grupo, i) => (
-          <div key={i} className={styles.ventana}>
+          <div key={i} className={styles.ventana} data-vc="ventana">
             <div className={styles.pista} data-vc="pista">
               {[0, 1].map((copia) =>
-                grupo.map((pieza, j) => (
-                  <Pieza
-                    key={`${copia}-${j}-${pieza.src}`}
-                    pieza={pieza}
-                    // Solo la primera pasada de la primera copia es navegable
-                    {...(copia === 1 || j >= grupo.length / 2
-                      ? { 'aria-hidden': true, tabIndex: -1 }
-                      : {})}
-                  />
-                )),
+                grupo.map((pieza, j) => {
+                  const clave = `${i}-${copia}-${j}`
+                  return (
+                    <Pieza
+                      key={clave}
+                      pieza={pieza}
+                      elegida={elegida?.clave === clave}
+                      onClick={vista ? (evento) => alTocarPieza(evento, pieza, clave) : undefined}
+                      // Solo la primera pasada de la primera copia es navegable
+                      {...(copia === 1 || j >= grupo.length / 2
+                        ? { 'aria-hidden': true, tabIndex: -1 }
+                        : {})}
+                    />
+                  )
+                }),
               )}
             </div>
           </div>
         ))}
       </div>
 
+      {vista === 'detener' && (
+        <PanelPieza pieza={elegida && piezas[elegida.n]} onCerrar={cerrarPanel} />
+      )}
+      {vista === 'abrir' && abierta && (
+        <DialogoPieza
+          piezas={piezas}
+          inicial={abierta.n}
+          origen={abierta.origen}
+          raiz={scope}
+          onCerrar={() => {
+            setAbierta(null)
+            soltar()
+          }}
+        />
+      )}
+
       <div className={styles.cierre}>
         <EnlaceRuta to="/proyectos" className={`${boton.button} ${boton.primary}`}>
           Ver todos los proyectos
         </EnlaceRuta>
       </div>
+      <Etiqueta>{etiqueta}</Etiqueta>
     </section>
   )
 }
 
 // Una pieza: enlace a la ficha de su proyecto, con la proporción de su tipo.
 // El rótulo (tipo y cliente) aparece al pasar el mouse o con foco.
-function Pieza({ pieza, ...resto }) {
+function Pieza({ pieza, elegida = false, ...resto }) {
   return (
     <EnlaceRuta
       to={`/proyectos/${pieza.slug}`}
-      className={`${styles.pieza} ${styles[pieza.tipo] ?? ''}`}
+      className={`${styles.pieza} ${styles[pieza.tipo] ?? ''} ${elegida ? styles.elegida : ''}`}
+      data-n={pieza.n}
       aria-label={`${pieza.titulo}, ${pieza.tipo} para ${pieza.cliente}`}
       draggable={false}
       {...resto}
     >
-      <span className={styles.marco}>
+      <span className={styles.marco} data-marco>
         <img src={pieza.src} alt="" loading="lazy" decoding="async" draggable={false} />
       </span>
       <span className={styles.rotulo} aria-hidden="true">

@@ -14,6 +14,7 @@
 
 /* Base (movimiento reducido): cada cinta se recorre a mano */
 .ventana {
+  position: relative;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -80,7 +81,9 @@
   flex: none;
   height: var(--alto-pieza, 280px);
   aspect-ratio: 4 / 5;
-  transition: scale var(--transition-fast);
+  transition:
+    scale var(--transition-fast),
+    opacity var(--transition-fast);
 }
 
 /* La pieza bajo el cursor crece un poco */
@@ -175,4 +178,21 @@
     opacity: 1;
     translate: none;
   }
+}
+
+/* TEMPORAL — vista previa «cinta que se detiene»: la pieza elegida crece
+   en su lugar y las demás se apagan */
+.conElegida .pieza {
+  opacity: 0.3;
+}
+
+.conElegida .pieza.elegida {
+  opacity: 1;
+  scale: 1.1;
+  z-index: 2;
+}
+
+.conElegida .elegida .marco {
+  border-color: var(--gold);
+  box-shadow: var(--shadow-gold);
 }

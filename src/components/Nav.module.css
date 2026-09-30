@@ -47,28 +47,10 @@
      botón coincide con el logotipo visible y no arrastra el vacío del PNG. */
   margin-block: calc(var(--ancho-logo) * -0.318);
   margin-inline: calc(var(--ancho-logo) * -0.232);
-  /* Escala desde el borde izquierdo del logotipo visible (no del PNG, que
-     arrastra 23.2% de aire) y desde el centro vertical: conserva el respiro
-     lateral y el eje compartido con el círculo. Solo transform, sin reflow. */
-  transform-origin: 23.2% center;
-  transition: transform 0.4s var(--ease-out);
 }
 
-/* Lejos del top el logo se reduce para no pisar los titulares. Va en la
-   imagen y no en .marca, que ya usa transform para el :active. */
-.marcaCompacta .logo {
-  transform: scale(0.55);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .logo {
-    transition: none;
-  }
-}
-
-/* Hasta el logo compacto pisa el texto donde el contenido arranca a 40px
-   del borde (todo lo que está bajo ~1500px de ancho): se oculta mientras se
-   baja y vuelve, compacto, en cuanto se sube. */
+/* Lejos del top el logo se oculta: pisaba los titulares y no aportaba.
+   Vuelve solo al llegar arriba de todo. */
 .marcaOculta {
   opacity: 0;
   visibility: hidden;

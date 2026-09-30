@@ -3,9 +3,10 @@ import { useGSAP } from '@gsap/react'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Draggable } from 'gsap/Draggable'
 import { InertiaPlugin } from 'gsap/InertiaPlugin'
+import { Flip } from 'gsap/Flip'
 
 // Registro central de GSAP. Las animaciones se construyen en Etapa 3;
 // todo componente que anime debe importar gsap desde este archivo.
-gsap.registerPlugin(useGSAP, ScrollTrigger, Draggable, InertiaPlugin)
+gsap.registerPlugin(useGSAP, ScrollTrigger, Draggable, InertiaPlugin, Flip)
 
-export { gsap, useGSAP, ScrollTrigger, Draggable }
+export { gsap, useGSAP, ScrollTrigger, Draggable, Flip }

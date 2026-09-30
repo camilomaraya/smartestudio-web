@@ -24,19 +24,15 @@ const enlaces = [
   { label: 'Contacto', ancla: 'contacto', local: true },
 ]
 
-// Píxeles de scroll a partir de los cuales el logo pasa a su versión compacta.
-const UMBRAL_COMPACTO = 80
-// Píxeles mínimos de recorrido para considerar que cambió la dirección.
-const MARGEN_DIRECCION = 8
+// Píxeles de scroll a partir de los cuales el logo se oculta.
+const UMBRAL_LOGO = 80
 
 export default function Nav() {
   // `abierto` es el estado lógico; `visible` mantiene el panel en el DOM
   // mientras corre el fade de salida.
   const [abierto, setAbierto] = useState(false)
   const [visible, setVisible] = useState(false)
-  const [compacto, setCompacto] = useState(false)
   const [oculto, setOculto] = useState(false)
-  const ultimaY = useRef(0)
 
   const { pathname } = useLocation()
   const { navegarCon } = useTransicion()
@@ -174,20 +170,11 @@ export default function Nav() {
     return () => document.removeEventListener('keydown', alTeclear)
   }, [abierto])
 
-  // Lejos del top el logo se compacta y además se oculta mientras se baja,
-  // en cualquier ancho: al subir vuelve compacto.
+  // El logo solo vive arriba de todo: lejos del top se oculta, en cualquier
+  // ancho y sin importar la dirección, y queda solo el botón del menú.
   // Lenis mueve el scroll nativo, así que el evento de window llega igual.
   useEffect(() => {
-    const alScrollear = () => {
-      const y = window.scrollY
-      setCompacto(y > UMBRAL_COMPACTO)
-
-      // Un margen mínimo evita el parpadeo con micro-scrolls y el rebote de iOS.
-      const delta = y - ultimaY.current
-      if (Math.abs(delta) < MARGEN_DIRECCION) return
-      setOculto(y > UMBRAL_COMPACTO && delta > 0)
-      ultimaY.current = y
-    }
+    const alScrollear = () => setOculto(window.scrollY > UMBRAL_LOGO)
     alScrollear()
     window.addEventListener('scroll', alScrollear, { passive: true })
     return () => window.removeEventListener('scroll', alScrollear)
@@ -217,7 +204,6 @@ export default function Nav() {
         type="button"
         className={[
           styles.marca,
-          compacto && styles.marcaCompacta,
           // Con el menú abierto el logo es parte de la trampa de foco: siempre visible.
           oculto && !abierto && styles.marcaOculta,
         ]
