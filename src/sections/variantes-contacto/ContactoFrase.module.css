@@ -1,0 +1,210 @@
+/* TEMPORAL — variante «Frase para completar» (ver el .jsx). */
+.frase {
+  position: relative;
+  padding-block: var(--space-section);
+  border-top: 1px solid var(--line);
+}
+
+.cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-bottom: var(--space-8);
+}
+
+.titular {
+  font-size: var(--text-2xl);
+}
+
+.acento {
+  color: var(--gold);
+}
+
+.datos {
+  font-family: var(--font-utility);
+  color: var(--muted);
+}
+
+.datos a {
+  color: var(--white);
+  border-bottom: 1px solid var(--gold);
+}
+
+/* La carta: texto grande, los huecos en dorado */
+.carta {
+  max-width: 30em;
+  font-family: var(--font-utility);
+  font-size: clamp(1.35rem, 0.9rem + 2vw, 2.5rem);
+  line-height: 1.7;
+  color: var(--white);
+}
+
+.carta > p + p {
+  margin-top: 0.6em;
+}
+
+/*
+ * Hueco que crece con el texto: el ::after invisible lleva lo escrito (o
+ * el placeholder) y define el ancho de la celda; el input ocupa la misma
+ * celda encima. Así el campo mide lo que dice, sin medir en JS.
+ */
+.hueco {
+  display: inline-grid;
+  vertical-align: baseline;
+  max-width: 100%;
+}
+
+.hueco::after {
+  content: attr(data-valor);
+  /* Un pelo de holgura para el cursor, sin dejar espacio antes de la coma */
+  padding-right: 0.1em;
+  grid-area: 1 / 1;
+  visibility: hidden;
+  white-space: pre;
+  overflow: hidden;
+}
+
+.hueco input,
+.hueco select {
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 2ch;
+  /* Sin esto el select aporta el ancho de su opción más larga a la celda
+     y el hueco deja de medir lo que dice */
+  contain: inline-size;
+  min-height: 48px;
+  padding: 0;
+  background: none;
+  border: none;
+  border-bottom: 2px dashed rgba(243, 193, 58, 0.45);
+  border-radius: 0;
+  color: var(--gold);
+  font: inherit;
+  line-height: 1.3;
+  transition: border-color var(--transition-fast);
+}
+
+.hueco input::placeholder {
+  color: rgba(243, 193, 58, 0.4);
+}
+
+.hueco input:focus,
+.hueco select:focus {
+  outline: none;
+  border-bottom-style: solid;
+  border-bottom-color: var(--gold);
+}
+
+/* El select lleva flecha propia y espacio para ella */
+.huecoSelect::after {
+  padding-right: 1.2em;
+}
+
+.hueco select {
+  appearance: none;
+  padding-right: 1.1em;
+  background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%),
+    linear-gradient(-45deg, transparent 50%, var(--gold) 50%);
+  background-position:
+    calc(100% - 0.55em) 55%,
+    calc(100% - 0.3em) 55%;
+  background-size: 0.25em 0.25em;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+.hueco select option {
+  background-color: var(--bg-soft);
+  color: var(--white);
+  font-size: var(--text-base);
+}
+
+.vacio {
+  color: rgba(243, 193, 58, 0.4) !important;
+}
+
+[aria-invalid='true'] {
+  border-bottom-color: #f2685c !important;
+}
+
+.cuento {
+  margin-top: 0.6em;
+}
+
+/* El mensaje es un hueco grande con renglones */
+.mensaje {
+  display: block;
+  width: 100%;
+  min-height: calc(1.7em * 4);
+  padding: 0;
+  background: none;
+  background-image: repeating-linear-gradient(
+    transparent,
+    transparent calc(1.7em - 2px),
+    rgba(243, 193, 58, 0.25) calc(1.7em - 2px),
+    rgba(243, 193, 58, 0.25) 1.7em
+  );
+  background-attachment: local;
+  border: none;
+  color: var(--gold);
+  font: inherit;
+  line-height: 1.7;
+  resize: vertical;
+}
+
+.mensaje::placeholder {
+  color: rgba(243, 193, 58, 0.4);
+}
+
+.mensaje:focus {
+  outline: none;
+}
+
+.mensaje:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 6px;
+}
+
+.firma {
+  margin-top: 0.8em;
+  color: var(--muted);
+}
+
+.firmaNombre {
+  color: var(--white);
+}
+
+.enviar {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 48px;
+  margin-top: var(--space-7);
+  padding-inline: var(--space-6);
+  border-radius: var(--radius-pill);
+  background-color: var(--gold);
+  color: var(--bg);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-base);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.enviar:hover:not(:disabled) {
+  background-color: var(--gold-soft);
+  transform: translateY(-2px);
+}
+
+.enviar:disabled {
+  opacity: 0.6;
+}
+
+/* El reset global no quita el borde nativo de los botones */
+.frase button {
+  border: none;
+}
