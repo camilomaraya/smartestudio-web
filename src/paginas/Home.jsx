@@ -16,7 +16,10 @@ import PlanesRecomendador from '../sections/variantes-planes/PlanesRecomendador'
 import EquipoAcordeon from '../sections/variantes-equipo/EquipoAcordeon'
 import EquipoCredenciales from '../sections/variantes-equipo/EquipoCredenciales'
 import EquipoQuien from '../sections/variantes-equipo/EquipoQuien'
-import CTA from '../sections/CTA'
+import CTAActual from '../sections/variantes-cta/CTAActual'
+import CTAIman from '../sections/variantes-cta/CTAIman'
+import CTADosCaminos from '../sections/variantes-cta/CTADosCaminos'
+import CTAMarquee from '../sections/variantes-cta/CTAMarquee'
 
 export default function Home() {
   const location = useLocation()
@@ -190,7 +193,13 @@ export default function Home() {
       <EquipoAcordeon id="equipo" etiqueta="Equipo: acordeón" />
       <EquipoCredenciales etiqueta="Equipo: credenciales" />
       <EquipoQuien etiqueta="Equipo: ¿quién hace qué?" />
-      <CTA />
+      {/* TEMPORAL: variantes del CTA para comparar. La actual trae su
+          propio id="cta". Al elegir una, dejarla (con id="cta") en lugar de
+          sections/CTA.jsx y borrar sections/variantes-cta. */}
+      <CTAActual etiqueta="CTA: actual" />
+      <CTAIman etiqueta="CTA: titular gigante + imán" />
+      <CTADosCaminos etiqueta="CTA: dos caminos" />
+      <CTAMarquee etiqueta="CTA: marquee protagonista" />
     </div>
   )
 }

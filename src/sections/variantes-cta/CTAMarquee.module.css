@@ -1,0 +1,111 @@
+/* TEMPORAL — variante «Marquee protagonista» (ver el .jsx). */
+.marquee {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-8);
+  padding-block: var(--space-section);
+  border-top: 1px solid var(--line);
+  overflow: hidden;
+}
+
+.cabecera {
+  text-align: center;
+}
+
+.titular {
+  font-size: clamp(2.5rem, 6vw, 5.5rem);
+}
+
+.dorado {
+  color: var(--gold);
+}
+
+/* Las filas se cruzan: rotaciones opuestas y márgenes negativos para que
+   se monten una sobre otra. El ancho de 120% evita ver los bordes al
+   rotar. */
+.cruce {
+  display: flex;
+  flex-direction: column;
+  margin-inline: -10vw;
+}
+
+.fila {
+  overflow: hidden;
+  white-space: nowrap;
+  padding-block: var(--space-3);
+}
+
+.fila:nth-child(1) {
+  transform: rotate(-4deg);
+}
+
+.fila:nth-child(2) {
+  position: relative;
+  z-index: 1;
+  margin-block: calc(var(--space-6) * -1);
+  transform: rotate(3deg);
+}
+
+.fila:nth-child(3) {
+  transform: rotate(-1.5deg);
+}
+
+.pista {
+  display: inline-flex;
+}
+
+.frase {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-stretch: 125%;
+  font-size: clamp(2.5rem, 8vw, 6.5rem);
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+}
+
+.separador {
+  font-size: 0.45em;
+  margin-inline: 0.8em;
+}
+
+/* Tres tratamientos: contorno, cinta dorada, lleno blanco */
+.contorno .frase {
+  color: transparent;
+  -webkit-text-stroke: 1.5px var(--gold);
+}
+
+.cinta {
+  background-color: var(--gold);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+}
+
+.cinta .frase {
+  color: var(--bg);
+}
+
+.lleno .frase {
+  color: var(--white);
+}
+
+.lleno .separador,
+.contorno .separador {
+  color: var(--gold);
+  -webkit-text-stroke: 0;
+}
+
+.accion {
+  display: flex;
+  justify-content: center;
+}
+
+@media (max-width: 720px) {
+  .fila:nth-child(2) {
+    margin-block: calc(var(--space-4) * -1);
+  }
+}
