@@ -41,16 +41,14 @@ export function Valor({ valor, plan, categoria, className = '' }) {
 export function Titular() {
   return (
     <h2 className={styles.titular}>
-      {['Cuatro formas', 'de trabajar'].map((texto) => (
-        <span key={texto} className={styles.mascara}>
-          <span className={styles.linea} data-vpl="linea">
-            {texto}
-          </span>
-        </span>
-      ))}
       <span className={styles.mascara}>
-        <span className={`${styles.linea} ${styles.acento}`} data-vpl="linea">
-          juntxs
+        <span className={styles.linea} data-vpl="linea">
+          Cuatro formas
+        </span>
+      </span>
+      <span className={styles.mascara}>
+        <span className={styles.linea} data-vpl="linea">
+          de trabajar <span className={styles.acento}>juntxs</span>
         </span>
       </span>
     </h2>

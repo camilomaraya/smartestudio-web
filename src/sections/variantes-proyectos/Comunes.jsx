@@ -29,16 +29,14 @@ export function todasLasPiezas() {
 export function Titular() {
   return (
     <h2 className={styles.titular}>
-      {['Lo que se ve', 'es la mitad'].map((texto) => (
-        <span key={texto} className={styles.mascara}>
-          <span className={styles.linea} data-vp="linea">
-            {texto}
-          </span>
-        </span>
-      ))}
       <span className={styles.mascara}>
-        <span className={`${styles.linea} ${styles.acento}`} data-vp="linea">
-          del trabajo
+        <span className={styles.linea} data-vp="linea">
+          Lo que se ve es
+        </span>
+      </span>
+      <span className={styles.mascara}>
+        <span className={styles.linea} data-vp="linea">
+          la mitad <span className={styles.acento}>del trabajo</span>
         </span>
       </span>
     </h2>

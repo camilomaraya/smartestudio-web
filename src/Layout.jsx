@@ -5,7 +5,6 @@ import { useRutaScroll } from './hooks/useRutaScroll'
 import Nav from './components/Nav'
 import ContactoActual from './sections/variantes-contacto/ContactoActual'
 import ContactoChat from './sections/variantes-contacto/ContactoChat'
-import ContactoFrase from './sections/variantes-contacto/ContactoFrase'
 import ContactoPantalla from './sections/variantes-contacto/ContactoPantalla'
 import Footer from './components/Footer'
 import Transicion from './components/Transicion'
@@ -39,7 +38,6 @@ export default function Layout() {
           el footer) y se borra sections/variantes-contacto. */}
       <ContactoActual id="contacto" etiqueta="Formulario: actual pulido" />
       <ContactoChat etiqueta="Formulario: chat" />
-      <ContactoFrase etiqueta="Formulario: frase para completar" />
       <ContactoPantalla etiqueta="Formulario: una pregunta por pantalla" />
       <Footer />
     </Transicion>
