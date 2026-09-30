@@ -1,6 +1,8 @@
 .footer {
   border-top: 1px solid var(--line);
-  background-color: var(--bg-soft);
+  /* Negro y no --bg-soft: la sección de arriba (formulario) usa el gris
+     y el pie tiene que despegarse de ella */
+  background-color: var(--bg);
   padding-block: var(--space-8) var(--space-6);
 }
 
