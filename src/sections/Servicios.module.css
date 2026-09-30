@@ -1,17 +1,165 @@
-/* Sección de contenido sobre --bg: la alternancia de fondos de la versión
-   anterior quedó descartada (DESIGN.md §4), el ritmo lo marca el contraste
-   con las secciones full-viewport que la rodean. */
+/* Servicios del home (ver el .jsx).
+   Base = lista vertical de cartas (movimiento reducido, sin JS). El mazo
+   se arma en la media query, la misma condición que el JS. */
 .servicios {
+  position: relative;
   padding-block: var(--space-section);
 }
 
-.titular {
-  font-size: var(--text-3xl);
-  margin-bottom: var(--space-8);
+@media (prefers-reduced-motion: no-preference) {
+  /* El escenario fijado ya centra su contenido: sin padding arriba */
+  .servicios {
+    padding-top: 0;
+  }
 }
 
-/* Máscara del reveal por línea: el padding compensado evita cortar
-   acentos y descendentes. */
+.pila {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.carta {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  /* Fila de alto fijo: la imagen toma el alto de la carta y no la estira */
+  grid-template-rows: minmax(0, 1fr);
+  gap: var(--space-7);
+  align-items: center;
+  /* Tiene que caber entera en el viewport fijado */
+  height: min(56svh, 460px);
+  overflow: hidden;
+  padding: var(--space-6);
+  border: 1px solid rgba(243, 193, 58, 0.25);
+  border-radius: var(--radius-lg);
+  background-color: var(--bg-soft);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.numero {
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.nombre {
+  --text-display: clamp(2rem, 4vw, 3.75rem);
+  margin-top: var(--space-3);
+  color: var(--white);
+}
+
+.resumen {
+  max-width: 40ch;
+  margin-top: var(--space-3);
+  font-size: var(--text-lg);
+  color: var(--muted);
+}
+
+.incluye {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.incluye li {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-utility);
+  font-size: var(--text-xs);
+  color: var(--white);
+}
+
+.enlace {
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-pill);
+  background-color: var(--gold);
+  font-family: var(--font-utility);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--bg);
+  transition: background-color var(--transition-fast);
+}
+
+.enlace:hover,
+.enlace:focus-visible {
+  background-color: var(--gold-soft);
+}
+
+.imagen {
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+/* El mazo: un viewport fijado con las cuatro cartas en la misma celda, la
+   01 encima (z-index descendente) */
+@media (prefers-reduced-motion: no-preference) {
+  /* Titular arriba y mazo debajo, centrados juntos en el viewport */
+  .mazo {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100svh;
+    padding-top: var(--nav-height);
+  }
+
+  .cabecera :global(h2) {
+    margin-bottom: var(--space-6);
+  }
+
+  .pila {
+    display: grid;
+  }
+
+  .carta {
+    grid-area: 1 / 1;
+    z-index: calc(10 - var(--i));
+    /* Desde abajo: la carta que espera se achica hacia arriba y el y: 24
+       deja asomar su borde inferior bajo la de encima */
+    transform-origin: center bottom;
+  }
+}
+
+@media (max-width: 800px) {
+  .carta {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    gap: var(--space-4);
+    height: auto;
+    padding: var(--space-5);
+  }
+
+  .imagen {
+    order: -1;
+    height: 24svh;
+    align-self: auto;
+  }
+}
+
+/* --- Titular y cierre, centrados --- */
+/* Un poco bajo --text-3xl: «Lo que hacemos por tu marca,» en una sola
+   línea no cabía en el container a ese tamaño */
+.titular {
+  font-size: clamp(1.5rem, 3.2vw, 2.9rem);
+  margin-bottom: var(--space-8);
+  text-align: center;
+}
+
 .mascara {
   display: block;
   overflow: hidden;
@@ -23,137 +171,33 @@
   display: block;
 }
 
+/* Titular en dos líneas: la primera no se parte salvo en celular */
+@media (min-width: 700px) {
+  .linea {
+    white-space: nowrap;
+  }
+}
+
 .acento {
   color: var(--gold);
 }
 
-.lista {
+.cierre {
   display: flex;
   flex-direction: column;
-}
-
-.item {
-  position: relative;
-}
-
-/* Regla propia en vez de border-top: un borde no se puede escalar desde la
-   izquierda, y el trazado es la mitad del gesto. La última fila cierra el
-   índice con la suya abajo. */
-.regla {
-  display: block;
-  height: 1px;
-  background-color: var(--line);
-}
-
-.item:last-child::after {
-  content: '';
-  display: block;
-  height: 1px;
-  background-color: var(--line);
-}
-
-.fila {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-5);
-  padding-block: var(--space-6);
-  transition: padding-inline var(--transition-fast);
+  margin-top: var(--space-8);
+  text-align: center;
 }
 
-.numero {
-  font-family: var(--font-utility);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  letter-spacing: 0.08em;
-  color: var(--gold);
-}
-
-.cuerpo {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.nombre {
-  font-size: var(--text-2xl);
-  transition: color var(--transition-fast);
-}
-
-.gancho {
-  font-size: var(--text-base);
-  color: var(--muted);
-  transition: color var(--transition-fast);
-}
-
-.flecha {
-  align-self: center;
-  font-size: var(--text-xl);
-  color: var(--muted);
-  transition:
-    transform var(--transition-fast),
-    color var(--transition-fast);
-}
-
-/* El hover mueve la fila hacia dentro: el índice reacciona como una lista
-   física, sin fondo ni caja que sumar. */
-.fila:hover,
-.fila:focus-visible {
-  padding-inline: var(--space-4);
-}
-
-.fila:hover .nombre,
-.fila:focus-visible .nombre {
-  color: var(--gold);
-}
-
-.fila:hover .gancho,
-.fila:focus-visible .gancho {
-  color: var(--white);
-}
-
-.fila:hover .flecha,
-.fila:focus-visible .flecha {
-  transform: translateX(6px);
-  color: var(--gold);
-}
-
+/* Space Grotesk, como la bajada del hero. balance reparte las líneas
+   parejas y evita la última línea con una palabra suelta */
 .bajada {
-  max-width: var(--container-narrow);
-  margin-top: var(--space-7);
+  max-width: 70ch;
+  font-family: var(--font-utility);
   font-size: var(--text-lg);
+  line-height: 1.55;
+  text-wrap: balance;
   color: var(--muted);
-}
-
-.verTodo {
-  color: var(--white);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-  text-decoration-color: var(--gold);
-  transition: color var(--transition-fast);
-}
-
-.verTodo:hover,
-.verTodo:focus-visible {
-  color: var(--gold);
-}
-
-@media (max-width: 640px) {
-  .fila {
-    grid-template-columns: auto 1fr;
-    gap: var(--space-4);
-    padding-block: var(--space-5);
-  }
-
-  /* La flecha pasa bajo el texto, alineada con él: en dos columnas
-     apretadas, una tercera columna deja el nombre sin ancho. */
-  .flecha {
-    grid-column: 2;
-    align-self: start;
-    justify-self: start;
-  }
-
-  .nombre {
-    font-size: var(--text-xl);
-  }
 }

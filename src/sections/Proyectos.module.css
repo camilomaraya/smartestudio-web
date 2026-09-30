@@ -1,4 +1,53 @@
-/* TEMPORAL — ver Comunes.jsx. */
+/* Proyectos del home (ver el .jsx). */
+.proyectos {
+  position: relative;
+  padding-block: var(--space-section);
+  overflow: hidden;
+}
+
+.cintas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  margin-block: var(--space-7);
+}
+
+/* Base (movimiento reducido): cada cinta se recorre a mano */
+.ventana {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pista {
+  display: flex;
+  gap: var(--space-5);
+  width: max-content;
+  padding-inline: var(--gutter);
+}
+
+/* Piezas grandes: la de arriba ronda media pantalla de alto */
+.ventana:first-child .pista {
+  --alto-pieza: clamp(260px, 42svh, 440px);
+}
+
+.ventana:last-child .pista {
+  --alto-pieza: clamp(200px, 32svh, 340px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ventana {
+    overflow: visible;
+  }
+
+  .pista {
+    /* El margen lo da la cinta entera, que desborda la pantalla */
+    padding-inline: 0;
+    padding-right: var(--space-5);
+    will-change: transform;
+  }
+}
+
+/* --- Titular y cierre --- */
 .titular {
   font-size: var(--text-3xl);
   text-align: center;
@@ -31,6 +80,14 @@
   flex: none;
   height: var(--alto-pieza, 280px);
   aspect-ratio: 4 / 5;
+  transition: scale var(--transition-fast);
+}
+
+/* La pieza bajo el cursor crece un poco */
+.pieza:hover,
+.pieza:focus-visible {
+  scale: 1.04;
+  z-index: 1;
 }
 
 .reel,
@@ -110,17 +167,6 @@
   font-family: var(--font-utility);
   font-size: 0.7rem;
   color: var(--muted);
-}
-
-/* Crédito fijo: el rótulo va debajo de la pieza, siempre visible */
-.creditoFijo .rotulo {
-  position: static;
-  margin-top: var(--space-3);
-  padding: 0;
-  background: none;
-  backdrop-filter: none;
-  opacity: 1;
-  translate: none;
 }
 
 /* Sin hover (táctil): el rótulo queda visible */

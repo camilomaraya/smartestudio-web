@@ -1,15 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router'
-import { serviciosPrincipales } from '../../data/servicios'
+import { serviciosPrincipales } from '../data/servicios'
 
 /*
- * TEMPORAL — la lógica de Contacto.jsx sacada a un hook para que las
- * variantes del formulario compartan exactamente el mismo contrato con
- * server/contacto.php: mismo endpoint, mismo payload (con `servicio` y
- * `origen`), honeypot `sitio` y Turnstile. Las variantes cambian solo la
+ * Lógica del formulario de contacto (sections/Contacto.jsx), con el
+ * contrato de server/contacto.php: endpoint, payload (con `servicio` y
+ * `origen`), honeypot `sitio` y Turnstile. El componente decide solo la
  * forma de preguntar.
- *
- * Al elegir una variante, esto pasa a ser la lógica de Contacto.jsx.
  */
 
 const ENDPOINT_CONTACTO = '/contacto.php'
@@ -38,9 +35,9 @@ export function useFormularioContacto() {
   const [errorMsg, setErrorMsg] = useState('')
 
   /*
-   * Igual que en Contacto.jsx: arranca en false y pasa a true en el efecto.
-   * En el prerender —o si el JS nunca llega— cada variante muestra todos
-   * sus campos juntos y se puede enviar de una vez.
+   * Arranca en false y pasa a true en el efecto. En el prerender —o si el
+   * JS nunca llega— el formulario muestra todos sus campos juntos y se
+   * puede enviar de una vez.
    */
   const [interactivo, setInteractivo] = useState(false)
   useEffect(() => setInteractivo(true), [])
@@ -119,7 +116,7 @@ export function useFormularioContacto() {
 
   /*
    * Envía. Valida todo antes: si algo falta devuelve { campo, falta } para
-   * que la variante lleve al visitante hasta ahí, y no envía.
+   * que el formulario lleve al visitante hasta ahí, y no envía.
    */
   const enviar = async (formElement) => {
     if (estado === 'enviando') return null

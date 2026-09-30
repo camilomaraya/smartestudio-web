@@ -15,6 +15,9 @@ export const serviciosPrincipales = [
   {
     slug: 'community-management',
     titulo: 'Community Management',
+    // Imagen de la carta del home. PLACEHOLDER: pieza de un proyecto hasta
+    // que haya una propia del servicio.
+    imagen: '/placeholders/villa-verla-post-1.svg',
     // Línea corta para la fila del home, donde no cabe el resumen entero.
     gancho: 'Tus redes, con una voz que se reconoce.',
     resumen:
@@ -32,6 +35,7 @@ export const serviciosPrincipales = [
   {
     slug: 'diseno-grafico',
     titulo: 'Diseño gráfico e identidad',
+    imagen: '/placeholders/villa-verla-portada.svg',
     gancho: 'Que se reconozca sin leer el nombre.',
     resumen:
       'Antes de publicar nada hay que saber cómo te ves. Construimos tu identidad desde cero —o la ordenamos si ya existe— para que todo lo que salga de tu marca se reconozca al toque.',
@@ -48,6 +52,7 @@ export const serviciosPrincipales = [
   {
     slug: 'foto-video',
     titulo: 'Fotografía y video',
+    imagen: '/placeholders/la-rusia-reel-1.svg',
     gancho: 'Tu producto, mejor que a contraluz.',
     resumen:
       'Tu producto merece verse mejor que en una foto de celular a contraluz. Sesiones y reels grabados y editados por nosotrxs, pensados para el formato donde van a vivir.',
@@ -64,6 +69,7 @@ export const serviciosPrincipales = [
   {
     slug: 'publicidad-digital',
     titulo: 'Publicidad digital',
+    imagen: '/placeholders/automotriz-carmona-post-1.svg',
     gancho: 'Pauta que no quema presupuesto.',
     resumen:
       'Pauta que no quema presupuesto. Definimos a quién le hablas, cuánto inviertes y qué esperas que pase — y después te mostramos si pasó.',

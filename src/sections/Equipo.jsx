@@ -1,92 +1,57 @@
-import { useRef } from 'react'
-import { equipo } from '../data/equipo'
+import { useRef, useState } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
+import { equipo } from '../data/equipo'
 import styles from './Equipo.module.css'
 
 /*
- * Equipo — sección de contenido del estándar nuevo (DESIGN.md §4).
+ * Equipo — cada persona es un carné. Al pasar el
+ * mouse, o al tocar el botón de girar, la credencial da vuelta y muestra
+ * la bio y en qué te ayuda.
  *
- * Deja de ser una grilla de `.card` con avatares circulares chicos: ahora
- * son tres retratos verticales grandes, sin caja, con el texto debajo. En
- * una agencia de tres personas el equipo ES el producto, y un círculo de
- * 80px con iniciales no comunica eso.
- *
- * Está pensado para que las fotos reales entren sin rediseñar nada: el
- * marco ya tiene su proporción 3:4 y hoy lo ocupa un placeholder con
- * iniciales. Cuando lleguen los retratos, se reemplaza el contenido del
- * marco y el layout no se mueve.
- *
- * El gesto propio: cada retrato se descubre de abajo hacia arriba con una
- * máscara, y su texto entra después. No es el reveal genérico ni el zigzag
- * de la sección E — un gesto por sección (§6).
+ * POR CONFIRMAR CON ABBY: qué servicios toca cada una (acá sale del cargo).
  */
+const AYUDA = {
+  'abby-herrera': ['Community Management', 'Contenido mensual', 'Tus mensajes y comentarios'],
+  'danae-reyes': ['Identidad de marca', 'Diseño gráfico', 'Línea visual para redes'],
+  'abraham-flores': ['Fotografía', 'Reels y video', 'Sesiones para redes'],
+}
+// Giro de reposo de cada credencial «sobre la mesa»
+const GIROS = [-3, 1.5, -1]
+
 export default function Equipo() {
   const scope = useRef(null)
+  const [volteadas, setVolteadas] = useState(() => new Set())
+
+  const voltear = (personaId) =>
+    setVolteadas((prev) => {
+      const siguiente = new Set(prev)
+      if (siguiente.has(personaId)) siguiente.delete(personaId)
+      else siguiente.add(personaId)
+      return siguiente
+    })
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia()
-
       mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const lineas = scope.current.querySelectorAll('[data-equipo="linea"]')
-        const retratos = scope.current.querySelectorAll('[data-equipo="retrato"]')
-        const textos = scope.current.querySelectorAll('[data-equipo="texto"]')
-        const bajada = scope.current.querySelector('[data-equipo="bajada"]')
-
-        gsap.set(lineas, { yPercent: 110, y: 0 })
-        // El retrato nace recortado por abajo y se descubre; la escala
-        // interna evita que el borde superior se vea entrar.
-        gsap.set(retratos, { clipPath: 'inset(100% 0% 0% 0%)' })
-        gsap.set(textos, { opacity: 0, y: 16 })
-        gsap.set(bajada, { opacity: 0, y: 20 })
-
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: scope.current, start: 'top 75%', once: true },
-        })
-
-        // fromTo con `y: 0` explícito: GSAP suma `y` y `yPercent`, y bajo el
-        // doble montaje de StrictMode la segunda pasada duplicaría el
-        // desplazamiento dejando el titular tapado por su máscara.
-        tl.fromTo(
-          lineas,
-          { yPercent: 110, y: 0 },
-          { yPercent: 0, y: 0, duration: 0.9, stagger: 0.1, ease: 'power4.out' },
+        const raiz = scope.current
+        revelarTitular(raiz)
+        // Llegan como si alguien las dejara sobre la mesa. El giro de
+        // reposo lo pone la propiedad CSS rotate; GSAP solo suma el giro
+        // extra de la caída y lo lleva a 0.
+        gsap.fromTo(
+          raiz.querySelectorAll('[data-eqc="credencial"]'),
+          { opacity: 0, y: -60, rotation: (i) => GIROS[i] * 3 },
+          {
+            opacity: 1,
+            y: 0,
+            rotation: 0,
+            duration: 0.9,
+            stagger: 0.14,
+            ease: 'back.out(1.4)',
+            scrollTrigger: { trigger: raiz, start: 'top 60%', once: true },
+          },
         )
-          .to(
-            retratos,
-            {
-              clipPath: 'inset(0% 0% 0% 0%)',
-              duration: 1,
-              stagger: 0.12,
-              ease: 'power3.inOut',
-              // Sin clearProps: el clip-path final es el estado de reposo y
-              // limpiarlo no cambia nada, pero dejarlo evita un repaint.
-            },
-            0.4,
-          )
-          .to(
-            textos,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.7,
-              stagger: 0.12,
-              ease: 'power3.out',
-              clearProps: 'opacity,transform',
-            },
-            0.75,
-          )
-          .to(
-            bajada,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              ease: 'power3.out',
-              clearProps: 'opacity,transform',
-            },
-            '>-0.3',
-          )
       })
     },
     { scope },
@@ -95,57 +60,122 @@ export default function Equipo() {
   return (
     <section ref={scope} id="equipo" className={styles.equipo}>
       <div className="container">
-        <h2 className={styles.titular}>
-          <span className={styles.mascara}>
-            <span className={styles.linea} data-equipo="linea">
-              Detrás de cada
-            </span>
-          </span>
-          <span className={styles.mascara}>
-            <span className={styles.linea} data-equipo="linea">
-              publicación hay
-            </span>
-          </span>
-          <span className={styles.mascara}>
-            <span className={`${styles.linea} ${styles.acento}`} data-equipo="linea">
-              tres personas
-            </span>
-          </span>
-        </h2>
+        <Titular />
 
-        <ul className={styles.lista}>
-          {equipo.map((persona) => {
-            const iniciales = persona.nombre
-              .split(' ')
-              .map((parte) => parte[0])
-              .join('')
-
+        <ul className={styles.mesa}>
+          {equipo.map((persona, i) => {
+            const volteada = volteadas.has(persona.id)
             return (
-              <li key={persona.id} className={styles.persona}>
-                {/* Marco 3:4 listo para la foto real. Hoy lo ocupa el
-                    placeholder de iniciales; cuando llegue el retrato se
-                    reemplaza acá dentro y el layout no se mueve. */}
-                <div className={styles.retrato} data-equipo="retrato">
-                  <span className={styles.iniciales} aria-hidden="true">
-                    {iniciales}
-                  </span>
+              <li
+                key={persona.id}
+                className={styles.lugar}
+                style={{ '--giro': `${GIROS[i]}deg` }}
+              >
+                <div className={styles.credencial} data-eqc="credencial">
+                  <div className={`${styles.giro} ${volteada ? styles.volteada : ''}`}>
+                    {/* Frente */}
+                    <div className={`${styles.cara} ${styles.frente}`} aria-hidden={volteada}>
+                      <span className={styles.ranura} aria-hidden="true" />
+                      <div className={styles.encabezado}>
+                        <span>Smart Estudio</span>
+                        <span className={styles.codigo}>SMART-{String(i + 1).padStart(2, '0')}</span>
+                      </div>
+                      <Retrato persona={persona} />
+                      <h3 className={`titular ${styles.nombre}`}>{persona.nombre}</h3>
+                      <p className={styles.cargo}>{persona.cargo}</p>
+                    </div>
+
+                    {/* Dorso */}
+                    <div className={`${styles.cara} ${styles.dorso}`} aria-hidden={!volteada}>
+                      <p className={styles.cargo}>{persona.nombre}</p>
+                      <p className={styles.bio}>{persona.bio}</p>
+                      <p className={styles.ayudaTitulo}>En qué te ayuda</p>
+                      <ul className={styles.ayuda}>
+                        {AYUDA[persona.id]?.map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
                 </div>
 
-                <div className={styles.texto} data-equipo="texto">
-                  <h3 className={styles.nombre}>{persona.nombre}</h3>
-                  <p className={styles.cargo}>{persona.cargo}</p>
-                  <p className={styles.bio}>{persona.bio}</p>
-                </div>
+                <button
+                  type="button"
+                  className={styles.voltear}
+                  aria-pressed={volteada}
+                  onClick={() => voltear(persona.id)}
+                >
+                  {volteada ? 'Ver credencial' : `Conocer a ${persona.nombre.split(' ')[0]}`}
+                  <span aria-hidden="true"> ↻</span>
+                </button>
               </li>
             )
           })}
         </ul>
 
-        <p className={styles.bajada} data-equipo="bajada">
-          Somos un equipo chico a propósito: hablas con quien hace el trabajo, sin
-          intermediarios ni cuentas que rebotan entre departamentos.
-        </p>
+        <Bajada />
       </div>
     </section>
+  )
+}
+
+const iniciales = (nombre) =>
+  nombre
+    .split(' ')
+    .map((parte) => parte[0])
+    .join('')
+
+// Marco 3:4 listo para la foto real: hoy lo ocupa el placeholder con
+// iniciales; cuando llegue el retrato va acá dentro y nada se mueve.
+function Retrato({ persona }) {
+  return (
+    <div className={styles.retrato}>
+      <span className={styles.iniciales} aria-hidden="true">
+        {iniciales(persona.nombre)}
+      </span>
+    </div>
+  )
+}
+
+function Titular() {
+  return (
+    <h2 className={styles.titular}>
+      {['Detrás de cada', 'publicación hay'].map((texto) => (
+        <span key={texto} className={styles.mascara}>
+          <span className={styles.linea} data-veq="linea">
+            {texto}
+          </span>
+        </span>
+      ))}
+      <span className={styles.mascara}>
+        <span className={`${styles.linea} ${styles.acento}`} data-veq="linea">
+          tres personas
+        </span>
+      </span>
+    </h2>
+  )
+}
+
+function Bajada() {
+  return (
+    <p className={styles.bajada}>
+      Somos un equipo chico a propósito: hablas con quien hace el trabajo, sin intermediarios ni
+      cuentas que rebotan entre departamentos.
+    </p>
+  )
+}
+
+function revelarTitular(raiz) {
+  gsap.fromTo(
+    raiz.querySelectorAll('[data-veq="linea"]'),
+    { yPercent: 110, y: 0 },
+    {
+      yPercent: 0,
+      y: 0,
+      duration: 0.9,
+      stagger: 0.1,
+      ease: 'power4.out',
+      scrollTrigger: { trigger: raiz, start: 'top 75%', once: true },
+    },
   )
 }

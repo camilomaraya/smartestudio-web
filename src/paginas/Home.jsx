@@ -6,16 +6,11 @@ import { useTransicion } from '../hooks/useTransicion'
 import Hero from '../sections/Hero'
 import Manifiesto from '../sections/Manifiesto'
 import Correccion from '../components/Correccion'
-import ServiciosPreview from '../sections/variantes-servicios/ServiciosPreview'
-import ServiciosApilados from '../sections/variantes-servicios/ServiciosApilados'
-import ProyectosCinta from '../sections/variantes-proyectos/ProyectosCinta'
-import ProyectosCollage from '../sections/variantes-proyectos/ProyectosCollage'
-import ProyectosCarrusel from '../sections/variantes-proyectos/ProyectosCarrusel'
-import PlanesEscalera from '../sections/variantes-planes/PlanesEscalera'
-import PlanesRecomendador from '../sections/variantes-planes/PlanesRecomendador'
-import EquipoAcordeon from '../sections/variantes-equipo/EquipoAcordeon'
-import EquipoCredenciales from '../sections/variantes-equipo/EquipoCredenciales'
-import CTAIman from '../sections/variantes-cta/CTAIman'
+import Servicios from '../sections/Servicios'
+import Proyectos from '../sections/Proyectos'
+import Planes from '../sections/Planes'
+import Equipo from '../sections/Equipo'
+import CTA from '../sections/CTA'
 
 export default function Home() {
   const location = useLocation()
@@ -166,31 +161,11 @@ export default function Home() {
       <Hero />
       <Manifiesto id="manifiesto" />
       <Correccion />
-      {/* TEMPORAL: variantes de Servicios para comparar. Al elegir una, dejar
-          solo esa (con id="servicios") en lugar de sections/Servicios.jsx y
-          borrar sections/variantes-servicios. */}
-      <ServiciosPreview id="servicios" etiqueta="Servicios: vista previa" />
-      <ServiciosApilados etiqueta="Servicios: apilados" />
-      <ServiciosApilados largo etiqueta="Servicios: apilados, texto largo" />
-      {/* TEMPORAL: variantes de Proyectos para comparar. Al elegir una,
-          dejarla (con id="detras") en lugar de sections/Detras.jsx y borrar
-          sections/variantes-proyectos. */}
-      <ProyectosCinta id="detras" etiqueta="Proyectos: cinta" />
-      <ProyectosCollage etiqueta="Proyectos: collage" />
-      <ProyectosCarrusel etiqueta="Proyectos: carrusel" />
-      {/* TEMPORAL: variantes de Planes para comparar. Al elegir una, dejarla
-          (con id="planes", ancla del botón del hero) en lugar de
-          sections/Planes.jsx y borrar sections/variantes-planes. */}
-      <PlanesEscalera id="planes" etiqueta="Planes: escalera" />
-      <PlanesRecomendador etiqueta="Planes: arma tu plan" />
-      {/* TEMPORAL: variantes de Equipo para comparar. Al elegir una,
-          dejarla (con id="equipo") en lugar de sections/Equipo.jsx y borrar
-          sections/variantes-equipo. */}
-      <EquipoAcordeon id="equipo" etiqueta="Equipo: acordeón" />
-      <EquipoCredenciales etiqueta="Equipo: credenciales" />
-      {/* TEMPORAL: queda una sola variante del CTA. Al confirmarla, pasa a
-          ser sections/CTA.jsx y se borra sections/variantes-cta. */}
-      <CTAIman id="cta" etiqueta="CTA: titular gigante + imán" />
+      <Servicios />
+      <Proyectos />
+      <Planes />
+      <Equipo />
+      <CTA />
     </div>
   )
 }

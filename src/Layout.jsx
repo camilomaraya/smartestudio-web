@@ -3,9 +3,7 @@ import { Outlet } from 'react-router'
 import { useLenis } from './hooks/useLenis'
 import { useRutaScroll } from './hooks/useRutaScroll'
 import Nav from './components/Nav'
-import ContactoActual from './sections/variantes-contacto/ContactoActual'
-import ContactoChat from './sections/variantes-contacto/ContactoChat'
-import ContactoPantalla from './sections/variantes-contacto/ContactoPantalla'
+import Contacto from './sections/Contacto'
 import Footer from './components/Footer'
 import Transicion from './components/Transicion'
 import styles from './Layout.module.css'
@@ -32,13 +30,7 @@ export default function Layout() {
       <main ref={mainRef} tabIndex={-1} className={styles.main}>
         <Outlet />
       </main>
-      {/* TEMPORAL: variantes del formulario para comparar, en todas las
-          rutas como el original. Al elegir una, pasa a ser
-          sections/Contacto.jsx (con id="contacto", ancla del hero, la nav y
-          el footer) y se borra sections/variantes-contacto. */}
-      <ContactoActual id="contacto" etiqueta="Formulario: actual pulido" />
-      <ContactoChat etiqueta="Formulario: chat" />
-      <ContactoPantalla etiqueta="Formulario: una pregunta por pantalla" />
+      <Contacto />
       <Footer />
     </Transicion>
   )

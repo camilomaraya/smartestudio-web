@@ -1,440 +1,365 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { useLocation } from 'react-router'
-import { serviciosPrincipales } from '../data/servicios'
 import { useReveal } from '../hooks/useReveal'
+import {
+  CAMPOS,
+  OPCIONES_SERVICIO,
+  mensajeWhatsApp,
+  useFormularioContacto,
+} from '../hooks/useFormularioContacto'
 import styles from './Contacto.module.css'
 
 /*
- * Contacto — cuestionario de 3 pasos (DESIGN.md §12).
+ * Contacto — el formulario como una conversación por
+ * mensaje directo, en la misma estética del celular de la sección F. Smart
+ * pregunta de a una, tus respuestas quedan como burbujas propias y se
+ * pueden tocar para corregirlas.
  *
- * Un formulario de cuatro campos en blanco pide un esfuerzo que mucha gente
- * no hace. Partirlo en tres preguntas cortas —qué necesitas, quién eres, qué
- * nos querés contar— baja el costo de empezar, y la primera respuesta ya nos
- * dice a qué servicio apunta el interesado.
+ * Sin JS: el chat no existe y se ven los cinco campos seguidos, con la
+ * pregunta como etiqueta. Se envía igual.
  *
- * SIN JAVASCRIPT SIGUE SIENDO UN FORMULARIO COMPLETO. Los tres pasos están
- * siempre en el DOM; el modo paso a paso se activa recién en un efecto, así
- * que el HTML prerenderizado muestra los tres bloques seguidos y se puede
- * enviar de una sola vez. El cuestionario se suma encima, no es la condición
- * para poder escribir (regla 1 del §6).
- *
- * El backend no cambia de contrato: mismo endpoint, mismo honeypot, mismo
- * Turnstile. Se suman dos campos, `servicio` y `origen`.
+ * Las preguntas son placeholder en la voz de marca. La lógica del envío
+ * (contrato con server/contacto.php) vive en hooks/useFormularioContacto.
  */
-
-const estadoInicial = { servicio: '', nombre: '', email: '', empresa: '', mensaje: '' }
-
-// Ruta relativa al endpoint PHP. En prod queda en el mismo dominio que el
-// build (same-origin, sin CORS). En dev el PHP no corre salvo que apuntes
-// `php -S` a server/ y ajustes esto.
-const ENDPOINT_CONTACTO = '/contacto.php'
-
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY ?? ''
-
-const OPCION_SIN_DECIDIR = 'Todavía no lo sé'
-
-const PASOS = [
-  { n: 1, titulo: '¿Qué necesitas?' },
-  { n: 2, titulo: '¿Quién eres?' },
-  { n: 3, titulo: 'Contanos' },
-]
-
-function mensajeWhatsApp(nombre) {
-  const texto = nombre
-    ? `Hola Smart Estudio, soy ${nombre}. Les escribí por el formulario del sitio y quería seguir la conversación por acá.`
-    : 'Hola Smart Estudio, les escribí por el formulario del sitio y quería seguir la conversación por acá.'
-  return `https://wa.me/56981649378?text=${encodeURIComponent(texto)}`
+const PREGUNTAS = {
+  servicio: () => '¡Hola! 👋 ¿En qué te podemos ayudar?',
+  nombre: () => 'Buenísimo. ¿Cómo te llamas?',
+  email: (f) => `Un gusto, ${f.nombre.trim().split(' ')[0]}. ¿A qué email te escribimos?`,
+  empresa: () => '¿Tu marca o empresa tiene nombre? Si no, te la puedes saltar.',
+  mensaje: () => 'Último: cuéntanos de tu proyecto, tu marca o lo que necesitas.',
 }
+const ETIQUETAS = {
+  servicio: '¿En qué te podemos ayudar?',
+  nombre: 'Tu nombre',
+  email: 'Tu email',
+  empresa: 'Tu marca o empresa (opcional)',
+  mensaje: 'Cuéntanos de tu proyecto, tu marca o lo que necesitas',
+}
+const LISTO = CAMPOS.length
+const PAUSA_ESCRIBIENDO = 700
 
 export default function Contacto() {
   const scope = useReveal()
-  const { pathname } = useLocation()
   const idBase = useId()
+  const f = useFormularioContacto()
+  const [paso, setPaso] = useState(0)
+  const [respondidos, setRespondidos] = useState(() => CAMPOS.map(() => false))
+  const [escribiendo, setEscribiendo] = useState(false)
+  const [aviso, setAviso] = useState('')
+  const listaRef = useRef(null)
+  const composerRef = useRef(null)
+  const tocado = useRef(false)
 
-  const [formulario, setFormulario] = useState(estadoInicial)
-  const [estado, setEstado] = useState('idle') // idle | enviando | exito | error
-  const [errorMsg, setErrorMsg] = useState('')
-  const [paso, setPaso] = useState(1)
-  const [avisoPaso, setAvisoPaso] = useState('')
-
-  /*
-   * Arranca en false y solo pasa a true en el efecto: durante el prerender
-   * —y si el JS nunca llega— quedan los tres pasos visibles y el formulario
-   * es utilizable de una sola vez.
-   */
-  const [porPasos, setPorPasos] = useState(false)
-  useEffect(() => setPorPasos(true), [])
-
-  const turnstileRef = useRef(null)
-  const turnstileWidgetId = useRef(null)
-  const turnstileToken = useRef('')
-  const tituloPasoRef = useRef(null)
-
+  // Entre respuesta y pregunta, Smart «escribe». Con movimiento reducido
+  // la pregunta llega directo.
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || !turnstileRef.current) return undefined
+    if (!tocado.current) return undefined
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined
+    setEscribiendo(true)
+    const t = setTimeout(() => setEscribiendo(false), PAUSA_ESCRIBIENDO)
+    return () => clearTimeout(t)
+  }, [paso])
 
-    let cancelado = false
-
-    const montar = () => {
-      if (cancelado || !window.turnstile || turnstileWidgetId.current) return
-      turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        theme: 'dark',
-        callback: (token) => {
-          turnstileToken.current = token
-        },
-        'expired-callback': () => {
-          turnstileToken.current = ''
-        },
-        'error-callback': () => {
-          turnstileToken.current = ''
-        },
-      })
-    }
-
-    if (window.turnstile) {
-      montar()
-      return undefined
-    }
-
-    const intervalo = setInterval(() => {
-      if (window.turnstile) {
-        clearInterval(intervalo)
-        montar()
-      }
-    }, 150)
-
-    return () => {
-      cancelado = true
-      clearInterval(intervalo)
-    }
-  }, [])
-
-  const actualizar = (event) => {
-    const { name, value } = event.target
-    setFormulario((previo) => ({ ...previo, [name]: value }))
-  }
-
-  const elegirServicio = (valor) => {
-    setFormulario((previo) => ({ ...previo, servicio: valor }))
-    setAvisoPaso('')
-  }
-
-  // Qué falta para poder avanzar. Devuelve null si el paso está completo.
-  const faltaEnPaso = (n) => {
-    if (n === 1 && !formulario.servicio) return 'Elige una opción para seguir.'
-    if (n === 2) {
-      if (!formulario.nombre.trim()) return 'Necesitamos tu nombre.'
-      if (!formulario.email.trim()) return 'Necesitamos tu email.'
-      // Validación mínima, la de verdad la hace el backend con FILTER_VALIDATE_EMAIL.
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formulario.email)) return 'Revisa el email.'
-    }
-    if (n === 3 && !formulario.mensaje.trim()) return 'Escribe tu mensaje.'
-    return null
-  }
-
-  const avanzar = () => {
-    const falta = faltaEnPaso(paso)
-    if (falta) {
-      setAvisoPaso(falta)
-      return
-    }
-    setAvisoPaso('')
-    setPaso((p) => Math.min(p + 1, 3))
-  }
-
-  const retroceder = () => {
-    setAvisoPaso('')
-    setPaso((p) => Math.max(p - 1, 1))
-  }
-
-  // Al cambiar de paso el foco va a su título: sin esto el lector de
-  // pantalla se queda en el botón y no anuncia la pregunta nueva.
+  // La conversación siempre muestra lo último; el foco va al campo nuevo
   useEffect(() => {
-    if (!porPasos || estado === 'exito') return
-    tituloPasoRef.current?.focus({ preventScroll: true })
-  }, [paso, porPasos, estado])
-
-  const enviar = async (event) => {
-    event.preventDefault()
-    if (estado === 'enviando') return
-
-    // Con JS activo, el submit solo procede desde el último paso; los
-    // anteriores avanzan. Sin JS, el navegador envía todo junto.
-    if (porPasos && paso < 3) {
-      avanzar()
-      return
+    const lista = listaRef.current
+    if (lista) lista.scrollTo({ top: lista.scrollHeight, behavior: 'smooth' })
+    if (tocado.current && !escribiendo) {
+      composerRef.current
+        ?.querySelector('[data-activo] :is(input, textarea, button)')
+        ?.focus({ preventScroll: true })
     }
+  }, [paso, escribiendo])
 
-    for (const n of [1, 2, 3]) {
-      const falta = faltaEnPaso(n)
-      if (falta) {
-        setPaso(n)
-        setAvisoPaso(falta)
-        return
-      }
-    }
+  const responder = (i, valor) => {
+    const campo = CAMPOS[i]
+    const falta = f.faltaEn(campo, valor)
+    if (falta) return setAviso(falta)
+    setAviso('')
+    tocado.current = true
+    const nuevos = respondidos.map((r, j) => (j === i ? true : r))
+    setRespondidos(nuevos)
+    // Sigue en la primera pregunta sin responder: si venía de corregir
+    // una respuesta vieja, vuelve directo al final
+    const siguiente = nuevos.findIndex((r) => !r)
+    setPaso(siguiente === -1 ? LISTO : siguiente)
+  }
 
-    setEstado('enviando')
-    setErrorMsg('')
+  const corregir = (i) => {
+    setAviso('')
+    tocado.current = true
+    setPaso(i)
+  }
 
-    try {
-      const respuesta = await fetch(ENDPOINT_CONTACTO, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nombre: formulario.nombre,
-          email: formulario.email,
-          empresa: formulario.empresa,
-          mensaje: formulario.mensaje,
-          servicio: formulario.servicio,
-          // Desde qué página se envió: sirve para saber qué convierte.
-          origen: pathname,
-          sitio: event.target.elements.sitio.value, // honeypot
-          turnstileToken: turnstileToken.current,
-        }),
-      })
-
-      const datos = await respuesta.json().catch(() => null)
-
-      if (respuesta.ok && datos?.ok) {
-        setEstado('exito')
-      } else {
-        setEstado('error')
-        setErrorMsg(datos?.mensaje || 'No pudimos enviar tu mensaje. Intenta de nuevo.')
-      }
-    } catch {
-      // Sin backend PHP disponible (p. ej. en dev) o error de red: no rompemos la UI.
-      setEstado('error')
-      setErrorMsg(
-        'No pudimos conectar con el servidor. Intenta de nuevo o escríbenos por WhatsApp.',
-      )
-    } finally {
-      if (window.turnstile && turnstileWidgetId.current !== null) {
-        window.turnstile.reset(turnstileWidgetId.current)
-      }
-      turnstileToken.current = ''
+  const alEnviar = async (evento) => {
+    evento.preventDefault()
+    if (f.interactivo && paso < LISTO) return responder(paso)
+    const problema = await f.enviar(evento.currentTarget)
+    if (problema) {
+      setPaso(CAMPOS.indexOf(problema.campo))
+      setAviso(problema.falta)
     }
   }
 
-  if (estado === 'exito') {
+  // Enter envía la burbuja; Shift+Enter hace salto de línea en el mensaje
+  const alTeclaMensaje = (evento) => {
+    if (evento.key === 'Enter' && !evento.shiftKey) {
+      evento.preventDefault()
+      evento.currentTarget.form.requestSubmit()
+    }
+  }
+
+  if (f.estado === 'exito') {
     return (
       <section ref={scope} id="contacto" className={styles.contacto}>
         <div className="container">
-          <div className={styles.exito} data-reveal-group>
-            <h2 className={styles.titular}>
-              <span className={styles.acento}>Gracias</span> por escribirnos
-            </h2>
-            <p className={styles.exitoTexto}>
-              Recibimos tu mensaje y te vamos a responder a la brevedad. Si quieres avanzar
-              más rápido, seguimos la conversación por WhatsApp.
-            </p>
-            <a
-              className={styles.botonPrimario}
-              href={mensajeWhatsApp(formulario.nombre)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Continuar por WhatsApp
-            </a>
-          </div>
+          <Exito nombre={f.formulario.nombre} />
         </div>
       </section>
     )
   }
 
-  // Un paso se ve si el modo por pasos está apagado (sin JS) o es el actual.
-  const visible = (n) => !porPasos || paso === n
+  const respuesta = (campo) => {
+    const valor = f.formulario[campo].trim()
+    if (campo === 'empresa' && !valor) return 'Me la salto'
+    return valor
+  }
+  const visible = (i) => !f.interactivo || paso === i
+  const activo = (i) => (f.interactivo && paso === i ? { 'data-activo': true } : {})
+
+  const texto = (campo, props) => (
+    <div className={styles.campo} hidden={!visible(CAMPOS.indexOf(campo))} {...activo(CAMPOS.indexOf(campo))}>
+      <label
+        htmlFor={`${idBase}-${campo}`}
+        className={f.interactivo ? 'visually-hidden' : styles.etiquetaCampo}
+      >
+        {ETIQUETAS[campo]}
+      </label>
+      <div className={styles.entrada}>
+        <input
+          id={`${idBase}-${campo}`}
+          name={campo}
+          value={f.formulario[campo]}
+          onChange={f.actualizar}
+          disabled={f.enviando}
+          placeholder="Escribe aquí…"
+          {...props}
+        />
+        {f.interactivo && (
+          <button type="submit" className={styles.enviarBurbuja} aria-label="Responder">
+            ↑
+          </button>
+        )}
+      </div>
+      {campo === 'empresa' && f.interactivo && (
+        <button
+          type="button"
+          className={styles.saltar}
+          onClick={() => {
+            f.fijar('empresa', '')
+            responder(3, '')
+          }}
+        >
+          Saltar
+        </button>
+      )}
+    </div>
+  )
 
   return (
     <section ref={scope} id="contacto" className={styles.contacto}>
-      <div className="container">
-        <div className={styles.cabecera} data-reveal-group>
+      <div className={`container ${styles.grilla}`}>
+        <div className={styles.intro} data-reveal-group>
           <h2 className={styles.titular}>
-            Conversemos, <span className={styles.acento}>sin compromiso</span>
+            Conversemos, <span className={styles.acento}>como por chat</span>
           </h2>
-          <ul className={styles.datos}>
-            <li>
-              <span className={styles.datoLabel}>WhatsApp</span>
-              <a href="https://wa.me/56981649378" target="_blank" rel="noreferrer">
-                +56 9 8164 9378
-              </a>
-            </li>
-            <li>
-              <span className={styles.datoLabel}>Email</span>
-              <a href="mailto:contacto@smartestudio.cl">contacto@smartestudio.cl</a>
-            </li>
-          </ul>
+          <p className={styles.bajada}>
+            Cinco preguntas cortas y listo. Si prefieres, escríbenos directo por{' '}
+            <a href="https://wa.me/56981649378" target="_blank" rel="noreferrer">
+              WhatsApp
+            </a>{' '}
+            o a <a href="mailto:contacto@smartestudio.cl">contacto@smartestudio.cl</a>.
+          </p>
         </div>
 
-        <form className={styles.formulario} onSubmit={enviar} data-reveal>
-          {porPasos && (
-            <div className={styles.progreso}>
-              <ol className={styles.pasos}>
-                {PASOS.map((p) => (
-                  <li
-                    key={p.n}
-                    className={`${styles.pasoMarca} ${p.n === paso ? styles.pasoActual : ''} ${
-                      p.n < paso ? styles.pasoHecho : ''
-                    }`}
-                  >
-                    <span aria-hidden="true">{String(p.n).padStart(2, '0')}</span>
-                  </li>
-                ))}
-              </ol>
-              {/* El progreso también en texto: los números dorados no le
-                  dicen nada a un lector de pantalla. */}
-              <p className={styles.progresoTexto} aria-live="polite">
-                Paso {paso} de 3
-              </p>
-            </div>
-          )}
-
-          {/* PASO 1 — servicio */}
-          <fieldset className={styles.paso} hidden={!visible(1)}>
-            <legend className={styles.pasoTitulo} tabIndex={-1} ref={paso === 1 ? tituloPasoRef : null}>
-              {PASOS[0].titulo}
-            </legend>
-            <div className={styles.opciones}>
-              {[...serviciosPrincipales.map((s) => s.titulo), OPCION_SIN_DECIDIR].map((op) => (
-                <label
-                  key={op}
-                  className={`${styles.opcion} ${formulario.servicio === op ? styles.opcionElegida : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="servicio"
-                    value={op}
-                    checked={formulario.servicio === op}
-                    onChange={() => elegirServicio(op)}
-                    className={styles.radio}
-                  />
-                  <span>{op}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          {/* PASO 2 — datos */}
-          <fieldset className={styles.paso} hidden={!visible(2)}>
-            <legend className={styles.pasoTitulo} tabIndex={-1} ref={paso === 2 ? tituloPasoRef : null}>
-              {PASOS[1].titulo}
-            </legend>
-
-            <div className={styles.campo}>
-              <label htmlFor={`${idBase}-nombre`}>Nombre</label>
-              <input
-                id={`${idBase}-nombre`}
-                name="nombre"
-                type="text"
-                autoComplete="name"
-                required
-                value={formulario.nombre}
-                onChange={actualizar}
-                disabled={estado === 'enviando'}
-              />
-            </div>
-
-            <div className={styles.campo}>
-              <label htmlFor={`${idBase}-email`}>Email</label>
-              <input
-                id={`${idBase}-email`}
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formulario.email}
-                onChange={actualizar}
-                disabled={estado === 'enviando'}
-              />
-            </div>
-
-            <div className={styles.campo}>
-              <label htmlFor={`${idBase}-empresa`}>
-                Empresa <span className={styles.opcional}>(opcional)</span>
-              </label>
-              <input
-                id={`${idBase}-empresa`}
-                name="empresa"
-                type="text"
-                autoComplete="organization"
-                value={formulario.empresa}
-                onChange={actualizar}
-                disabled={estado === 'enviando'}
-              />
-            </div>
-          </fieldset>
-
-          {/* PASO 3 — mensaje */}
-          <fieldset className={styles.paso} hidden={!visible(3)}>
-            <legend className={styles.pasoTitulo} tabIndex={-1} ref={paso === 3 ? tituloPasoRef : null}>
-              {PASOS[2].titulo}
-            </legend>
-
-            <div className={styles.campo}>
-              <label htmlFor={`${idBase}-mensaje`}>
-                Cuéntanos de tu proyecto, tu marca o lo que necesitas
-              </label>
-              <textarea
-                id={`${idBase}-mensaje`}
-                name="mensaje"
-                rows="5"
-                required
-                value={formulario.mensaje}
-                onChange={actualizar}
-                disabled={estado === 'enviando'}
-              />
-            </div>
-
-            {TURNSTILE_SITE_KEY && <div ref={turnstileRef} className={styles.turnstile} />}
-          </fieldset>
-
-          {/* Honeypot: campo señuelo, invisible y fuera del tab para personas. */}
-          <div className={styles.hpCampo} aria-hidden="true">
-            <label htmlFor={`${idBase}-sitio`}>Sitio web</label>
-            <input
-              id={`${idBase}-sitio`}
-              name="sitio"
-              type="text"
-              tabIndex={-1}
-              autoComplete="off"
-            />
+        <form className={styles.ventana} onSubmit={alEnviar} noValidate={f.interactivo} data-reveal>
+          <div className={styles.cabecera}>
+            <span className={styles.avatar} aria-hidden="true">
+              S
+            </span>
+            <span>
+              <span className={styles.cuenta}>smartestudio</span>
+              <span className={styles.estado}>Activo ahora</span>
+            </span>
           </div>
 
-          {avisoPaso && (
-            <p className={styles.aviso} role="alert">
-              {avisoPaso}
-            </p>
-          )}
-          {estado === 'error' && (
-            <p className={styles.error} role="alert">
-              {errorMsg}
-            </p>
+          {f.interactivo && (
+            <ol className={styles.mensajes} ref={listaRef} aria-live="polite" data-lenis-prevent>
+              {CAMPOS.slice(0, Math.min(paso, LISTO)).map((campo, i) => (
+                <li key={campo} className={styles.par}>
+                  <p className={styles.bot}>{PREGUNTAS[campo](f.formulario)}</p>
+                  <button
+                    type="button"
+                    className={styles.yo}
+                    onClick={() => corregir(i)}
+                    aria-label={`Tu respuesta: ${respuesta(campo)}. Tocar para corregir`}
+                  >
+                    {respuesta(campo)}
+                  </button>
+                </li>
+              ))}
+              {paso === LISTO && respondidos.every(Boolean) && (
+                <li className={styles.par}>
+                  {escribiendo ? (
+                    <Escribiendo />
+                  ) : (
+                    <p className={styles.bot}>Listo, eso es todo. ¿Lo enviamos?</p>
+                  )}
+                </li>
+              )}
+              {paso < LISTO && (
+                <li className={styles.par}>
+                  {escribiendo ? (
+                    <Escribiendo />
+                  ) : (
+                    <p className={styles.bot}>{PREGUNTAS[CAMPOS[paso]](f.formulario)}</p>
+                  )}
+                </li>
+              )}
+            </ol>
           )}
 
-          <div className={styles.acciones}>
-            {porPasos && paso > 1 && (
-              <button type="button" onClick={retroceder} className={styles.botonSecundario}>
-                ← Atrás
-              </button>
-            )}
+          <div className={styles.composer} ref={composerRef}>
+            <fieldset className={styles.campo} hidden={!visible(0)} {...activo(0)}>
+              <legend className={f.interactivo ? 'visually-hidden' : styles.etiquetaCampo}>
+                {ETIQUETAS.servicio}
+              </legend>
+              <div className={styles.opciones}>
+                {OPCIONES_SERVICIO.map((op) => (
+                  <label
+                    key={op}
+                    className={`${styles.opcion} ${f.formulario.servicio === op ? styles.opcionElegida : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="servicio"
+                      value={op}
+                      checked={f.formulario.servicio === op}
+                      onChange={() => f.fijar('servicio', op)}
+                      // Tocar una respuesta rápida la manda, como en un chat.
+                      // detail 0 = click sintético de las flechas del
+                      // teclado: ahí solo se elige, y Enter la manda.
+                      onClick={(e) => f.interactivo && e.detail > 0 && responder(0, op)}
+                      className={styles.radio}
+                    />
+                    <span>{op}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
 
-            {porPasos && paso < 3 ? (
-              <button type="button" onClick={avanzar} className={styles.botonPrimario}>
-                Siguiente
-              </button>
-            ) : (
-              <button
-                type="submit"
-                className={styles.botonPrimario}
-                disabled={estado === 'enviando'}
+            {texto('nombre', { type: 'text', autoComplete: 'name', required: true })}
+            {texto('email', { type: 'email', autoComplete: 'email', required: true })}
+            {texto('empresa', { type: 'text', autoComplete: 'organization' })}
+
+            <div className={styles.campo} hidden={!visible(4)} {...activo(4)}>
+              <label
+                htmlFor={`${idBase}-mensaje`}
+                className={f.interactivo ? 'visually-hidden' : styles.etiquetaCampo}
               >
-                {estado === 'enviando' ? 'Enviando…' : 'Enviar mensaje'}
+                {ETIQUETAS.mensaje}
+              </label>
+              <div className={styles.entrada}>
+                <textarea
+                  id={`${idBase}-mensaje`}
+                  name="mensaje"
+                  rows={f.interactivo ? 2 : 5}
+                  required
+                  value={f.formulario.mensaje}
+                  onChange={f.actualizar}
+                  onKeyDown={f.interactivo ? alTeclaMensaje : undefined}
+                  disabled={f.enviando}
+                  placeholder="Escribe aquí…"
+                />
+                {f.interactivo && (
+                  <button type="submit" className={styles.enviarBurbuja} aria-label="Responder">
+                    ↑
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.final} hidden={f.interactivo && paso !== LISTO} {...activo(LISTO)}>
+              <Turnstile refTurnstile={f.turnstileRef} conTurnstile={f.conTurnstile} />
+              <button type="submit" className={styles.enviar} disabled={f.enviando}>
+                {f.enviando ? 'Enviando…' : 'Enviar mensaje'}
               </button>
-            )}
+            </div>
+
+            <Honeypot idBase={idBase} />
+            <Avisos aviso={aviso} estado={f.estado} errorMsg={f.errorMsg} />
           </div>
         </form>
       </div>
     </section>
+  )
+}
+
+function Escribiendo() {
+  return (
+    <p className={`${styles.bot} ${styles.escribiendo}`} aria-label="Escribiendo">
+      <span />
+      <span />
+      <span />
+    </p>
+  )
+}
+
+// Honeypot: campo señuelo, invisible y fuera del tab para personas.
+function Honeypot({ idBase }) {
+  return (
+    <div className={styles.hpCampo} aria-hidden="true">
+      <label htmlFor={`${idBase}-sitio`}>Sitio web</label>
+      <input id={`${idBase}-sitio`} name="sitio" type="text" tabIndex={-1} autoComplete="off" />
+    </div>
+  )
+}
+
+function Turnstile({ refTurnstile, conTurnstile }) {
+  if (!conTurnstile) return null
+  return <div ref={refTurnstile} className={styles.turnstile} />
+}
+
+// Aviso de validación y error del envío
+function Avisos({ aviso, estado, errorMsg }) {
+  return (
+    <>
+      {aviso && (
+        <p className={styles.aviso} role="alert">
+          {aviso}
+        </p>
+      )}
+      {estado === 'error' && (
+        <p className={styles.error} role="alert">
+          {errorMsg}
+        </p>
+      )}
+    </>
+  )
+}
+
+function Exito({ nombre }) {
+  return (
+    <div className={styles.exito}>
+      <h2 className={styles.exitoTitular}>
+        <span className={styles.acento}>Gracias</span> por escribirnos
+      </h2>
+      <p className={styles.exitoTexto}>
+        Recibimos tu mensaje y te vamos a responder a la brevedad. Si quieres avanzar más rápido,
+        seguimos la conversación por WhatsApp.
+      </p>
+      <a className={styles.whatsapp} href={mensajeWhatsApp(nombre)} target="_blank" rel="noreferrer">
+        Continuar por WhatsApp
+      </a>
+    </div>
   )
 }

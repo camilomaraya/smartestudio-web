@@ -1,242 +1,239 @@
-import { useRef } from 'react'
-import { planes, categoriasPlanes, notaPlanes } from '../data/planes'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, useGSAP } from '../lib/gsap'
 import { scrollToSection } from '../lib/lenis'
+import { planes, categoriasPlanes, notaPlanes } from '../data/planes'
 import styles from './Planes.module.css'
 
 /*
- * Planes — sección de contenido del estándar nuevo (DESIGN.md §4).
+ * Planes — «arma tu plan»: marcas lo que necesita tu marca y la
+ * carta de la derecha recomienda el plan más chico que lo cubre.
  *
- * Es una TABLA comparativa, no cuatro tarjetas. Los cuatro planes describen
- * las mismas categorías con distintas cantidades, y lo que alguien hace
- * frente a planes escalonados es compararlos: en tarjetas hay que ir y
- * volver cuatro veces para responder "¿cuántos reels tiene cada uno?".
+ * Cada necesidad pide un plan mínimo, sacado de las cantidades reales de
+ * data/planes.js (p. ej. Google Ads aparece recién en Smart, el dron en
+ * Marketing 360°). Gana el más alto de los marcados. POR CONFIRMAR CON LA
+ * AGENCIA: esas equivalencias.
  *
- * Es una <table> de verdad, con th scope: son datos tabulares, y un lector
- * de pantalla debe poder anunciar "Reels profesionales, Smart, 3". Con divs
- * la relación entre el número y su fila/columna se pierde.
- *
- * El gesto es el que ya tenía la sección: las columnas entran escalonadas y
- * la destacada un beat después. Se conserva porque comunica jerarquía —el
- * plan recomendado llega último y por eso se mira.
+ * Los datos (precios, cantidades) son los reales de data/planes.js.
  */
+const NECESIDADES = [
+  { id: 'redes', texto: 'Publicar seguido en redes', minimo: 'despega' },
+  { id: 'google', texto: 'Campañas en Google', minimo: 'smart' },
+  { id: 'meta', texto: 'Más de una campaña en Meta', minimo: 'marketing-360' },
+  { id: 'reels', texto: '4 reels al mes o más', minimo: 'marketing-360' },
+  { id: 'dron', texto: 'Tomas con dron', minimo: 'marketing-360' },
+  { id: 'cobertura', texto: 'Cobertura de eventos', minimo: 'marketing-360' },
+  { id: 'historias', texto: 'Historias semanales', minimo: 'full-marketing' },
+  { id: 'organizacion', texto: 'Organización de eventos', minimo: 'full-marketing' },
+]
+const indicePlan = (planId) => planes.findIndex((p) => p.id === planId)
+const RESUMEN = ['posts', 'reels', 'campanas-meta']
+const resumen = categoriasPlanes.filter((c) => RESUMEN.includes(c.id))
+
+const irAContacto = (evento) => {
+  evento.preventDefault()
+  scrollToSection('#contacto')
+}
+
 export default function Planes() {
   const scope = useRef(null)
+  const carta = useRef(null)
+  const [marcadas, setMarcadas] = useState(() => new Set())
+
+  const elegidas = NECESIDADES.filter((n) => marcadas.has(n.id))
+  const recomendado = elegidas.reduce((max, n) => Math.max(max, indicePlan(n.minimo)), 0)
+  const plan = planes[recomendado]
+
+  const alternar = (necesidadId) =>
+    setMarcadas((prev) => {
+      const siguiente = new Set(prev)
+      if (siguiente.has(necesidadId)) siguiente.delete(necesidadId)
+      else siguiente.add(necesidadId)
+      return siguiente
+    })
 
   useGSAP(
     () => {
       const mm = gsap.matchMedia()
-
-      mm.add('(prefers-reduced-motion: no-preference)', () => {
-        const lineas = scope.current.querySelectorAll('[data-planes="linea"]')
-        const columnas = scope.current.querySelectorAll('[data-planes="columna"]')
-        const filas = scope.current.querySelectorAll('[data-planes="fila"]')
-        const cierre = scope.current.querySelector('[data-planes="cierre"]')
-
-        gsap.set(lineas, { yPercent: 110, y: 0 })
-        gsap.set(columnas, { opacity: 0, y: 20 })
-        gsap.set(filas, { opacity: 0 })
-        gsap.set(cierre, { opacity: 0, y: 20 })
-
-        const tl = gsap.timeline({
-          scrollTrigger: { trigger: scope.current, start: 'top 75%', once: true },
-        })
-
-        // fromTo con `y: 0` explícito: GSAP suma `y` y `yPercent`, y bajo el
-        // doble montaje de StrictMode la segunda pasada duplicaría el
-        // desplazamiento dejando el titular tapado por su máscara.
-        tl.fromTo(
-          lineas,
-          { yPercent: 110, y: 0 },
-          { yPercent: 0, y: 0, duration: 0.9, stagger: 0.1, ease: 'power4.out' },
-        )
-          .to(
-            columnas,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.7,
-              ease: 'power3.out',
-              clearProps: 'opacity,transform',
-              // El destacado llega un beat después: la jerarquía se comunica
-              // con el tiempo, no sumando otro color.
-              stagger: (i, el) => i * 0.1 + ('destacado' in el.dataset ? 0.14 : 0),
-            },
-            0.45,
-          )
-          .to(
-            filas,
-            {
-              opacity: 1,
-              duration: 0.5,
-              stagger: 0.05,
-              ease: 'power2.out',
-              clearProps: 'opacity',
-            },
-            0.7,
-          )
-          .to(
-            cierre,
-            {
-              opacity: 1,
-              y: 0,
-              duration: 0.6,
-              ease: 'power3.out',
-              clearProps: 'opacity,transform',
-            },
-            '>-0.2',
-          )
-      })
+      mm.add('(prefers-reduced-motion: no-preference)', () => revelarTitular(scope.current))
     },
     { scope },
   )
 
-  const irAContacto = (evento) => {
-    evento.preventDefault()
-    scrollToSection('#contacto')
-  }
-
-  // Un valor puede ser una cantidad, `true` (incluido) o `null` (no va).
-  const celda = (valor, plan, categoria) => {
-    if (valor === null) {
-      return (
-        <>
-          <span aria-hidden="true" className={styles.no}>
-            —
-          </span>
-          <span className="visually-hidden">
-            No incluido en {plan.nombre}: {categoria.etiqueta}
-          </span>
-        </>
-      )
+  // La carta entra de nuevo cuando cambia el plan recomendado
+  const primera = useRef(true)
+  useEffect(() => {
+    if (primera.current) {
+      primera.current = false
+      return
     }
-    if (valor === true) {
-      return (
-        <>
-          <span aria-hidden="true" className={styles.si}>
-            ✓
-          </span>
-          <span className="visually-hidden">Incluido</span>
-        </>
-      )
-    }
-    return <span className={styles.cantidad}>{valor}</span>
-  }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const tween = gsap.fromTo(
+      carta.current,
+      { opacity: 0, y: 16, scale: 0.98 },
+      { opacity: 1, y: 0, scale: 1, duration: 0.45, ease: 'power3.out', clearProps: 'all' },
+    )
+    return () => tween.kill()
+  }, [recomendado])
 
   return (
     <section ref={scope} id="planes" className={styles.planes}>
       <div className="container">
-        <h2 className={styles.titular}>
-          <span className={styles.mascara}>
-            <span className={styles.linea} data-planes="linea">
-              Cuatro formas
-            </span>
-          </span>
-          <span className={styles.mascara}>
-            <span className={styles.linea} data-planes="linea">
-              de trabajar
-            </span>
-          </span>
-          <span className={styles.mascara}>
-            <span className={`${styles.linea} ${styles.acento}`} data-planes="linea">
-              juntxs
-            </span>
-          </span>
-        </h2>
+        <Titular />
 
-        {/* El scroll horizontal se anuncia y recibe foco: en pantallas
-            angostas la tabla no entra y hay que poder recorrerla con
-            teclado, no solo arrastrando. */}
-        <div
-          className={styles.marco}
-          tabIndex={0}
-          role="region"
-          aria-label="Comparación de planes, desplazable horizontalmente"
-        >
-          <table className={styles.tabla}>
-            <caption className="visually-hidden">
-              Comparación de los cuatro planes: qué incluye cada uno y su precio
-              referencial.
-            </caption>
-
-            <thead>
-              <tr>
-                {/* Esquina vacía: encabeza la columna de categorías */}
-                <td className={styles.esquina} />
-                {planes.map((plan) => (
-                  <th
-                    key={plan.id}
-                    scope="col"
-                    className={`${styles.cabecera} ${plan.destacado ? styles.destacada : ''}`}
-                    data-planes="columna"
-                    data-destacado={plan.destacado ? '' : undefined}
+        <div className={styles.grilla}>
+          <div className={styles.preguntas}>
+            <h3 className={styles.pregunta}>¿Qué necesita tu marca?</h3>
+            <p className={styles.ayuda}>Marca todo lo que aplique.</p>
+            <ul className={styles.fichas}>
+              {NECESIDADES.map((n) => (
+                <li key={n.id}>
+                  <button
+                    type="button"
+                    aria-pressed={marcadas.has(n.id)}
+                    className={`${styles.ficha} ${marcadas.has(n.id) ? styles.fichaMarcada : ''}`}
+                    onClick={() => alternar(n.id)}
                   >
-                    {plan.destacado && <span className={styles.badge}>Recomendado</span>}
-                    <span className={styles.nombre}>{plan.nombre}</span>
-                    {plan.tagline && <span className={styles.tagline}>{plan.tagline}</span>}
-                    <span className={styles.precio}>
-                      <span className={styles.desde}>desde</span>
-                      <span className={styles.monto}>{plan.precio}</span>
-                    </span>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {categoriasPlanes.map((categoria) => (
-                <tr key={categoria.id} className={styles.fila} data-planes="fila">
-                  <th scope="row" className={styles.categoria}>
-                    {categoria.etiqueta}
-                  </th>
-                  {planes.map((plan) => (
-                    <td
-                      key={plan.id}
-                      className={`${styles.valor} ${plan.destacado ? styles.destacada : ''}`}
-                    >
-                      {celda(categoria.valores[plan.id], plan, categoria)}
-                    </td>
-                  ))}
-                </tr>
+                    <span className={styles.check} aria-hidden="true" />
+                    {n.texto}
+                  </button>
+                </li>
               ))}
-            </tbody>
+            </ul>
+          </div>
 
-            <tfoot>
-              <tr>
-                <td className={styles.esquina} />
-                {planes.map((plan) => (
-                  <td
-                    key={plan.id}
-                    className={`${styles.accion} ${plan.destacado ? styles.destacada : ''}`}
-                  >
-                    <a
-                      href="#contacto"
-                      onClick={irAContacto}
-                      className={`${styles.boton} ${plan.destacado ? styles.botonDestacado : ''}`}
-                    >
-                      Conversemos
-                      {/* Cuatro botones "Conversemos" seguidos no se
-                          distinguen entre sí al tabular. */}
-                      <span className="visually-hidden"> sobre el plan {plan.nombre}</span>
-                    </a>
-                  </td>
+          <div className={styles.resultado}>
+            {/* Dónde queda el recomendado en la escala de planes */}
+            <div className={styles.escala} style={{ '--i': recomendado }} aria-hidden="true">
+              <span className={styles.indicador} />
+              {planes.map((p, i) => (
+                <span key={p.id} className={i === recomendado ? styles.escalaActiva : undefined}>
+                  {p.nombre}
+                </span>
+              ))}
+            </div>
+
+            <div ref={carta} className={styles.carta} aria-live="polite">
+              <p className={styles.sugerimos}>
+                {elegidas.length ? 'Te recomendamos' : 'Para empezar'}
+              </p>
+              <h3 className={`titular ${styles.nombre}`}>{plan.nombre}</h3>
+              {plan.tagline && <p className={styles.tagline}>{plan.tagline}</p>}
+              <p className={styles.precio}>
+                <span className={styles.desde}>desde</span>
+                <span className={styles.monto}>{plan.precio}</span>
+                <span className={styles.desde}>+ IVA</span>
+              </p>
+
+              {elegidas.length ? (
+                <div className={styles.porque}>
+                  <p>Incluye lo que marcaste:</p>
+                  <ul>
+                    {elegidas.map((n) => (
+                      <li key={n.id}>{n.texto}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <p className={styles.vacio}>
+                  Marca lo que necesitas y te decimos por dónde empezar.
+                </p>
+              )}
+
+              <dl className={styles.numeros}>
+                {resumen.map((categoria) => (
+                  <div key={categoria.id}>
+                    <dt>{categoria.etiqueta}</dt>
+                    <dd>
+                      <Valor
+                        valor={categoria.valores[plan.id]}
+                        plan={plan}
+                        categoria={categoria}
+                      />
+                    </dd>
+                  </div>
                 ))}
-              </tr>
-            </tfoot>
-          </table>
+              </dl>
+
+              <a href="#contacto" onClick={irAContacto} className={styles.cta}>
+                Conversemos
+                <span className="visually-hidden"> sobre el plan {plan.nombre}</span>
+              </a>
+            </div>
+          </div>
         </div>
 
-        <div className={styles.cierre} data-planes="cierre">
-          <p className={styles.adaptable}>
-            ¿Necesitas algo más específico para tu empresa? Todo es conversable: los
-            planes son un punto de partida, no una lista cerrada.{' '}
-            <a href="#contacto" onClick={irAContacto} className={styles.enlaceCierre}>
-              Armemos el tuyo
-            </a>
-          </p>
-          <p className={styles.nota}>{notaPlanes}</p>
-        </div>
+        <Cierre />
       </div>
     </section>
+  )
+}
+
+// Valor de una categoría con su texto para lector de pantalla
+function Valor({ valor, plan, categoria, className = '' }) {
+  if (valor === null) {
+    return (
+      <span className={`${styles.no} ${className}`}>
+        <span aria-hidden="true">—</span>
+        <span className="visually-hidden">
+          No incluido en {plan.nombre}: {categoria.etiqueta}
+        </span>
+      </span>
+    )
+  }
+  if (valor === true) {
+    return (
+      <span className={`${styles.si} ${className}`}>
+        <span aria-hidden="true">✓</span>
+        <span className="visually-hidden">Incluido</span>
+      </span>
+    )
+  }
+  return <span className={className}>{valor}</span>
+}
+
+function Titular() {
+  return (
+    <h2 className={styles.titular}>
+      <span className={styles.mascara}>
+        <span className={styles.linea} data-vpl="linea">
+          Cuatro formas
+        </span>
+      </span>
+      <span className={styles.mascara}>
+        <span className={styles.linea} data-vpl="linea">
+          de trabajar <span className={styles.acento}>juntxs</span>
+        </span>
+      </span>
+    </h2>
+  )
+}
+
+function Cierre() {
+  return (
+    <div className={styles.cierre}>
+      <p className={styles.adaptable}>
+        ¿Necesitas algo más específico para tu empresa? Todo es conversable: los planes son un
+        punto de partida, no una lista cerrada.{' '}
+        <a href="#contacto" onClick={irAContacto} className={styles.enlace}>
+          Armemos el tuyo
+        </a>
+      </p>
+      <p className={styles.nota}>{notaPlanes}</p>
+    </div>
+  )
+}
+
+function revelarTitular(raiz) {
+  gsap.fromTo(
+    raiz.querySelectorAll('[data-vpl="linea"]'),
+    { yPercent: 110, y: 0 },
+    {
+      yPercent: 0,
+      y: 0,
+      duration: 0.9,
+      stagger: 0.1,
+      ease: 'power4.out',
+      scrollTrigger: { trigger: raiz, start: 'top 75%', once: true },
+    },
   )
 }

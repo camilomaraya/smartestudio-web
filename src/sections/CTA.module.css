@@ -1,24 +1,31 @@
-/* Cierre editorial a viewport completo. Único uso de --bg-soft en el
-   recorrido rediseñado: funciona como acento final. */
+/* CTA del home (ver el .jsx). */
 .cta {
-  min-height: 100vh;
+  position: relative;
   min-height: 100svh;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  align-items: center;
   padding-block: var(--space-section);
-  background-color: var(--bg-soft);
-  border-block: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  /* Mismo resplandor que el hero: el cierre rima con la apertura */
+  background: radial-gradient(ellipse 60% 50% at 50% 50%, rgba(243, 193, 58, 0.07), transparent 70%),
+    var(--bg);
   overflow: hidden;
-}
-
-.ctaHeadline {
   text-align: center;
-  margin-bottom: var(--space-8);
 }
 
-/* Máscara del reveal, igual que en hero e interstitial: el padding/margin
-   compensado evita cortar acentos y descendentes. */
+.contenido {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Big Shoulders es condensada: aguanta este cuerpo sin desbordar. La
+   segunda línea es más grande, es la palabra que cierra. */
+.titular {
+  /* Tope por alto: en pantallas bajas el botón tiene que seguir a la vista */
+  font-size: clamp(3.5rem, min(13vw, 17svh), 12rem);
+}
+
 .mascara {
   display: block;
   overflow: hidden;
@@ -26,71 +33,32 @@
   margin-block: -0.08em;
 }
 
-/* Sin nowrap: a escala display el titular puede quebrar, y balance
-   reparte las líneas en vez de dejar una huérfana. */
 .linea {
   display: block;
-  text-wrap: balance;
+  white-space: nowrap;
 }
 
 .dorado {
   color: var(--gold);
+  font-size: 1.45em;
 }
 
-.marquee {
-  overflow: hidden;
-  white-space: nowrap;
-  padding-block: var(--space-4);
+.palabra {
+  display: inline-block;
 }
 
-.pista {
-  display: inline-flex;
-  animation: desplazar 30s linear infinite;
+.letra {
+  display: inline-block;
+  will-change: transform;
 }
 
-/* Enorme y expandido: momento de impacto */
-.frase {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-stretch: 125%;
-  font-size: clamp(2.5rem, 7vw, 5.5rem);
-  line-height: 1.1;
-  text-transform: uppercase;
-  letter-spacing: -0.02em;
-  color: var(--white);
-  display: inline-flex;
-  align-items: center;
+.bajada {
+  margin-top: var(--space-6);
+  font-family: var(--font-utility);
+  font-size: var(--text-xl);
+  color: #c9c9c9;
 }
 
-/* Alterna blanco/dorado entre repeticiones (par de copias = loop parejo) */
-.frase:nth-child(even) {
-  color: var(--gold);
-}
-
-.separador {
-  font-size: 0.5em;
-  color: var(--gold);
-  margin-inline: 0.8em;
-}
-
-@keyframes desplazar {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    /* La pista contiene 4 copias; media pista = 2 copias, loop perfecto */
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pista {
-    animation: none;
-  }
-}
-
-.ctaAccion {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--space-8);
+.accion {
+  margin-top: var(--space-7);
 }
