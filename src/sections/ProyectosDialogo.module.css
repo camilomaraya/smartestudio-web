@@ -1,22 +1,6 @@
-/* TEMPORAL — ver VistaPrevia.jsx. */
+/* Vista previa de una pieza (ver el .jsx). */
 
-.etiqueta {
-  position: absolute;
-  bottom: var(--space-5);
-  left: var(--gutter);
-  z-index: 5;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid currentColor;
-  border-radius: var(--radius-pill);
-  background-color: var(--bg);
-  font-family: var(--font-utility);
-  font-size: var(--text-sm);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--gold);
-}
-
-/* --- Texto compartido --- */
+/* --- Texto --- */
 .tipo {
   font-family: var(--font-utility);
   font-weight: 600;
@@ -38,7 +22,6 @@
 }
 
 
-/* --- Pieza que se abre --- */
 /* Sobre la nav (100) y bajo la cortina de transición (200) */
 .dialogo {
   position: fixed;
@@ -150,73 +133,5 @@
 
   .texto {
     max-width: 40ch;
-  }
-}
-
-/* --- Cinta que se detiene --- */
-.panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.5s var(--ease-out);
-}
-
-.panelAbierto {
-  grid-template-rows: 1fr;
-}
-
-.panelInterior {
-  min-height: 0;
-  overflow: hidden;
-}
-
-.panelContenido {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) auto;
-  gap: var(--space-7);
-  align-items: start;
-  padding-bottom: var(--space-7);
-  animation: aparecer 0.45s var(--ease-out);
-}
-
-@keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-}
-
-.acciones {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-4);
-}
-
-.seguir {
-  font-family: var(--font-utility);
-  font-size: var(--text-sm);
-  color: var(--muted);
-  transition: color var(--transition-fast);
-}
-
-.seguir:hover,
-.seguir:focus-visible {
-  color: var(--white);
-}
-
-@media (max-width: 800px) {
-  .panelContenido {
-    grid-template-columns: 1fr;
-    gap: var(--space-4);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .panel {
-    transition: none;
-  }
-
-  .panelContenido {
-    animation: none;
   }
 }

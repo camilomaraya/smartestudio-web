@@ -3,7 +3,6 @@ import { useLocation } from 'react-router'
 import { ScrollTrigger } from '../lib/gsap'
 import { getLenis } from '../lib/lenis'
 import { servicioPorSlug } from '../data/servicios'
-import { proyectoPorSlug } from '../data/proyectos'
 
 /*
  * useLayoutEffect no existe en el servidor: durante el prerender React
@@ -17,14 +16,13 @@ const MARCA = 'Smart Estudio'
 
 const SECCIONES = {
   servicios: 'Servicios',
-  proyectos: 'Proyectos',
 }
 
 /*
  * Nombre legible de una ficha.
  *
- * Sale de los datos, no del slug: "Diseño gráfico e identidad" y "La Rusia
- * Barra Nikkei", no "Diseno-grafico" ni "La-rusia" capitalizados a mano.
+ * Sale de los datos, no del slug: "Diseño gráfico e identidad", no
+ * "Diseno-grafico" capitalizado a mano.
  * Esto alimenta el título de la pestaña y el nombre que muestra la cortina
  * de transición, así que un slug mal capitalizado se vería en ambos.
  *
@@ -34,11 +32,6 @@ function desdeSlug(seccion, slug) {
   if (seccion === 'servicios') {
     const servicio = servicioPorSlug(slug)
     if (servicio) return servicio.titulo
-  }
-
-  if (seccion === 'proyectos') {
-    const proyecto = proyectoPorSlug(slug)
-    if (proyecto) return proyecto.nombre
   }
 
   const texto = slug.replace(/-/g, ' ')

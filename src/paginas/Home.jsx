@@ -162,10 +162,7 @@ export default function Home() {
       <Manifiesto id="manifiesto" />
       <Correccion />
       <Servicios />
-      {/* TEMPORAL: dos vistas previas de la cinta para comparar. Al elegir,
-          queda una sola <Proyectos /> y se borra sections/variantes-proyectos. */}
-      <Proyectos id="proyectos" vista="abrir" etiqueta="Vista previa: pieza que se abre" />
-      <Proyectos vista="detener" etiqueta="Vista previa: cinta que se detiene" />
+      <Proyectos />
       <Planes />
       <Equipo />
       <CTA />

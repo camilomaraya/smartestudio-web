@@ -1,6 +1,5 @@
 import { tituloDeRuta } from '../hooks/useRutaScroll'
 import { servicioPorSlug } from '../data/servicios'
-import { proyectoPorSlug } from '../data/proyectos'
 
 /*
  * SEO por ruta para el prerender (Fase 3c).
@@ -22,14 +21,12 @@ const DESCRIPCIONES = {
   '/': DESCRIPCION_BASE,
   '/servicios':
     'Community management, diseño gráfico e identidad, fotografía y video, y publicidad digital. Lo que hacemos por tu marca en Smart Estudio.',
-  '/proyectos':
-    'Marcas que confiaron en Smart Estudio. Casos de community management, contenido audiovisual y campañas en La Serena–Coquimbo.',
 }
 
 /*
- * Todas las fichas usan el `resumen` real de sus datos: el mismo párrafo que
- * sirve en el índice y en la cabecera de la ficha (§8). Un párrafo escrito
- * una vez, tres lugares servidos.
+ * Las fichas de servicio usan el `resumen` real de sus datos: el mismo
+ * párrafo que sirve en el índice y en la cabecera de la ficha (§8). Un
+ * párrafo escrito una vez, tres lugares servidos.
  *
  * El respaldo genérico queda para un slug que no exista en los datos: esa
  * ruta no se prerenderiza y termina en el 404, pero la función no puede
@@ -41,15 +38,7 @@ function descripcionDeFicha(seccion, slug) {
     if (servicio) return servicio.resumen
   }
 
-  if (seccion === 'proyectos') {
-    const proyecto = proyectoPorSlug(slug)
-    if (proyecto) return proyecto.resumen
-  }
-
   const nombre = slug.replace(/-/g, ' ')
-  if (seccion === 'proyectos') {
-    return `Proyecto ${nombre} — el trabajo que hicimos con esta marca en Smart Estudio, agencia de marketing digital en La Serena–Coquimbo.`
-  }
   return `${nombre} en Smart Estudio — cómo trabajamos este servicio para marcas de La Serena–Coquimbo.`
 }
 

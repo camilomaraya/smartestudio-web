@@ -48,7 +48,7 @@
   }
 }
 
-/* --- Titular y cierre --- */
+/* --- Titular --- */
 .titular {
   font-size: var(--text-3xl);
   text-align: center;
@@ -69,11 +69,6 @@
   color: var(--gold);
 }
 
-.cierre {
-  display: flex;
-  justify-content: center;
-}
-
 /* --- Pieza --- */
 .pieza {
   position: relative;
@@ -81,6 +76,12 @@
   flex: none;
   height: var(--alto-pieza, 280px);
   aspect-ratio: 4 / 5;
+  /* Es un botón: sin el relleno ni el fondo del navegador */
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: zoom-in;
+  text-align: left;
   transition:
     scale var(--transition-fast),
     opacity var(--transition-fast);
@@ -129,8 +130,8 @@
   box-shadow: var(--shadow-gold);
 }
 
-/* Rótulo sobre la pieza: tipo (lo que hicimos) y el crédito del cliente,
-   chico y apagado. Aparece al pasar el mouse o con foco. */
+/* Rótulo sobre la pieza: tipo (lo que hicimos) y su título. Aparece al
+   pasar el mouse o con foco. */
 .rotulo {
   position: absolute;
   left: var(--space-3);
@@ -166,10 +167,10 @@
   color: var(--gold);
 }
 
-.credito {
+.titulo {
   font-family: var(--font-utility);
-  font-size: 0.7rem;
-  color: var(--muted);
+  font-size: 0.75rem;
+  color: var(--white);
 }
 
 /* Sin hover (táctil): el rótulo queda visible */
@@ -178,21 +179,4 @@
     opacity: 1;
     translate: none;
   }
-}
-
-/* TEMPORAL — vista previa «cinta que se detiene»: la pieza elegida crece
-   en su lugar y las demás se apagan */
-.conElegida .pieza {
-  opacity: 0.3;
-}
-
-.conElegida .pieza.elegida {
-  opacity: 1;
-  scale: 1.1;
-  z-index: 2;
-}
-
-.conElegida .elegida .marco {
-  border-color: var(--gold);
-  box-shadow: var(--shadow-gold);
 }

@@ -1,16 +1,17 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { gsap, Flip } from '../../lib/gsap'
-import { getLenis } from '../../lib/lenis'
-import styles from './VistaPrevia.module.css'
+import { gsap, Flip } from '../lib/gsap'
+import { getLenis } from '../lib/lenis'
+import styles from './ProyectosDialogo.module.css'
 
 /*
- * TEMPORAL — las dos vistas previas de la cinta de Proyectos, para
- * comparar. Al elegir una, lo suyo pasa a Proyectos.jsx y se borra esta
- * carpeta.
+ * Vista previa de una pieza de la cinta (sections/Proyectos.jsx): la pieza
+ * vuela desde la cinta al centro (Flip) y queda al lado de su texto, con la
+ * cinta desenfocada detrás. Flechas para pasar a la siguiente; Esc o un
+ * clic afuera la devuelven a la copia de la cinta más cercana al centro de
+ * la pantalla.
  *
- * Por el enfoque nuevo (no promocionar clientes), la vista previa muestra
- * la pieza y el texto «detrás»; el cliente no aparece.
+ * Muestra la pieza y el texto «detrás»; el cliente no aparece.
  */
 
 const ID_FLIP = 'vista-previa'
@@ -19,17 +20,7 @@ const RATIO = { reel: 9 / 16, historia: 9 / 16, web: 16 / 10, informe: 16 / 10 }
 const ratio = (tipo) => RATIO[tipo] ?? 4 / 5
 const conMovimiento = () => !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-export function Etiqueta({ children }) {
-  if (!children) return null
-  return <p className={styles.etiqueta}>{children}</p>
-}
-
-/*
- * «Pieza que se abre»: la pieza vuela desde la cinta al centro (Flip) y
- * queda al lado de su texto, con la cinta desenfocada detrás. Al cerrar
- * vuelve a la copia de la cinta más cercana al centro de la pantalla.
- */
-export function DialogoPieza({ piezas, inicial, origen, raiz, onCerrar }) {
+export default function DialogoPieza({ piezas, inicial, origen, raiz, onCerrar }) {
   const [n, setN] = useState(inicial)
   const dialogo = useRef(null)
   const grande = useRef(null)
@@ -233,37 +224,4 @@ function masCentrada(raiz, n) {
     }
   })
   return mejor
-}
-
-/*
- * «Cinta que se detiene»: la cinta frena, la pieza crece en su lugar y
- * debajo se despliega su texto. Tocarla de nuevo cierra el panel.
- */
-export function PanelPieza({ pieza, onCerrar }) {
-  // Conserva la última pieza mientras el panel se cierra
-  const [ultima, setUltima] = useState(pieza)
-  if (pieza && pieza !== ultima) setUltima(pieza)
-  const abierto = Boolean(pieza)
-  const p = pieza ?? ultima
-
-  return (
-    <div className={`${styles.panel} ${abierto ? styles.panelAbierto : ''}`} aria-live="polite">
-      <div className={styles.panelInterior}>
-        {p && (
-          <div key={p.src} className={`container ${styles.panelContenido}`} inert={!abierto}>
-            <div>
-              <p className={styles.tipo}>{p.tipo}</p>
-              <h3 className={styles.titulo}>{p.titulo}</h3>
-            </div>
-            <p className={styles.detras}>{p.detras}</p>
-            <div className={styles.acciones}>
-              <button type="button" className={styles.seguir} onClick={onCerrar}>
-                Seguir mirando
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  )
 }

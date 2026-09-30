@@ -1,9 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../lib/gsap'
 import { proyectosPublicables } from '../data/proyectos'
-import EnlaceRuta from '../components/EnlaceRuta'
-import boton from '../components/ui/Button.module.css'
-import { DialogoPieza, Etiqueta, PanelPieza } from './variantes-proyectos/VistaPrevia'
+import DialogoPieza from './ProyectosDialogo'
 import styles from './Proyectos.module.css'
 
 /*
@@ -15,12 +13,12 @@ import styles from './Proyectos.module.css'
  * (una copia entera) y vuelve a empezar sin costura. La segunda copia es
  * decorativa: fuera del árbol de accesibilidad y del tabulado.
  *
- * El foco es el trabajo de Smart: la pieza y su tipo mandan; el cliente
- * aparece como crédito chico.
+ * El sitio no promociona clientes: cada pieza muestra solo lo que es (su
+ * tipo y su título). Tocarla la abre en grande con el texto de lo que hay
+ * detrás (ProyectosDialogo.jsx).
  */
 
-// Todas las piezas publicables, aplanadas, con su proyecto como crédito.
-// Intercala clientes (una pieza de cada uno por vuelta) para que ninguna
+// Todas las piezas publicables, aplanadas. Intercala trabajos (una pieza de cada uno por vuelta) para que ninguna
 // secuencia quede con tres piezas seguidas del mismo.
 function todasLasPiezas() {
   const proyectos = proyectosPublicables()
@@ -29,7 +27,7 @@ function todasLasPiezas() {
   for (let vuelta = 0; vuelta < maximo; vuelta += 1) {
     for (const proyecto of proyectos) {
       const pieza = proyecto.piezas[vuelta]
-      if (pieza) salida.push({ ...pieza, slug: proyecto.slug, cliente: proyecto.nombre })
+      if (pieza) salida.push(pieza)
     }
   }
   return salida
@@ -43,53 +41,24 @@ const CINTAS = [piezas.filter((_, i) => i % 2 === 0), piezas.filter((_, i) => i 
   (grupo) => [...grupo, ...grupo],
 )
 
-/*
- * TEMPORAL — `vista` compara las dos vistas previas al tocar una pieza
- * (ver variantes-proyectos/VistaPrevia.jsx): 'abrir' o 'detener'. Sin
- * `vista`, tocar una pieza lleva directo a su ficha.
- */
-export default function Proyectos({ id, vista, etiqueta }) {
+export default function Proyectos() {
   const scope = useRef(null)
-  // Control de la cinta desde las vistas previas: frenarla y soltarla
+  // Control de la cinta desde el diálogo: frenarla al abrir, soltarla al cerrar
   const control = useRef(null)
   const detenida = useRef(false)
   const [abierta, setAbierta] = useState(null) // { n, origen }
-  const [elegida, setElegida] = useState(null) // { n, clave }
 
-  const frenar = () => {
+  const abrir = (evento, pieza) => {
     detenida.current = true
     control.current?.frenar()
+    setAbierta({ n: pieza.n, origen: evento.currentTarget })
   }
-  const soltar = () => {
+
+  const cerrar = () => {
+    setAbierta(null)
     detenida.current = false
     control.current?.soltar()
   }
-
-  const alTocarPieza = (evento, pieza, clave) => {
-    if (vista === 'abrir') {
-      evento.preventDefault()
-      frenar()
-      setAbierta({ n: pieza.n, origen: evento.currentTarget })
-    } else if (vista === 'detener') {
-      evento.preventDefault()
-      // Segundo toque sobre la misma pieza: cierra el panel
-      if (elegida?.clave === clave) return cerrarPanel()
-      frenar()
-      setElegida({ n: pieza.n, clave })
-    }
-  }
-
-  const cerrarPanel = () => {
-    setElegida(null)
-    soltar()
-  }
-
-  useEffect(() => {
-    if (!elegida) return undefined
-    const alTeclear = (evento) => evento.key === 'Escape' && cerrarPanel()
-    document.addEventListener('keydown', alTeclear)
-    return () => document.removeEventListener('keydown', alTeclear)
-  })
 
   useGSAP(
     () => {
@@ -170,11 +139,7 @@ export default function Proyectos({ id, vista, etiqueta }) {
   )
 
   return (
-    <section
-      ref={scope}
-      id={id}
-      className={`${styles.proyectos} ${elegida ? styles.conElegida : ''}`}
-    >
+    <section ref={scope} id="proyectos" className={styles.proyectos}>
       <div className="container">
         <h2 className={styles.titular}>
           <span className={styles.mascara}>
@@ -195,63 +160,45 @@ export default function Proyectos({ id, vista, etiqueta }) {
           <div key={i} className={styles.ventana} data-vc="ventana">
             <div className={styles.pista} data-vc="pista">
               {[0, 1].map((copia) =>
-                grupo.map((pieza, j) => {
-                  const clave = `${i}-${copia}-${j}`
-                  return (
-                    <Pieza
-                      key={clave}
-                      pieza={pieza}
-                      elegida={elegida?.clave === clave}
-                      onClick={vista ? (evento) => alTocarPieza(evento, pieza, clave) : undefined}
-                      // Solo la primera pasada de la primera copia es navegable
-                      {...(copia === 1 || j >= grupo.length / 2
-                        ? { 'aria-hidden': true, tabIndex: -1 }
-                        : {})}
-                    />
-                  )
-                }),
+                grupo.map((pieza, j) => (
+                  <Pieza
+                    key={`${copia}-${j}-${pieza.src}`}
+                    pieza={pieza}
+                    onClick={(evento) => abrir(evento, pieza)}
+                    // Solo la primera pasada de la primera copia es navegable
+                    {...(copia === 1 || j >= grupo.length / 2
+                      ? { 'aria-hidden': true, tabIndex: -1 }
+                      : {})}
+                  />
+                )),
               )}
             </div>
           </div>
         ))}
       </div>
 
-      {vista === 'detener' && (
-        <PanelPieza pieza={elegida && piezas[elegida.n]} onCerrar={cerrarPanel} />
-      )}
-      {vista === 'abrir' && abierta && (
+      {abierta && (
         <DialogoPieza
           piezas={piezas}
           inicial={abierta.n}
           origen={abierta.origen}
           raiz={scope}
-          onCerrar={() => {
-            setAbierta(null)
-            soltar()
-          }}
+          onCerrar={cerrar}
         />
       )}
-
-      <div className={styles.cierre}>
-        <EnlaceRuta to="/proyectos" className={`${boton.button} ${boton.primary}`}>
-          Ver todos los proyectos
-        </EnlaceRuta>
-      </div>
-      <Etiqueta>{etiqueta}</Etiqueta>
     </section>
   )
 }
 
-// Una pieza: enlace a la ficha de su proyecto, con la proporción de su tipo.
-// El rótulo (tipo y cliente) aparece al pasar el mouse o con foco.
-function Pieza({ pieza, elegida = false, ...resto }) {
+// Una pieza, con la proporción de su tipo. El rótulo (tipo y título)
+// aparece al pasar el mouse o con foco.
+function Pieza({ pieza, ...resto }) {
   return (
-    <EnlaceRuta
-      to={`/proyectos/${pieza.slug}`}
-      className={`${styles.pieza} ${styles[pieza.tipo] ?? ''} ${elegida ? styles.elegida : ''}`}
+    <button
+      type="button"
+      className={`${styles.pieza} ${styles[pieza.tipo] ?? ''}`}
       data-n={pieza.n}
-      aria-label={`${pieza.titulo}, ${pieza.tipo} para ${pieza.cliente}`}
-      draggable={false}
+      aria-label={`${pieza.titulo} (${pieza.tipo}). Ver en grande`}
       {...resto}
     >
       <span className={styles.marco} data-marco>
@@ -259,9 +206,9 @@ function Pieza({ pieza, elegida = false, ...resto }) {
       </span>
       <span className={styles.rotulo} aria-hidden="true">
         <span className={styles.tipo}>{pieza.tipo}</span>
-        <span className={styles.credito}>para {pieza.cliente}</span>
+        <span className={styles.titulo}>{pieza.titulo}</span>
       </span>
-    </EnlaceRuta>
+    </button>
   )
 }
 

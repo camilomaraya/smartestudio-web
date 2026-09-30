@@ -1,29 +1,21 @@
 /*
- * Proyectos — fuente única para la sección E del home, el índice /proyectos
- * y las fichas.
+ * Piezas de la cinta del home (sections/Proyectos.jsx), agrupadas por el
+ * trabajo para el que se hicieron. Ya no hay índice ni fichas de proyecto:
+ * el sitio no promociona clientes, así que `nombre`, `rubro`, `resumen` y
+ * `portada` hoy no se muestran en ningún lado. Lo que se ve de cada pieza es
+ * su tipo, su título y el texto `detras`.
  *
- * DOS COSAS PENDIENTES, las dos de contenido, ninguna de código:
+ * PENDIENTE de contenido: TODAS las imágenes son marcadores de posición
+ * (`public/placeholders/`, generados por `scripts/generar-placeholders.mjs`).
+ * Reemplazarlas es copiar los archivos reales y cambiar las rutas de acá.
+ * El sitio TUTEA ("puedes", "quieres"), no vosea.
  *
- * 1. TODAS las imágenes son marcadores de posición (`public/placeholders/`,
- *    generados por `scripts/generar-placeholders.mjs`). Reemplazarlas es
- *    copiar los archivos reales y cambiar las rutas de acá.
- * 2. `resumen` es copy PLACEHOLDER en la voz de marca, no texto aprobado.
- *    El sitio TUTEA ("puedes", "quieres"), no vosea.
- *
- * ⚠ PERMISOS — BLOQUEANTE DE LANZAMIENTO (DESIGN.md §8): cada cliente
- * necesita permiso explícito para aparecer con nombre. Solo **Villa Verla**
- * está confirmado (es proyecto propio de Camilo). Los otros cuatro son de
- * Abby y están en `permiso: true` únicamente para poder maquetar el índice
- * completo — cada uno lleva su `TODO PERMISO`.
- *
- * ANTES DE PUBLICAR: confirmar los cuatro, o poner en `false` los que no
- * tengan autorización. `proyectosPublicables()` los filtra de todo el sitio
- * —home, índice, fichas y rutas del prerender— con solo cambiar ese
- * booleano; no hay ningún otro lugar que tocar.
- *
- * Regla de contenido (§8): `resumen` se escribe una vez y sirve en tres
- * lugares —índice, cabecera de ficha y meta description—.
- * Las fichas NO llevan métricas ni porcentajes: material y contexto.
+ * ⚠ PERMISOS (DESIGN.md §8): aunque el cliente no aparezca, las piezas son
+ * suyas. Solo **Villa Verla** está confirmado (proyecto propio de Camilo);
+ * los otros cuatro son de Abby y están en `permiso: true` para maquetar —
+ * cada uno lleva su `TODO PERMISO`. ANTES DE PUBLICAR: confirmarlos o poner
+ * en `false` los que no tengan autorización; `proyectosPublicables()` los
+ * saca de la cinta.
  */
 
 const P = '/placeholders'
@@ -250,39 +242,4 @@ export const proyectos = [
  */
 export function proyectosPublicables() {
   return proyectos.filter((proyecto) => proyecto.permiso)
-}
-
-export function proyectoPorSlug(slug) {
-  return proyectosPublicables().find((proyecto) => proyecto.slug === slug)
-}
-
-export const SLUGS_PROYECTOS = proyectosPublicables().map((proyecto) => proyecto.slug)
-
-/*
- * Piezas para la sección E del home.
- *
- * Regla de contenido 3 (§8): E usa piezas de clientes DISTINTOS a los de las
- * fichas, para que el sitio no se sienta más chico de lo que es. Mientras
- * haya un solo proyecto publicable eso no se puede cumplir, así que cae al
- * único disponible; en cuanto haya varios, toma una pieza por cliente
- * empezando por los que no tienen ficha propia.
- */
-export function piezasDestacadas(cantidad = 5) {
-  const publicables = proyectosPublicables()
-  if (publicables.length === 0) return []
-
-  const seleccion = []
-  // Una pieza por cliente antes de repetir cliente: variedad primero.
-  for (let vuelta = 0; seleccion.length < cantidad; vuelta += 1) {
-    let sumoEnEstaVuelta = false
-    for (const proyecto of publicables) {
-      const pieza = proyecto.piezas[vuelta]
-      if (!pieza) continue
-      seleccion.push({ ...pieza, proyecto: proyecto.nombre, slug: proyecto.slug })
-      sumoEnEstaVuelta = true
-      if (seleccion.length === cantidad) break
-    }
-    if (!sumoEnEstaVuelta) break
-  }
-  return seleccion
 }
