@@ -71,9 +71,9 @@ export default function Proyectos({ id, vista, etiqueta }) {
       frenar()
       setAbierta({ n: pieza.n, origen: evento.currentTarget })
     } else if (vista === 'detener') {
-      // Segundo toque sobre la misma pieza: sigue a la ficha
-      if (elegida?.clave === clave) return
       evento.preventDefault()
+      // Segundo toque sobre la misma pieza: cierra el panel
+      if (elegida?.clave === clave) return cerrarPanel()
       frenar()
       setElegida({ n: pieza.n, clave })
     }

@@ -2,7 +2,6 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { gsap, Flip } from '../../lib/gsap'
 import { getLenis } from '../../lib/lenis'
-import EnlaceRuta from '../../components/EnlaceRuta'
 import styles from './VistaPrevia.module.css'
 
 /*
@@ -189,9 +188,6 @@ export function DialogoPieza({ piezas, inicial, origen, raiz, onCerrar }) {
             {pieza.titulo}
           </h3>
           <p className={styles.detras}>{pieza.detras}</p>
-          <EnlaceRuta to={`/proyectos/${pieza.slug}`} className={styles.enlace}>
-            Ver el proyecto <span aria-hidden="true">→</span>
-          </EnlaceRuta>
           <nav className={styles.navegacion} aria-label="Otras piezas">
             <button type="button" onClick={() => ir(-1)} aria-label="Pieza anterior">
               ‹
@@ -241,7 +237,7 @@ function masCentrada(raiz, n) {
 
 /*
  * «Cinta que se detiene»: la cinta frena, la pieza crece en su lugar y
- * debajo se despliega su texto. Tocarla de nuevo lleva a la ficha.
+ * debajo se despliega su texto. Tocarla de nuevo cierra el panel.
  */
 export function PanelPieza({ pieza, onCerrar }) {
   // Conserva la última pieza mientras el panel se cierra
@@ -261,9 +257,6 @@ export function PanelPieza({ pieza, onCerrar }) {
             </div>
             <p className={styles.detras}>{p.detras}</p>
             <div className={styles.acciones}>
-              <EnlaceRuta to={`/proyectos/${p.slug}`} className={styles.enlace}>
-                Ver el proyecto <span aria-hidden="true">→</span>
-              </EnlaceRuta>
               <button type="button" className={styles.seguir} onClick={onCerrar}>
                 Seguir mirando
               </button>
