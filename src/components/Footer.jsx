@@ -10,7 +10,8 @@ import styles from './Footer.module.css'
 // Mismos tres tipos que en Nav.jsx. El footer vive en el Layout, así que
 // sus anclas del home tienen que navegar cuando se está en otra ruta.
 const enlaces = [
-  { label: 'Servicios', ancla: 'servicios' },
+  { label: 'Servicios', ruta: '/servicios' },
+  { label: 'Proyectos', ancla: 'proyectos' },
   { label: 'Planes', ancla: 'planes' },
   { label: 'Equipo', ancla: 'equipo' },
   { label: 'Contacto', ancla: 'contacto', local: true },

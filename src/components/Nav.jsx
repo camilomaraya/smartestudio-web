@@ -17,7 +17,8 @@ import styles from './Nav.module.css'
  *            navegar primero (ver lib/navegacion.js).
  */
 const enlaces = [
-  { label: 'Servicios', ancla: 'servicios' },
+  { label: 'Servicios', ruta: '/servicios' },
+  { label: 'Proyectos', ancla: 'proyectos' },
   { label: 'Planes', ancla: 'planes' },
   { label: 'Equipo', ancla: 'equipo' },
   { label: 'Contacto', ancla: 'contacto', local: true },
