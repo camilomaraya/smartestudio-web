@@ -2,14 +2,15 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { gsap, Flip } from '../lib/gsap'
 import { getLenis } from '../lib/lenis'
-import styles from './ProyectosDialogo.module.css'
+import styles from './DialogoPieza.module.css'
 
 /*
- * Vista previa de una pieza de la cinta (sections/Proyectos.jsx): la pieza
- * vuela desde la cinta al centro (Flip) y queda al lado de su texto, con la
- * cinta desenfocada detrás. Flechas para pasar a la siguiente; Esc o un
- * clic afuera la devuelven a la copia de la cinta más cercana al centro de
- * la pantalla.
+ * Vista previa de una pieza (la cinta del home y las galerías de Servicios):
+ * la pieza vuela desde su lugar al centro (Flip) y queda al lado de su
+ * texto, con la página desenfocada detrás. Flechas para pasar a la
+ * siguiente; Esc o un clic afuera la devuelven a la copia más cercana al
+ * centro de la pantalla dentro de `raiz` (en la cinta hay varias). Si la
+ * pieza no está a la vista, el diálogo se funde.
  *
  * Muestra la pieza y el texto «detrás»; el cliente no aparece.
  */

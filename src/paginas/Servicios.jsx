@@ -1,21 +1,28 @@
 import { serviciosPrincipales, complementariosSueltos } from '../data/servicios'
+import { piezasDeServicio } from '../data/proyectos'
 import { useReveal } from '../hooks/useReveal'
+import { useRevealLineas } from '../hooks/useRevealLineas'
 import EnlaceRuta from '../components/EnlaceRuta'
 import CabeceraPagina from '../components/CabeceraPagina'
+import GaleriaPiezas from '../components/GaleriaPiezas'
 import styles from './Servicios.module.css'
 
 /*
  * Índice de servicios (DESIGN.md §4, "Ritmo de un índice").
  *
  * Lista vertical, no grilla: un bloque por servicio, uno debajo del otro.
- * Cada bloque es asimétrico —nombre a la izquierda, desarrollo a la
- * derecha— para que la página no se lea como una tabla de precios.
+ * Arriba, el nombre a escala de titular y al lado el desarrollo; abajo, una
+ * tira con piezas de ese servicio, para que el trabajo se pueda juzgar
+ * antes de entrar a la ficha. Lo que incluye cada uno queda para la ficha.
  *
  * El `resumen` es el mismo párrafo que sirve en la ficha y en la meta
  * description: se escribe una vez (§8).
  */
+const PIEZAS_EN_TIRA = 4
+
 export default function Servicios() {
   const scope = useReveal()
+  const lineas = useRevealLineas()
 
   return (
     <>
@@ -25,25 +32,26 @@ export default function Servicios() {
       />
 
       <div ref={scope} className={`container ${styles.cuerpo}`}>
-        <ol className={styles.lista}>
+        <ol ref={lineas} className={styles.lista}>
           {serviciosPrincipales.map((servicio, indice) => (
-            <li key={servicio.slug} className={styles.item} data-reveal>
+            <li key={servicio.slug} className={styles.item}>
               <article className={styles.bloque}>
                 <div className={styles.columnaNombre}>
                   <span className={styles.numero} aria-hidden="true">
                     {String(indice + 1).padStart(2, '0')}
                   </span>
-                  <h2 className={styles.nombre}>{servicio.titulo}</h2>
+                  <h2 className={styles.nombre}>
+                    <span className={styles.mascara}>
+                      <span className={styles.linea} data-linea>
+                        {servicio.titulo}
+                      </span>
+                    </span>
+                  </h2>
                 </div>
 
-                <div className={styles.columnaDetalle}>
+                <div className={styles.columnaDetalle} data-reveal>
+                  <p className={styles.gancho}>{servicio.gancho}</p>
                   <p className={styles.resumen}>{servicio.resumen}</p>
-
-                  <ul className={styles.incluye}>
-                    {servicio.incluye.map((linea) => (
-                      <li key={linea}>{linea}</li>
-                    ))}
-                  </ul>
 
                   <EnlaceRuta
                     to={`/servicios/${servicio.slug}`}
@@ -57,6 +65,15 @@ export default function Servicios() {
                         "Ver el servicio" seguidos no se distinguen entre sí. */}
                     <span className="visually-hidden">: {servicio.titulo}</span>
                   </EnlaceRuta>
+                </div>
+
+                <div className={styles.tira}>
+                  <GaleriaPiezas
+                    piezas={piezasDeServicio(servicio.slug)}
+                    limite={PIEZAS_EN_TIRA}
+                    variante="tira"
+                    etiqueta={`Piezas de ${servicio.titulo}`}
+                  />
                 </div>
               </article>
             </li>

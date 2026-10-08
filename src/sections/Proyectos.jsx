@@ -1,7 +1,8 @@
 import { useRef, useState } from 'react'
 import { gsap, useGSAP, ScrollTrigger } from '../lib/gsap'
-import { proyectosPublicables } from '../data/proyectos'
-import DialogoPieza from './ProyectosDialogo'
+import { piezasPublicables } from '../data/proyectos'
+import Pieza from '../components/Pieza'
+import DialogoPieza from '../components/DialogoPieza'
 import styles from './Proyectos.module.css'
 
 /*
@@ -15,26 +16,11 @@ import styles from './Proyectos.module.css'
  *
  * El sitio no promociona clientes: cada pieza muestra solo lo que es (su
  * tipo y su título). Tocarla la abre en grande con el texto de lo que hay
- * detrás (ProyectosDialogo.jsx).
+ * detrás (components/DialogoPieza.jsx).
  */
 
-// Todas las piezas publicables, aplanadas. Intercala trabajos (una pieza de cada uno por vuelta) para que ninguna
-// secuencia quede con tres piezas seguidas del mismo.
-function todasLasPiezas() {
-  const proyectos = proyectosPublicables()
-  const salida = []
-  const maximo = Math.max(0, ...proyectos.map((p) => p.piezas.length))
-  for (let vuelta = 0; vuelta < maximo; vuelta += 1) {
-    for (const proyecto of proyectos) {
-      const pieza = proyecto.piezas[vuelta]
-      if (pieza) salida.push(pieza)
-    }
-  }
-  return salida
-}
-
 // `n`: posición en la lista única, para ubicar cada pieza entre sus copias
-const piezas = todasLasPiezas().map((pieza, n) => ({ ...pieza, n }))
+const piezas = piezasPublicables().map((pieza, n) => ({ ...pieza, n }))
 // Cada copia repite su grupo dos veces: con ~10 piezas chicas una sola
 // pasada medía menos que una pantalla ancha y dejaba un hueco al final
 const CINTAS = [piezas.filter((_, i) => i % 2 === 0), piezas.filter((_, i) => i % 2 === 1)].map(
@@ -187,28 +173,6 @@ export default function Proyectos() {
         />
       )}
     </section>
-  )
-}
-
-// Una pieza, con la proporción de su tipo. El rótulo (tipo y título)
-// aparece al pasar el mouse o con foco.
-function Pieza({ pieza, ...resto }) {
-  return (
-    <button
-      type="button"
-      className={`${styles.pieza} ${styles[pieza.tipo] ?? ''}`}
-      data-n={pieza.n}
-      aria-label={`${pieza.titulo} (${pieza.tipo}). Ver en grande`}
-      {...resto}
-    >
-      <span className={styles.marco} data-marco>
-        <img src={pieza.src} alt="" loading="lazy" decoding="async" draggable={false} />
-      </span>
-      <span className={styles.rotulo} aria-hidden="true">
-        <span className={styles.tipo}>{pieza.tipo}</span>
-        <span className={styles.titulo}>{pieza.titulo}</span>
-      </span>
-    </button>
   )
 }
 

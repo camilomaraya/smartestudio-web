@@ -1,9 +1,14 @@
 /*
- * Piezas de la cinta del home (sections/Proyectos.jsx), agrupadas por el
- * trabajo para el que se hicieron. Ya no hay índice ni fichas de proyecto:
- * el sitio no promociona clientes, así que `nombre`, `rubro`, `resumen` y
- * `portada` hoy no se muestran en ningún lado. Lo que se ve de cada pieza es
- * su tipo, su título y el texto `detras`.
+ * Piezas de la cinta del home (sections/Proyectos.jsx) y de Servicios (índice
+ * y fichas), agrupadas por el trabajo para el que se hicieron. Ya no hay
+ * índice ni fichas de proyecto: el sitio no promociona clientes, así que
+ * `nombre`, `rubro`, `resumen` y `portada` hoy no se muestran en ningún lado.
+ * Lo que se ve de cada pieza es su tipo, su título y el texto `detras`.
+ *
+ * `servicio` (slug de data/servicios.js) dice en qué ficha de servicio cae
+ * cada pieza. Es por pieza y no por proyecto: un mismo trabajo tiene piezas
+ * de foto, de diseño y de redes. PROVISORIO: asignación por criterio, a
+ * revisar.
  *
  * PENDIENTE de contenido: TODAS las imágenes son marcadores de posición
  * (`public/placeholders/`, generados por `scripts/generar-placeholders.mjs`).
@@ -36,6 +41,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/villa-verla-web-1.svg`,
         titulo: 'Sitio con reserva directa',
+        servicio: 'diseno-grafico',
         detras:
           'Antes había que escribir por Instagram y esperar. La web contesta las tres preguntas que todos hacían —capacidad, qué incluye, cuánto sale— y deja el contacto a un toque.',
       },
@@ -44,6 +50,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/villa-verla-post-1.svg`,
         titulo: 'Anuncio de temporada',
+        servicio: 'community-management',
         detras:
           'La foto es de un evento real, no de banco. Se nota, y es justamente lo que hace que alguien se imagine su propia fiesta ahí.',
       },
@@ -52,6 +59,7 @@ export const proyectos = [
         formato: 'video',
         src: `${P}/villa-verla-reel-1.svg`,
         titulo: 'Recorrido del lugar',
+        servicio: 'foto-video',
         detras:
           'Grabado en vertical desde el principio. Un recorrido de treinta segundos ahorra las diez fotos que nadie termina de mirar.',
       },
@@ -60,6 +68,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/villa-verla-post-2.svg`,
         titulo: 'Preguntas frecuentes',
+        servicio: 'community-management',
         detras:
           'Las dudas que llegaban por mensaje, convertidas en contenido. Menos mensajes repetidos, más tiempo para atender a quien de verdad va a reservar.',
       },
@@ -68,6 +77,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/villa-verla-informe-1.svg`,
         titulo: 'Informe mensual',
+        servicio: 'community-management',
         detras:
           'Lo que pasó en el mes, en dos páginas y sin jerga: qué se publicó, qué se movió y qué conviene hacer distinto.',
       },
@@ -88,6 +98,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/automotriz-carmona-post-1.svg`,
         titulo: 'Explicando un servicio',
+        servicio: 'community-management',
         detras:
           'Nadie busca "mantención preventiva". Buscan que no se les quede el auto. El texto arranca por ahí, no por el nombre técnico.',
       },
@@ -96,6 +107,7 @@ export const proyectos = [
         formato: 'video',
         src: `${P}/automotriz-carmona-reel-1.svg`,
         titulo: 'El taller por dentro',
+        servicio: 'foto-video',
         detras:
           'Mostrar el lugar y las manos que trabajan hace más por la confianza que cualquier frase sobre calidad.',
       },
@@ -104,6 +116,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/automotriz-carmona-historia-1.svg`,
         titulo: 'Antes y después',
+        servicio: 'foto-video',
         detras:
           'El formato más simple del catálogo y el que más se comparte. Se graba en dos minutos mientras el trabajo ya se está haciendo.',
       },
@@ -112,6 +125,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/automotriz-carmona-post-2.svg`,
         titulo: 'Pauta local',
+        servicio: 'publicidad-digital',
         detras:
           'Segmentada por comuna y por kilómetros a la redonda. A un taller no le sirve que lo vea alguien a dos horas de distancia.',
       },
@@ -132,6 +146,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/la-rusia-post-1.svg`,
         titulo: 'Plato del mes',
+        servicio: 'foto-video',
         detras:
           'Luz lateral y fondo oscuro, siempre igual. La consistencia es lo que hace que el feed se lea como una carta y no como un álbum suelto.',
       },
@@ -140,6 +155,7 @@ export const proyectos = [
         formato: 'video',
         src: `${P}/la-rusia-reel-1.svg`,
         titulo: 'El plato armándose',
+        servicio: 'foto-video',
         detras:
           'Diez segundos de emplatado retienen más que cualquier foto final. El formato pide movimiento y acá sobraba.',
       },
@@ -148,6 +164,7 @@ export const proyectos = [
         formato: 'video',
         src: `${P}/la-rusia-reel-2.svg`,
         titulo: 'La barra en hora punta',
+        servicio: 'foto-video',
         detras:
           'El ambiente también es producto. Se graba sin guion, en el servicio real, con permiso de la gente que aparece.',
       },
@@ -156,6 +173,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/la-rusia-historia-1.svg`,
         titulo: 'Disponibilidad del día',
+        servicio: 'community-management',
         detras:
           'Lo efímero va a historias, no al feed. Sirve hoy y mañana no molesta a nadie en el perfil.',
       },
@@ -176,6 +194,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/veterinaria-larrain-post-1.svg`,
         titulo: 'Calendario de vacunas',
+        servicio: 'diseno-grafico',
         detras:
           'Información que la gente guarda y vuelve a mirar. Ese tipo de post trabaja durante meses, no durante un día.',
       },
@@ -184,6 +203,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/veterinaria-larrain-post-2.svg`,
         titulo: 'Señales de alerta',
+        servicio: 'community-management',
         detras:
           'Escrito con la vet, revisado por ella. En salud no se improvisa el contenido, y decirlo así también construye confianza.',
       },
@@ -192,6 +212,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/veterinaria-larrain-historia-1.svg`,
         titulo: 'Pacientes del día',
+        servicio: 'community-management',
         detras:
           'Con permiso de cada familia. Es el contenido que más cariño genera y el que menos esfuerzo cuesta: ya está pasando.',
       },
@@ -212,6 +233,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/alfalfa-cakes-post-1.svg`,
         titulo: 'Catálogo de tortas',
+        servicio: 'foto-video',
         detras:
           'Cada torta fotografiada igual: mismo fondo, misma altura de cámara. Así el catálogo se ve como una colección y no como fotos sueltas.',
       },
@@ -220,6 +242,7 @@ export const proyectos = [
         formato: 'video',
         src: `${P}/alfalfa-cakes-reel-1.svg`,
         titulo: 'El decorado',
+        servicio: 'foto-video',
         detras:
           'La parte que a la gente le gusta mirar. No hace falta mostrar la receta entera: alcanza con el momento en que la cosa toma forma.',
       },
@@ -228,6 +251,7 @@ export const proyectos = [
         formato: 'imagen',
         src: `${P}/alfalfa-cakes-post-2.svg`,
         titulo: 'Cómo encargar',
+        servicio: 'diseno-grafico',
         detras:
           'Plazos, tamaños y cómo se reserva. Las tres cosas que frenaban un pedido, resueltas en una sola imagen.',
       },
@@ -242,4 +266,27 @@ export const proyectos = [
  */
 export function proyectosPublicables() {
   return proyectos.filter((proyecto) => proyecto.permiso)
+}
+
+/*
+ * Todas las piezas publicables, aplanadas. Intercala trabajos (una pieza de
+ * cada uno por vuelta) para que ninguna secuencia quede con tres piezas
+ * seguidas del mismo.
+ */
+export function piezasPublicables() {
+  const publicables = proyectosPublicables()
+  const salida = []
+  const maximo = Math.max(0, ...publicables.map((p) => p.piezas.length))
+  for (let vuelta = 0; vuelta < maximo; vuelta += 1) {
+    for (const proyecto of publicables) {
+      const pieza = proyecto.piezas[vuelta]
+      if (pieza) salida.push(pieza)
+    }
+  }
+  return salida
+}
+
+// Las piezas de un servicio, en el mismo orden intercalado
+export function piezasDeServicio(slug) {
+  return piezasPublicables().filter((pieza) => pieza.servicio === slug)
 }

@@ -4,9 +4,11 @@ import {
   complementariosDe,
   serviciosPrincipales,
 } from '../data/servicios'
+import { piezasDeServicio } from '../data/proyectos'
 import { useReveal } from '../hooks/useReveal'
 import EnlaceRuta from '../components/EnlaceRuta'
 import CabeceraPagina from '../components/CabeceraPagina'
+import GaleriaPiezas from '../components/GaleriaPiezas'
 import NoEncontrada from './NoEncontrada'
 import styles from './FichaServicio.module.css'
 
@@ -16,8 +18,12 @@ import styles from './FichaServicio.module.css'
  * El `resumen` entra como bajada de la cabecera: es el mismo párrafo del
  * índice y de la meta description (DESIGN.md §8), escrito una sola vez.
  *
- * Sin métricas ni porcentajes, igual que las fichas de proyecto: material y
- * contexto, nada que después haya que sostener con números.
+ * La pieza va primero: justo bajo la cabecera, lo hecho por Smart en este
+ * servicio (sin cliente); cada pieza se abre con su texto «detrás».
+ * Después, cómo se trabaja y qué incluye.
+ *
+ * Sin métricas ni porcentajes: material y contexto, nada que después haya
+ * que sostener con números.
  */
 export default function FichaServicio() {
   const { slug } = useParams()
@@ -30,6 +36,7 @@ export default function FichaServicio() {
    */
   if (!servicio) return <NoEncontrada />
 
+  const piezas = piezasDeServicio(servicio.slug)
   const complementarios = complementariosDe(servicio.slug)
   const otros = serviciosPrincipales.filter((otro) => otro.slug !== servicio.slug)
 
@@ -46,6 +53,15 @@ export default function FichaServicio() {
       <CabeceraPagina lineas={lineas} bajada={servicio.resumen} />
 
       <div ref={scope} className={`container ${styles.cuerpo}`}>
+        {piezas.length > 0 && (
+          <section className={styles.piezas}>
+            <h2 className={styles.subtitulo} data-reveal>
+              Lo que hicimos
+            </h2>
+            <GaleriaPiezas piezas={piezas} etiqueta={`Piezas de ${servicio.titulo}`} />
+          </section>
+        )}
+
         <div className={styles.principal}>
           <section className={styles.comoTrabajamos} data-reveal>
             <h2 className={styles.subtitulo}>Cómo trabajamos</h2>

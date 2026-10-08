@@ -2,6 +2,12 @@
   padding-bottom: var(--space-section);
 }
 
+/* Lo hecho en este servicio, antes que cualquier explicación */
+.piezas {
+  padding-block: var(--space-7) var(--space-8);
+  border-top: 1px solid var(--line);
+}
+
 /* "Cómo trabajamos" pesa más que "Qué incluye": un párrafo que explica el
    criterio, y al lado la lista utilitaria que lo aterriza. */
 .principal {

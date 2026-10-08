@@ -1,0 +1,44 @@
+/* Galería de piezas (ver el .jsx). El alto lo fija `--alto-pieza`, que
+   lee Pieza.module.css; el ancho sale de la proporción de cada tipo. */
+.lista {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.item {
+  flex: none;
+}
+
+/* Tira del índice: una fila, que se recorre a mano si no entra */
+.tira {
+  --alto-pieza: clamp(180px, 28svh, 280px);
+  /* Que la pieza crecida en hover no se recorte en los bordes */
+  margin: calc(var(--space-3) * -1);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tira .lista {
+  width: max-content;
+  padding: var(--space-3);
+}
+
+/* Grilla de la ficha: hoja de contactos, filas a la misma altura */
+.grilla {
+  --alto-pieza: clamp(220px, 40svh, 400px);
+}
+
+.grilla .lista {
+  flex-wrap: wrap;
+  gap: var(--space-5);
+}
+
+@media (max-width: 600px) {
+  .grilla {
+    --alto-pieza: clamp(160px, 30svh, 260px);
+  }
+
+  .grilla .lista {
+    gap: var(--space-3);
+  }
+}
