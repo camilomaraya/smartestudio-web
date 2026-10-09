@@ -151,17 +151,20 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-4);
-  text-align: left;
 }
 
 /* Se apoya en .card (global.css): fondo, borde y hover dorado */
+/* Ícono y nombre centrados, como una sola pieza: en el mismo eje que el
+   titular y la etiqueta de la sección */
 .cardItem {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: var(--space-6);
-  min-height: 150px;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: 130px;
   padding: var(--space-5);
+  text-align: center;
 }
 
 .cardIcono {
@@ -175,6 +178,8 @@
   font-size: var(--text-sm);
   line-height: 1.4;
   color: var(--white);
+  /* Cortes parejos: que no quede una palabra sola en la última línea */
+  text-wrap: balance;
 }
 
 .volver {
@@ -220,7 +225,7 @@
   }
 
   .cardItem {
-    gap: var(--space-4);
+    gap: var(--space-3);
     min-height: 120px;
     padding: var(--space-4);
   }
