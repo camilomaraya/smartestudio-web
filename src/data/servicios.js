@@ -9,6 +9,11 @@
  * Regla de contenido (DESIGN.md §8): `resumen` se escribe UNA vez y sirve en
  * tres lugares —índice, cabecera de ficha y meta description—. No hay tres
  * versiones del mismo párrafo.
+ *
+ * `rubros`: para qué tipo de negocios ya se hizo el servicio, sin nombrar a
+ * nadie. Sale de lo publicado por Smart en Instagram. Se escribe como se lee
+ * («restaurantes», «una óptica») y la ficha lo une en una frase. Vacío = la
+ * línea no se muestra.
  */
 
 export const serviciosPrincipales = [
@@ -29,6 +34,13 @@ export const serviciosPrincipales = [
       'Gestión de comentarios y mensajes',
       'Informe mensual con métricas',
     ],
+    rubros: [
+      'un concesionario automotriz',
+      'un hospital veterinario',
+      'un centro médico',
+      'un centro de especialidades veterinarias',
+      'una cafetería',
+    ],
     detalle:
       'Partimos entendiendo a quién le hablas y qué quieres que pase cuando te lean. Con eso armamos un calendario mensual que apruebas antes de que salga nada, y desde ahí publicamos, respondemos y ajustamos. Cada mes cerramos con un informe que se entiende: qué funcionó, qué no y qué cambiamos el mes que viene.',
   },
@@ -46,6 +58,8 @@ export const serviciosPrincipales = [
       'Piezas para impresión y señalética',
       'Plantillas editables para tu equipo',
     ],
+    // PENDIENTE: confirmar con Abby para qué marcas se hizo identidad y diseño.
+    rubros: [],
     detalle:
       'No entregamos un logo suelto y suerte. Definimos una línea gráfica completa —colores, tipografías, cómo se combinan— y te la dejamos documentada, con plantillas que tu equipo puede usar sin que todo se desarme a los dos meses.',
   },
@@ -62,6 +76,16 @@ export const serviciosPrincipales = [
       'Edición, color y musicalización',
       'Fotografía de equipo y marca personal',
       'Cobertura de eventos',
+    ],
+    rubros: [
+      'restaurantes',
+      'cafeterías',
+      'pastelerías',
+      'un concesionario automotriz',
+      'un centro de eventos',
+      'una óptica',
+      'una perfumería',
+      'una novela gráfica',
     ],
     detalle:
       'Grabamos pensando en dónde se va a ver. Un reel no se compone igual que una foto de catálogo, y una toma que funciona en horizontal se cae en vertical. Vamos con equipo propio a tu local, tu taller o donde pase la cosa, y vuelves con material que sirve por meses.',
@@ -80,6 +104,8 @@ export const serviciosPrincipales = [
       'Gestión de la inversión publicitaria',
       'Informes con métricas que se entienden',
     ],
+    // PENDIENTE: la pauta no se ve en Instagram; pedirle a Abby campañas reales.
+    rubros: [],
     detalle:
       'Antes de poner un peso definimos qué cuenta como resultado: mensajes, visitas, ventas. Después armamos las campañas, las miramos seguido y movemos el presupuesto hacia lo que rinde. Los informes no son capturas de pantalla del panel: te decimos qué pasó y qué conviene hacer.',
   },

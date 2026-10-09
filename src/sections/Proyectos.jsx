@@ -21,11 +21,10 @@ import styles from './Proyectos.module.css'
 
 // `n`: posición en la lista única, para ubicar cada pieza entre sus copias
 const piezas = piezasPublicables().map((pieza, n) => ({ ...pieza, n }))
-// Cada copia repite su grupo dos veces: con ~10 piezas chicas una sola
-// pasada medía menos que una pantalla ancha y dejaba un hueco al final
-const CINTAS = [piezas.filter((_, i) => i % 2 === 0), piezas.filter((_, i) => i % 2 === 1)].map(
-  (grupo) => [...grupo, ...grupo],
-)
+// Las piezas se reparten alternadas entre las dos cintas. Con ~17 por cinta
+// una pasada ya cubre más que una pantalla ancha: no hace falta repetirlas
+// dentro de la copia (sí hacía falta cuando eran ~10)
+const CINTAS = [piezas.filter((_, i) => i % 2 === 0), piezas.filter((_, i) => i % 2 === 1)]
 
 export default function Proyectos() {
   const scope = useRef(null)
@@ -151,10 +150,8 @@ export default function Proyectos() {
                     key={`${copia}-${j}-${pieza.src}`}
                     pieza={pieza}
                     onClick={(evento) => abrir(evento, pieza)}
-                    // Solo la primera pasada de la primera copia es navegable
-                    {...(copia === 1 || j >= grupo.length / 2
-                      ? { 'aria-hidden': true, tabIndex: -1 }
-                      : {})}
+                    // Solo la primera copia es navegable
+                    {...(copia === 1 ? { 'aria-hidden': true, tabIndex: -1 } : {})}
                   />
                 )),
               )}

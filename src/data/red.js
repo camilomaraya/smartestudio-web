@@ -28,7 +28,7 @@ export const NODOS = [
     card: {
       tipo: 'imagen',
       src: `${P}/villa-verla-portada.svg`,
-      alt: 'Identidad visual de Villa Verla',
+      alt: 'Identidad visual de una marca',
       texto: 'Una identidad que se reconoce antes de leer el nombre.',
     },
   },
@@ -39,7 +39,7 @@ export const NODOS = [
     card: {
       tipo: 'imagen',
       src: `${P}/veterinaria-larrain-post-1.svg`,
-      alt: 'Post de Instagram para Veterinaria Larraín',
+      alt: 'Post de Instagram',
       texto: 'Un feed que se ve como tu negocio, no como una plantilla.',
     },
   },
@@ -72,7 +72,7 @@ export const NODOS = [
     card: {
       tipo: 'imagen',
       src: `${P}/alfalfa-cakes-post-1.svg`,
-      alt: 'Publicación de Alfalfa Cakes con comentarios',
+      alt: 'Publicación con comentarios',
       texto: 'Comentarios y mensajes que no quedan en visto.',
     },
   },
@@ -83,7 +83,7 @@ export const NODOS = [
     card: {
       tipo: 'imagen',
       src: `${P}/automotriz-carmona-post-1.svg`,
-      alt: 'Pieza de campaña para Automotriz Carmona',
+      alt: 'Pieza de campaña',
       texto: 'Pauta con un objetivo claro y un mensaje que lo sostiene.',
     },
   },

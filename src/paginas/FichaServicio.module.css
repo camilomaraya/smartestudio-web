@@ -8,6 +8,15 @@
   border-top: 1px solid var(--line);
 }
 
+/* Para quién ya se hizo, sin nombres: una línea entre las piezas y el
+   detalle */
+.rubros {
+  max-width: var(--container-narrow);
+  padding-bottom: var(--space-8);
+  font-size: var(--text-lg);
+  color: var(--muted);
+}
+
 /* "Cómo trabajamos" pesa más que "Qué incluye": un párrafo que explica el
    criterio, y al lado la lista utilitaria que lo aterriza. */
 .principal {

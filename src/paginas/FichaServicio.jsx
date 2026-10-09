@@ -23,8 +23,11 @@ import styles from './FichaServicio.module.css'
  * Después, cómo se trabaja y qué incluye.
  *
  * Sin métricas ni porcentajes: material y contexto, nada que después haya
- * que sostener con números.
+ * que sostener con números. Los `rubros` dicen para qué tipo de negocios ya
+ * se hizo, sin nombrar a ningún cliente.
  */
+const listaRubros = new Intl.ListFormat('es', { type: 'conjunction' })
+
 export default function FichaServicio() {
   const { slug } = useParams()
   const servicio = servicioPorSlug(slug)
@@ -62,6 +65,12 @@ export default function FichaServicio() {
             </h2>
             <GaleriaPiezas piezas={piezas} etiqueta={`Piezas de ${servicio.titulo}`} />
           </section>
+        )}
+
+        {servicio.rubros.length > 0 && (
+          <p className={styles.rubros} data-reveal>
+            Lo hemos hecho para {listaRubros.format(servicio.rubros)}.
+          </p>
         )}
 
         <div className={styles.principal}>

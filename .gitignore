@@ -4,3 +4,7 @@ dist
 *.local
 .env
 server/config.php
+
+# Material interno de referencia sobre clientes: no va al repo ni al sitio
+logos-clientes-smart-estudio/
+Clientes Smart Estudio.html

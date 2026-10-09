@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" width="1080" height="1350" role="img" aria-label="Marcador de posición: post">
   <defs>
-    <pattern id="t" width="46" height="46" patternUnits="userSpaceOnUse" patternTransform="rotate(22)">
+    <pattern id="t" width="46" height="46" patternUnits="userSpaceOnUse" patternTransform="rotate(30)">
       <line x1="0" y1="0" x2="0" y2="46" stroke="#2a2a2a" stroke-width="1.5"/>
     </pattern>
   </defs>
