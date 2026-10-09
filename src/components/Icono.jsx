@@ -1,9 +1,9 @@
+import desktop from '@fortawesome/fontawesome-free/svgs/solid/desktop.svg?raw'
 import cartShopping from '@fortawesome/fontawesome-free/svgs/solid/cart-shopping.svg?raw'
 import server from '@fortawesome/fontawesome-free/svgs/solid/server.svg?raw'
 import locationDot from '@fortawesome/fontawesome-free/svgs/solid/location-dot.svg?raw'
 import gaugeHigh from '@fortawesome/fontawesome-free/svgs/solid/gauge-high.svg?raw'
 import chartLine from '@fortawesome/fontawesome-free/svgs/solid/chart-line.svg?raw'
-import chartPie from '@fortawesome/fontawesome-free/svgs/solid/chart-pie.svg?raw'
 import gears from '@fortawesome/fontawesome-free/svgs/solid/gears.svg?raw'
 import envelopeOpenText from '@fortawesome/fontawesome-free/svgs/solid/envelope-open-text.svg?raw'
 import styles from './Icono.module.css'
@@ -15,12 +15,12 @@ import styles from './Icono.module.css'
  * nuevo, importarlo acá y sumarlo al mapa.
  */
 const ICONOS = {
+  desktop,
   'cart-shopping': cartShopping,
   server,
   'location-dot': locationDot,
   'gauge-high': gaugeHigh,
   'chart-line': chartLine,
-  'chart-pie': chartPie,
   gears,
   'envelope-open-text': envelopeOpenText,
 }

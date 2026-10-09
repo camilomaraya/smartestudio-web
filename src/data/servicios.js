@@ -99,14 +99,16 @@ export const complementarios = [
   {
     grupo: 'Web y tecnología',
     servicio: null,
+    // En el orden del recorrido del cliente: tener la web, vender, que lo
+    // encuentren, medir, automatizar. Nombres como los diría el cliente.
     items: [
-      { nombre: 'Tiendas online (e‑commerce)', icono: 'cart-shopping' },
-      { nombre: 'Mantención web, hosting y dominios', icono: 'server' },
-      { nombre: 'SEO local y Google Business Profile', icono: 'location-dot' },
-      { nombre: 'SEO técnico y velocidad', icono: 'gauge-high' },
-      { nombre: 'Medición y analítica (GA4, GTM)', icono: 'chart-line' },
-      { nombre: 'Reportería y dashboards', icono: 'chart-pie' },
-      { nombre: 'Automatizaciones e integraciones (WhatsApp, CRM)', icono: 'gears' },
+      { nombre: 'Sitios web y landing pages', icono: 'desktop' },
+      { nombre: 'Tiendas online', icono: 'cart-shopping' },
+      { nombre: 'Mantención, hosting y dominios', icono: 'server' },
+      { nombre: 'Google Maps y SEO local', icono: 'location-dot' },
+      { nombre: 'SEO y velocidad web', icono: 'gauge-high' },
+      { nombre: 'Medición y reportes', icono: 'chart-line' },
+      { nombre: 'Automatizaciones con WhatsApp y CRM', icono: 'gears' },
       { nombre: 'Email marketing', icono: 'envelope-open-text' },
     ],
   },
