@@ -3,10 +3,15 @@
 .cabecera {
   padding-block: calc(var(--gutter) + var(--ancho-logo) * 0.363 + var(--space-7))
     var(--space-8);
+  /* Centrada, como los titulares del home */
+  text-align: center;
 }
 
+/* Casi la escala del hero del home, con tope para que la línea más larga
+   (~14 caracteres: «Lo que hacemos», «Diseño gráfico») entre entera: los
+   cortes son de composición y no tienen que partirse solos. */
 .titulo {
-  font-size: var(--text-3xl);
+  font-size: clamp(1.75rem, 7.6vw, 6rem);
 }
 
 /* Máscara del reveal por línea, igual que en hero, interstitial y CTA:
@@ -27,8 +32,8 @@
 }
 
 .bajada {
-  max-width: var(--container-narrow);
-  margin-top: var(--space-5);
+  max-width: 58ch;
+  margin: var(--space-6) auto 0;
   font-size: var(--text-lg);
   color: var(--muted);
 }

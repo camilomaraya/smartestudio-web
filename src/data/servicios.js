@@ -89,6 +89,9 @@ export const serviciosPrincipales = [
  * Complementarios (nivel 2). No llevan página propia — refleja la jerarquía
  * real del negocio (DESIGN.md §8).
  *
+ * Cada ítem es `{ nombre, icono? }`. `icono` (nombre de Font Awesome, ver
+ * components/Icono.jsx) lo llevan los que se muestran como card en el índice.
+ *
  * `servicio` los ancla a la ficha del principal donde tienen sentido; los que
  * van en `null` solo aparecen en el índice, como bloque subordinado al final.
  */
@@ -97,25 +100,25 @@ export const complementarios = [
     grupo: 'Web y tecnología',
     servicio: null,
     items: [
-      'Tiendas online (e-commerce)',
-      'Mantención web, hosting y dominios',
-      'SEO local y Google Business Profile',
-      'SEO técnico y velocidad',
-      'Medición y analítica (GA4, GTM)',
-      'Reportería y dashboards',
-      'Automatizaciones e integraciones (WhatsApp, CRM)',
-      'Email marketing',
+      { nombre: 'Tiendas online (e‑commerce)', icono: 'cart-shopping' },
+      { nombre: 'Mantención web, hosting y dominios', icono: 'server' },
+      { nombre: 'SEO local y Google Business Profile', icono: 'location-dot' },
+      { nombre: 'SEO técnico y velocidad', icono: 'gauge-high' },
+      { nombre: 'Medición y analítica (GA4, GTM)', icono: 'chart-line' },
+      { nombre: 'Reportería y dashboards', icono: 'chart-pie' },
+      { nombre: 'Automatizaciones e integraciones (WhatsApp, CRM)', icono: 'gears' },
+      { nombre: 'Email marketing', icono: 'envelope-open-text' },
     ],
   },
   {
     grupo: 'Estrategia y publicidad',
     servicio: 'publicidad-digital',
     items: [
-      'Auditoría y diagnóstico digital',
-      'Plan de estrategia de contenidos',
-      'TikTok Ads',
-      'Gestión de influencers y colaboraciones',
-      'Gestión de reputación y reseñas',
+      { nombre: 'Auditoría y diagnóstico digital' },
+      { nombre: 'Plan de estrategia de contenidos' },
+      { nombre: 'TikTok Ads' },
+      { nombre: 'Gestión de influencers y colaboraciones' },
+      { nombre: 'Gestión de reputación y reseñas' },
     ],
   },
   {
@@ -123,7 +126,7 @@ export const complementarios = [
     servicio: 'foto-video',
     // Único grupo que no ejecutamos en casa: se coordina con terceros.
     externalizado: true,
-    items: ['Tomas aéreas con dron DJI'],
+    items: [{ nombre: 'Tomas aéreas con dron DJI' }],
   },
 ]
 

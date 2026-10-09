@@ -42,3 +42,10 @@
     gap: var(--space-3);
   }
 }
+
+/* En pantallas angostas una pieza ancha (web, informe) a esta altura no
+   entra: se achica para caber en el container, con su misma proporción. */
+.grilla .item > button {
+  width: min(100vw - var(--gutter) * 2, var(--alto-pieza) * var(--r));
+  height: auto;
+}

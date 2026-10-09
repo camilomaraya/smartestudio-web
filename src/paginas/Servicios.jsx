@@ -5,6 +5,7 @@ import { useRevealLineas } from '../hooks/useRevealLineas'
 import EnlaceRuta from '../components/EnlaceRuta'
 import CabeceraPagina from '../components/CabeceraPagina'
 import GaleriaPiezas from '../components/GaleriaPiezas'
+import Icono from '../components/Icono'
 import styles from './Servicios.module.css'
 
 /*
@@ -81,22 +82,28 @@ export default function Servicios() {
         </ol>
 
         {/* Bloque subordinado: no llevan página propia a propósito, refleja
-            la jerarquía real del negocio (DESIGN.md §8). */}
+            la jerarquía real del negocio (DESIGN.md §8). Cards informativas,
+            sin enlace: no hay a dónde llevar. */}
         {complementariosSueltos.length > 0 && (
-          <section className={styles.complementarios} data-reveal>
-            <h2 className={styles.complementariosTitulo}>También hacemos</h2>
-            <div className={styles.grupos}>
-              {complementariosSueltos.map((bloque) => (
-                <div key={bloque.grupo} className={styles.grupo}>
-                  <h3 className={styles.grupoTitulo}>{bloque.grupo}</h3>
-                  <ul className={styles.grupoLista}>
-                    {bloque.items.map((item) => (
-                      <li key={item}>{item}</li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
+          <section className={styles.complementarios}>
+            <h2 className={styles.complementariosTitulo} data-reveal>
+              También hacemos
+            </h2>
+            {complementariosSueltos.map((bloque) => (
+              <div key={bloque.grupo} className={styles.grupo}>
+                <h3 className={styles.grupoTitulo} data-reveal>
+                  {bloque.grupo}
+                </h3>
+                <ul className={styles.cards} data-reveal-group>
+                  {bloque.items.map((item) => (
+                    <li key={item.nombre} className={`card ${styles.cardItem}`}>
+                      <Icono nombre={item.icono} className={styles.cardIcono} />
+                      <span className={styles.cardNombre}>{item.nombre}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
           </section>
         )}
 

@@ -1,0 +1,11 @@
+.icono {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  line-height: 0;
+}
+
+.icono svg {
+  width: 100%;
+  height: 100%;
+}

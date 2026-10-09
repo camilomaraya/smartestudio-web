@@ -41,11 +41,13 @@ export default function FichaServicio() {
   const otros = serviciosPrincipales.filter((otro) => otro.slug !== servicio.slug)
 
   // El título parte en dos líneas cuando tiene con qué: una línea sola a
-  // esta escala se lee como etiqueta, no como titular.
+  // esta escala se lee como etiqueta, no como titular. Con dos palabras va
+  // una por línea («Community / Management» no entra en una).
   const palabras = servicio.titulo.split(' ')
+  const corte = palabras.length > 2 ? 2 : 1
   const lineas =
-    palabras.length > 2
-      ? [palabras.slice(0, 2).join(' '), palabras.slice(2).join(' ')]
+    palabras.length > 1
+      ? [palabras.slice(0, corte).join(' '), palabras.slice(corte).join(' ')]
       : [servicio.titulo]
 
   return (
@@ -91,7 +93,7 @@ export default function FichaServicio() {
                 </h3>
                 <ul className={styles.grupoLista}>
                   {bloque.items.map((item) => (
-                    <li key={item}>{item}</li>
+                    <li key={item.nombre}>{item.nombre}</li>
                   ))}
                 </ul>
               </div>

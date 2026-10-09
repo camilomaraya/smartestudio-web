@@ -116,35 +116,24 @@
 }
 
 /* ============================================
-   Complementarios: jerarquía menor, cierran la página
+   Complementarios: cierran la página, en cards
    ============================================ */
 .complementarios {
-  margin-top: var(--space-8);
+  margin-top: var(--space-9);
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-7);
+  text-align: center;
 }
 
 .complementariosTitulo {
-  font-family: var(--font-utility);
-  font-weight: 600;
-  font-size: var(--text-sm);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.grupos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: var(--space-6);
-  align-items: start;
+  font-size: var(--text-2xl);
 }
 
 .grupo {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-5);
 }
 
 .grupoTitulo {
@@ -154,14 +143,38 @@
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--gold);
+  /* Anula el Archivo Expanded de h1-h3: acá es etiqueta */
+  font-stretch: normal;
 }
 
-.grupoLista {
+.cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+  text-align: left;
+}
+
+/* Se apoya en .card (global.css): fondo, borde y hover dorado */
+.cardItem {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  justify-content: space-between;
+  gap: var(--space-6);
+  min-height: 150px;
+  padding: var(--space-5);
+}
+
+.cardIcono {
+  font-size: 1.5rem;
+  color: var(--gold);
+}
+
+.cardNombre {
+  font-family: var(--font-utility);
+  font-weight: 500;
   font-size: var(--text-sm);
-  color: var(--muted);
+  line-height: 1.4;
+  color: var(--white);
 }
 
 .volver {
@@ -184,6 +197,10 @@
 }
 
 @media (max-width: 860px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .bloque {
     grid-template-columns: 1fr;
     grid-template-areas:
@@ -192,5 +209,23 @@
       'tira';
     gap: var(--space-5);
     padding-block: var(--space-7);
+  }
+}
+
+/* En celular siguen de a dos, más compactas: de a una quedaban ocho
+   cards altas en fila */
+@media (max-width: 480px) {
+  .cards {
+    gap: var(--space-3);
+  }
+
+  .cardItem {
+    gap: var(--space-4);
+    min-height: 120px;
+    padding: var(--space-4);
+  }
+
+  .cardIcono {
+    font-size: 1.25rem;
   }
 }
